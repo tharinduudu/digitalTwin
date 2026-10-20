@@ -38,6 +38,11 @@ by the browser must never increment a number labelled as a measurement.
   edge and cushion materials are in `mechanics.js`. Both liner opacity values
   must also agree with `setCutaway()`.
 - Rubber feet and floor height: `RUBBER_FOOT` and `FLOOR_Y` in the geometry module.
+- Scintillator opacity: `SCINTILLATOR_OPACITY` in `detector-geometry.js` (0.36).
+  Particle flashes temporarily increase it. Acrylic and cushion opacity are separate.
+- Top artwork: `ENGRAVING_OPACITY` stays at 0.95 in both tile views.
+- U5 housing height: `seatConverter()` in `hardware-adjustments.js` seats the
+  exported housing before the readout meshes are merged. It does not edit KiCad.
 - Centered enclosure and Pi cable anchors: `readout-placement.js`; plugs and
   cable paths are drawn by `buildPiCables()` in `scene.js`.
 - Optical layer thickness: the sheet and cushion extrusions in `mechanics.js`.

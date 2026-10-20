@@ -82,6 +82,8 @@ function updateClock() {
     $('scene').dataset.mountingErrorMm = String(scene.hardware.mountingErrorMm ?? '');
     $('scene').dataset.acrylicFasteners = String(scene.acrylicFastenerCount || 0);
     $('scene').dataset.cornerBrackets = String(scene.cornerMounts?.brackets || 0);
+    $('scene').dataset.u5GapMm = String(scene.hardware.state.u5GapMm ?? '');
+    $('scene').dataset.u5OffsetMm = String(scene.hardware.state.u5OffsetMm ?? '');
   }
   if (lastMessage && performance.now() - lastMessage > 6000) {
     connected = false;

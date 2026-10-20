@@ -4,7 +4,7 @@ import { ReadoutHardware } from './hardware.js';
 import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';
 import { BEAM, smaLeadPoints, READOUT_X, piCableAnchors } from './readout-placement.js';
-import { TILE_HEIGHTS, FLOOR_Y } from './detector-geometry.js';
+import { TILE_HEIGHTS, FLOOR_Y, ENGRAVING_OPACITY, SCINTILLATOR_OPACITY } from './detector-geometry.js';
 
 const TILE_Y = TILE_HEIGHTS;
 const READOUT_PORT_Y = [-2.5, -4.5, -6.5];
@@ -172,7 +172,7 @@ export class TelescopeScene {
     this.readoutLeads = [];
     this.beamCables = [];
     TILE_Y.forEach((y, index) => {
-      const material = new THREE.MeshPhysicalMaterial({ color: '#6b9d83', transparent: true, opacity: 0.18,
+      const material = new THREE.MeshPhysicalMaterial({ color: '#6b9d83', transparent: true, opacity: SCINTILLATOR_OPACITY,
         roughness: 0.3, metalness: 0.05, emissive: '#7af1bd', emissiveIntensity: 0.02, depthWrite: false });
       const tile = this.box(20, 1, 20, 0, y, 0, material);
       tile.renderOrder = index + 1;
@@ -383,7 +383,7 @@ export class TelescopeScene {
   setCutaway(value) {
     this.cutaway = value;
     for (const item of this.tiles) { item.cover.visible = !value; item.tile.visible = value; }
-    this.topText.material.opacity = value ? 0.22 : 0.9;
+    this.topText.material.opacity = ENGRAVING_OPACITY;
     for (const fibre of this.fibres || []) fibre.visible = value;
     for (const padding of this.cushions || []) padding.material.opacity = value ? 0.055 : 0.2;
   }
@@ -474,7 +474,7 @@ export class TelescopeScene {
       this.flashes[index] *= Math.exp(-dt * 7);
       const item = this.tiles[index];
       item.tile.material.emissiveIntensity = 0.025 + this.flashes[index] * 0.95;
-      item.tile.material.opacity = 0.16 + this.flashes[index] * 0.22;
+      item.tile.material.opacity = SCINTILLATOR_OPACITY + this.flashes[index] * 0.2;
       item.edges.material.opacity = 0.55 + this.flashes[index] * 0.4;
     }
     for (let i = this.rings.length - 1; i >= 0; i--) {

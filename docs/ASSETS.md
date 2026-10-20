@@ -166,6 +166,15 @@ Bodies with matching materials are merged for drawing. Component sizes are
 not stretched to force them to fit. This alignment does not replace a complete
 enclosure clearance or manufacturing check.
 
+The exported U5 converter housing had a 4.1 mm gap above its footprint plane.
+`hardware-adjustments.js` lowers the complete component by that amount before
+merging the meshes. The housing is flush, its dimensions are unchanged, and
+the original KiCad file is untouched.
+
+The top engraving uses a bright white mask at 0.95 opacity independently of
+the clear acrylic. The scintillator opacity is 0.36 so its body is easier to
+see without hiding the fibre. These are display choices, not optical properties.
+
 The signal cables use the first three SMA ports, J3, J4, and J5. J6 has a
 yellow cap. Each cable runs inside the vertical extrusion, then comes out
 at its connector height. No signal cable is routed behind the box.
@@ -174,7 +183,8 @@ The box is horizontally centered as one group, keeping the Pi, readout, header,
 mounts, and ports aligned inside it. The black USB-C lead and blue Ethernet
 cable use opening-face centres extracted from the Pi CAD: OBJ5144 for USB-C
 and OBJ4358 for the RJ45 jack. Plugs and cable jackets are illustrative geometry.
-The rubber feet are tapered circular frustums rather than square blocks.
+The rubber feet are tapered circular frustums, wider against the extrusion
+and narrower at the table. Their top and bottom heights are unchanged.
 
 ## Browser libraries and photograph
 

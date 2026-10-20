@@ -20,8 +20,8 @@ test('the 2 mm acrylic sheets remain visible outside the beam height', () => {
   assert.ok(-ACRYLIC_OFFSET + 0.1 < -RAIL_HALF_HEIGHT);
 });
 
-test('rubber feet taper towards the posts and sit on the floor', () => {
-  assert.ok(RUBBER_FOOT.bottomRadius > RUBBER_FOOT.topRadius);
+test('rubber feet are wider against the posts and narrower on the floor', () => {
+  assert.ok(RUBBER_FOOT.topRadius > RUBBER_FOOT.bottomRadius);
   assert.ok(Math.abs(RUBBER_FOOT.topY - RUBBER_FOOT.height - FLOOR_Y) < 1e-9);
 });
 

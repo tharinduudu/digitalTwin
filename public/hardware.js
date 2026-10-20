@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
 import { mergeGeometries } from '/vendor/utils/BufferGeometryUtils.js';
 import { headerShift, PI_HOLES, caseMounts, mountingShift } from './readout-placement.js';
+import { seatConverter } from './hardware-adjustments.js';
 
 // CAD is in metres. The exhibition scene uses centimetres.
 const boardAxes = new THREE.Matrix4().makeBasis(
@@ -10,6 +11,7 @@ const boardAxes = new THREE.Matrix4().makeBasis(
 async function loadBoard(url, position, indicatorNames = [], headerName) {
   const { scene } = await new GLTFLoader().loadAsync(url);
   scene.updateMatrixWorld(true);
+  const converter = headerName === 'J2' ? seatConverter(scene) : null;
   const indicators = indicatorNames.map(name => {
     const node = scene.getObjectByName(name);
     if (!node) throw new Error(`CAD indicator ${name} missing`);
@@ -64,7 +66,7 @@ async function loadBoard(url, position, indicatorNames = [], headerName) {
   });
   const mounts = headerName === 'OBJ3742'
     ? PI_HOLES.map(p => new THREE.Vector3(...p).applyMatrix4(body.matrix)) : [];
-  return { body, indicators, ports, mounts, header: header.applyMatrix4(body.matrix) };
+  return { body, indicators, ports, mounts, converter, header: header.applyMatrix4(body.matrix) };
 }
 
 export class ReadoutHardware extends THREE.Group {
@@ -97,6 +99,8 @@ export class ReadoutHardware extends THREE.Group {
       this.add(pi.body);
       this.state.pi = true;
       const { body, indicators, ports } = readout;
+      this.state.u5GapMm = readout.converter.housingGapMm;
+      this.state.u5OffsetMm = readout.converter.offsetMm;
       this.add(body);
       indicators.forEach(point => {
         const material = new THREE.MeshStandardMaterial({ color: '#531919', emissive: '#ff2820', emissiveIntensity: 0.02 });

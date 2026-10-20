@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { STLLoader } from '/vendor/loaders/STLLoader.js';
 import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
 import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
-import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT } from './detector-geometry.js';
+import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT, ENGRAVING_OPACITY } from './detector-geometry.js';
 import { socketFastener } from './fasteners.js';
 import { addCornerBrackets } from './corner-brackets.js';
 
@@ -122,16 +122,18 @@ export async function installMechanicalParts(view) {
   // The supplied artwork is kept as an etching mask, without redrawing the logo.
   const artwork = await new THREE.TextureLoader().loadAsync('/assets/acrylic-engraving.png');
   artwork.colorSpace = THREE.SRGBColorSpace;
+  artwork.anisotropy = view.renderer.capabilities.getMaxAnisotropy();
   view.topText.geometry.dispose();
   view.topText.geometry = new THREE.PlaneGeometry(19.81, 19.81);
   view.topText.position.y = TILE_HEIGHTS[0] + ACRYLIC_OFFSET + 0.11;
   view.topText.rotation.z = ACRYLIC_ANGLE;
+  view.topText.renderOrder = 6;
   view.topText.material.dispose();
   view.topText.material = new THREE.MeshBasicMaterial({ map: artwork, transparent: true,
-    opacity: view.cutaway ? 0.22 : 0.75, depthWrite: false, side: THREE.DoubleSide });
+    opacity: ENGRAVING_OPACITY, toneMapped: false, depthWrite: false, side: THREE.DoubleSide });
   view.topText.material.onBeforeCompile = shader => {
     shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>',
-      '#include <map_fragment>\ndiffuseColor.rgb = vec3(0.82, 0.87, 0.84);');
+      '#include <map_fragment>\ndiffuseColor.rgb = vec3(0.96, 0.99, 0.97);');
   };
 
   // Replace the photographic approximation with the enclosure supplied as STL.

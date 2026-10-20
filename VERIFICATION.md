@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 26 Node tests pass. They cover the simulation rate near 230/min per
+All 28 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
@@ -36,6 +36,10 @@ optical-efficiency measurement.
   the labelled square pyramid from the lower selected tile's centre.
 - Opening the cover loads the actual readout and Pi 5 CAD without browser
   warnings or errors in the final check.
+- U5 is lowered 4.1 mm without scaling. The loaded model reports a zero
+  housing-to-footprint gap. The source KiCad file is unchanged.
+- The scintillator uses 0.36 opacity; the fibre remains visible. Top artwork
+  stays bright in both tile views. QR scanning has not been tested.
 - The Pi uses the enclosure's four 49 x 58 mm mounting points. Its PCB underside
   sits at the 4.9 mm standoff height. The readout is placed from the Pi header,
   not from an independent board-centre estimate. This is not a full mechanical
