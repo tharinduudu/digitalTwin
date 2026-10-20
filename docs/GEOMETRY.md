@@ -6,13 +6,14 @@ path, drawn to explain how the three tiles work.
 
 ## A track crossing a tile
 
-Scene distances are in centimetres. Height is `y`. The middle plane is at zero,
-the top is at +13, and the bottom is at -13. A track has a middle-plane position
-`(x0, z0)` and slopes `(dx, dz)`. At height `y`:
+Scene distances are in centimetres. Height is `y`. Tile centres are at
+12.05, -0.95, and -13.95, matching the horizontal beams. Their separations
+remain 13 cm. A track has a middle-plane position `(xm, zm)` and slopes
+`(dx, dz)`. With middle-plane height `ym = -0.95`, at height `y`:
 
 ```text
-x(y) = x0 - y dx
-z(y) = z0 - y dz
+x(y) = xm - (y - ym) dx
+z(y) = zm - (y - ym) dz
 ```
 
 It hits a tile when both coordinates are between -10 and +10 cm. One hit cannot
@@ -72,5 +73,5 @@ coincidences. Missed tracks are drawn faintly and thinned for performance.
 Raw single-channel counts are not used as a room-muon rate because they also
 contain dark and electronic pulses.
 
-The fibre path follows the groove. The moving light dots are still
+The fibre path follows the groove. The moving green bands are still
 illustrative; they are not a ray-traced calculation of light transport.

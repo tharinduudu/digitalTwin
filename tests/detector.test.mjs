@@ -36,8 +36,8 @@ test('source holds measured counts when a record becomes stale or a read fails',
   assert.equal(snapshot.last.c01, 211);
 });
 test('square acceptance is defined from an explicit lower-tile centre', () => {
-  assert.equal(acceptanceProfile().lower, -13);
-  assert.equal(acceptanceProfile().upper, 13);
+  assert.equal(acceptanceProfile().lower, -13.95);
+  assert.equal(acceptanceProfile().upper, 12.05);
   assert.equal(acceptedFromCentre(10/26, 10/26), true);
   assert.equal(acceptedFromCentre(10.01/26, 0), false);
   assert.equal(acceptedFromCentre(10/13, 0, 'c01'), true);

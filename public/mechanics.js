@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { STLLoader } from '/vendor/loaders/STLLoader.js';
 import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
 import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
+import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS } from './detector-geometry.js';
+import { socketFastener } from './fasteners.js';
 
 function acrylicShape(data) {
   const shape = new THREE.Shape(data.outline.map(p => new THREE.Vector2(...p)));
@@ -41,7 +43,7 @@ export async function installMechanicalParts(view) {
     upright.scale.y = (top - bottom) / 38.1;
     view.box(2.2, 0.5, 2.2, x, -18, z, view.black);
   }
-  for (const y of [12.05, -0.95, -13.95]) {
+  for (const y of TILE_HEIGHTS) {
     for (const z of [-11.16, 11.16]) mesh(rail, view.silver, [0, y, z]);
     for (const x of [-11.16, 11.16]) {
       const side = mesh(rail, view.silver, [x, y, 0]);
@@ -61,7 +63,7 @@ export async function installMechanicalParts(view) {
   view.mechanicalSheets = [];
   for (const old of view.sandwichPieces) { view.model.remove(old); old.geometry.dispose(); }
   view.tiles.forEach((item, index) => {
-    const y = [13, 0, -13][index];
+    const y = TILE_HEIGHTS[index];
     item.tile.geometry.dispose();
     item.tile.geometry = tile;
     item.edges.geometry.dispose();
@@ -80,12 +82,22 @@ export async function installMechanicalParts(view) {
     sensor.position.copy(tilePoint(19.021, 19.021, 8.5, y));
     view.model.add(sensor);
     for (const sign of [-1, 1]) {
-      const acrylicSheet = mesh(sheet, view.glass, [0, y + sign * 0.7, 0]);
-      acrylicSheet.rotation.y = Math.PI / 2;
+      const acrylicSheet = mesh(sheet, view.glass, [0, y + sign * 0.9, 0]);
+      acrylicSheet.rotation.y = ACRYLIC_ANGLE;
       view.mechanicalSheets.push(acrylicSheet);
       const padding = new THREE.MeshStandardMaterial({ map: view.wrap.map, color: '#303630',
         transparent: true, opacity: view.cutaway ? 0.15 : 1, roughness: 1, depthWrite: false });
-      view.cushions.push(mesh(cushion, padding, [0, y + sign * 0.55, 0]));
+      const lining = mesh(cushion, padding, [0, y + sign * 0.55, 0]);
+      lining.rotation.y = ACRYLIC_ANGLE;
+      view.cushions.push(lining);
+    }
+    for (const [x, z] of ACRYLIC_MOUNTS) {
+      const screw = socketFastener(view.silver, 0.45);
+      screw.rotation.x = -Math.PI / 2;
+      screw.position.set(x, y + 1.03, z);
+      // The sliding nut follows the longitudinal slot of each beam.
+      if (x) screw.rotateZ(Math.PI / 2);
+      view.model.add(screw);
     }
     const light = new FibreLight(fibreCurve(fibre, y), fibre.diameter_mm / 20);
     view.model.add(light.core, light.glow);
@@ -98,8 +110,8 @@ export async function installMechanicalParts(view) {
   artwork.colorSpace = THREE.SRGBColorSpace;
   view.topText.geometry.dispose();
   view.topText.geometry = new THREE.PlaneGeometry(19.81, 19.81);
-  view.topText.position.y = 13.81;
-  view.topText.rotation.z = Math.PI / 2;
+  view.topText.position.y = TILE_HEIGHTS[0] + 1.01;
+  view.topText.rotation.z = ACRYLIC_ANGLE;
   view.topText.material.dispose();
   view.topText.material = new THREE.MeshBasicMaterial({ map: artwork, transparent: true,
     opacity: view.cutaway ? 0.22 : 0.75, depthWrite: false, side: THREE.DoubleSide });
@@ -113,6 +125,12 @@ export async function installMechanicalParts(view) {
   base.scale(0.1, 0.1, 0.1);
   const enclosureBase = mesh(base, view.silver, [2.2, -5.1, 10.8]);
   view.readout.add(enclosureBase);
+  // These three slots belong to the supplied enclosure's mounting wings.
+  for (const [x, y] of [[-63.276, 41.097], [66.9, 41.4], [0, -87.198]]) {
+    const screw = socketFastener(view.silver, 0.8);
+    screw.position.set(2.2 + x / 10, -5.1 + y / 10, 11.02);
+    view.readout.add(screw);
+  }
   for (const old of [...view.lid.children]) { view.lid.remove(old); old.geometry?.dispose(); }
   lid.scale(0.1, 0.1, 0.1);
   const cover = new THREE.Mesh(lid, view.silver);

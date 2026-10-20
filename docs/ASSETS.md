@@ -49,7 +49,9 @@ changes, inspect its components before using the same selection.
 The Illustrator file has a PDF-compatible page. A blank plate is used to
 extract the outline and four holes/slots. This avoids mistaking letters for
 cutting paths. The marked plate is rendered separately as an engraving mask.
-The acrylic sheets and engraving are turned 90 degrees in `mechanics.js`.
+The source lettering is diagonal. The sheets and artwork are oriented so the
+letters read across the top when viewed from the readout-box side, with the
+four screw locations over the beam slots. `ACRYLIC_ANGLE` is shared by both.
 
 For the fibre, the script takes a horizontal section at 8.4 mm in the tile.
 It finds the inner and outer groove walls and places the fibre between them.
@@ -84,6 +86,14 @@ so it cannot specify the material thickness. The display uses 2 mm acrylic
 and 1 mm drawer liner on each side. Change those values in `mechanics.js` when
 the actual thicknesses have been measured. The liner texture is an illustration
 of a woven cushion, not a scanned surface.
+
+The tile planes coincide with the horizontal beam centre heights. A tile is
+10 mm thick and the supplied holder spans 15 mm vertically; both fit within
+the 20 mm extrusion height. The clear sheets sit above and below the tile.
+Four illustrated socket-head screws, washers, and sliding T-nuts sit over the
+beam slots at each level. The supplied box has three mounting-wing slots,
+which receive the same type of hardware. The M4-sized fasteners are drawn
+for the display, not taken from a manufacturer CAD model.
 
 ## Readout PCB
 

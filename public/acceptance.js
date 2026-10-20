@@ -1,5 +1,7 @@
+import { TILE_HEIGHTS } from './detector-geometry.js';
+
 export function acceptanceProfile(pair = 'all') {
-  const heights = [13, 0, -13];
+  const heights = TILE_HEIGHTS;
   const [top, bottom] = (pair === 'all' ? '02' : pair.slice(1)).split('').map(Number);
   const lower = heights[bottom], upper = heights[top];
   return { lower, upper, top, bottom, halfWidth: 10,

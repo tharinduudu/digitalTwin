@@ -21,14 +21,16 @@ by the browser must never increment a number labelled as a measurement.
 
 ## Where to make common changes
 
-- Tile width and separation: `GEOMETRY` in `simulation.mjs`, plane heights in
-  `scene.js` and `acceptance.js`, and the placement in `mechanics.js`. Keep them
-  consistent and run the geometry tests afterwards.
+- Tile heights: `TILE_HEIGHTS` in `detector-geometry.js`, shared by the scene,
+  acceptance overlay, mechanical placement, and simulation. Keep the tile and
+  holder recessed within the beams. Width and separation are in `GEOMETRY`.
 - Synthetic count rate: `target` in the `Simulation` constructor.
 - Room area: `ROOM.width` in `simulation.mjs`. The proposal rate already
   includes the area ratio, so do not add another rate multiplier.
-- Acrylic orientation: `acrylicSheet.rotation.y` and `topText.rotation.z` in
-  `mechanics.js`. Do not rotate the scintillator or fibre just to turn the art.
+- Acrylic orientation: `ACRYLIC_ANGLE` in `detector-geometry.js`. This turns the
+  sheets and lettering together without turning the scintillator or fibre.
+- Socket-head screws and T-nuts: `fasteners.js`; mounting positions are in
+  `mechanics.js` and `detector-geometry.js`.
 - Optical layer thickness: the sheet and cushion extrusions in `mechanics.js`.
 - Fibre endpoints and green light: `fibre.js`. Keep the endpoints on the holder
   recess face, and run the fibre tests after changing that position.

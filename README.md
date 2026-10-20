@@ -112,10 +112,15 @@ The tiles are 20 x 20 x 1 cm, with 13 cm between their centre planes.
 The tile and SiPM holder come from the supplied STL files. A section through
 the groove is used to place an illustrative 1 mm fibre between the groove
 walls. The acrylic outline, screw holes, slots, and engraving come from the
-Illustrator file. The acrylic sheets and engraving are rotated 90 degrees
-relative to the tile mesh. There is acrylic and a thin drawer-liner layer on
+Illustrator file. The sheets' mounting holes face the beam slots, and the
+lettering reads horizontally from the readout-box side. There is acrylic and a thin drawer-liner layer on
 both sides of each tile. Their thicknesses are display assumptions, not
 measurements taken from the artwork.
+
+The scintillator and its holder sit within the horizontal beams, so neither
+protrudes in a level side view. Four socket-head screws and sliding T-nuts
+secure each acrylic assembly. The readout uses its three existing mounting
+wing slots. Fastener dimensions are illustrative M4-sized hardware.
 
 The Hamamatsu S13360-2050VE component model sits in the corner holder's
 recess. Both ends of the fibre stop at its sensing face. Green light moves
@@ -166,6 +171,8 @@ these illustrated intersections are added to the measured numbers.
 | `public/mechanics.js` | Places the supplied STL parts, acrylic, liner, and fibre |
 | `public/fibre.js` | Follows the groove and animates green light towards the SiPM |
 | `public/readout-placement.js` | Aligns the GPIO header and defines the side cable route |
+| `public/detector-geometry.js` | Shares the recessed tile heights and acrylic orientation |
+| `public/fasteners.js` | Draws socket-head screws, washers and sliding T-nuts |
 | `public/hardware.js` | Loads the PCB and Pi CAD and flashes the indicators |
 | `public/acceptance.js` | Defines the selected-pair acceptance geometry |
 | `public/charts.js` | Draws the count history |

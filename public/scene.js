@@ -4,8 +4,9 @@ import { ReadoutHardware } from './hardware.js';
 import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';
 import { BEAM, smaLeadPoints } from './readout-placement.js';
+import { TILE_HEIGHTS } from './detector-geometry.js';
 
-const TILE_Y = [13, 0, -13];
+const TILE_Y = TILE_HEIGHTS;
 const READOUT_PORT_Y = [-2.5, -4.5, -6.5];
 const PAIR_COLORS = { c01: '#80ecc0', c12: '#f5a394', c02: '#bcb0f6', all: '#80ecc0' };
 

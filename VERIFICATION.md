@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 15 Node tests pass. They cover the simulation rate near 230/min per
+All 19 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
@@ -17,7 +17,11 @@ optical-efficiency measurement.
 ## Browser and CAD checks
 
 - The supplied frame, tile, holder, acrylic, liner, and enclosure load.
-- Acrylic and engraving are rotated 90 degrees relative to the tile.
+- Acrylic mounting holes face the beam slots. Lettering runs horizontally
+  from the readout-box side, accounting for the diagonal source artwork.
+- The 10 mm tile and 15 mm holder sit within each 20 mm beam height. Rendering
+  and track intersections share the same recessed plane heights.
+- Socket-head screws, washers and sliding T-nuts secure the acrylic and box.
 - Green light follows the fibre. The placeholder box and exposed green lead
   outside the tile corner have been removed.
 - Room tracks include misses and tile crossings. The acceptance toggle shows

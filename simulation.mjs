@@ -1,4 +1,5 @@
 // A geometric demonstration, not a transport or detector-efficiency calculation.
+import { TILE_HEIGHTS } from './public/detector-geometry.js';
 export function randomGenerator(seed = 20261020) {
   let state = seed >>> 0;
   return () => {
@@ -10,13 +11,13 @@ export function randomGenerator(seed = 20261020) {
   };
 }
 
-export const GEOMETRY = { width: 20, spacing: 13, thickness: 1, heights: [13, 0, -13] };
+export const GEOMETRY = { width: 20, spacing: 13, thickness: 1, heights: TILE_HEIGHTS };
 export const ROOM = { width: 120, displayedMissesPerSecond: 40 };
 const inside = (x, z) => Math.abs(x) <= 10 && Math.abs(z) <= 10;
 
 export function sampleTrack(random, width = GEOMETRY.width) {
-  const x = width * (random() - 0.5);
-  const z = width * (random() - 0.5);
+  const middleX = width * (random() - 0.5);
+  const middleZ = width * (random() - 0.5);
   // Assumed I(theta) proportional to cos^2(theta). The horizontal-area
   // projection adds another cos(theta), giving cos(theta) = U^(1/4).
   const cosine = Math.max(1e-8, random()) ** 0.25;
@@ -24,6 +25,8 @@ export function sampleTrack(random, width = GEOMETRY.width) {
   const phi = 2 * Math.PI * random();
   const dx = tangent * Math.cos(phi);
   const dz = tangent * Math.sin(phi);
+  const x = middleX + GEOMETRY.heights[1] * dx;
+  const z = middleZ + GEOMETRY.heights[1] * dz;
   const hits = GEOMETRY.heights.map(y => inside(x - y * dx, z - y * dz));
   return { x, z, dx, dz, hits };
 }
