@@ -1,0 +1,70 @@
+{
+  "frame": {
+    "file": "Full Assembly (simplified) 2.0.stl",
+    "sha256": "2e07efb999838d14cf837333d644bbbe6643671c555cb6474727350b85dd0de6",
+    "bounds_mm": [
+      [
+        -121.5999984741211,
+        -121.5999984741211,
+        -190.5
+      ],
+      [
+        121.67831420898438,
+        121.7298583984375,
+        190.5
+      ]
+    ],
+    "triangles": 63818
+  },
+  "hinges": {
+    "file": "3D Printable Hinges - ProductDesignOnline.com.stl",
+    "sha256": "be4ba59b9ba28ba894bb116d66fc79611014f9fa4b98ae12c1c0409fe21af431",
+    "bounds_mm": [
+      [
+        -74.4000015258789,
+        -98.9000015258789,
+        0.0
+      ],
+      [
+        74.4000015258789,
+        152.6999969482422,
+        32.400001525878906
+      ]
+    ],
+    "triangles": 120388
+  },
+  "holder": {
+    "file": "SiPM Holder Russian Tiles.stl",
+    "sha256": "6d10ca43bb8c57fad827c88c630929e8dc8017836b6151e2c9f317f69181de36",
+    "bounds_mm": [
+      [
+        0.0,
+        -1.1102230246251565e-15,
+        -2.5
+      ],
+      [
+        45.3641471862793,
+        45.3641471862793,
+        12.5
+      ]
+    ],
+    "triangles": 1044
+  },
+  "tile": {
+    "file": "tile_without the fiber but with the grove.stl",
+    "sha256": "295d919f53f0e05c11590cddf7ddb48fc9e291152d2e8fb35e14f1cb947076cd",
+    "bounds_mm": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        200.0,
+        200.0,
+        10.0
+      ]
+    ],
+    "triangles": 11716
+  }
+}

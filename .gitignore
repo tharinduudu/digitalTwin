@@ -1,0 +1,15 @@
+server.log
+screenshots/
+node_modules/
+.DS_Store
+.env
+cad/*.step
+cad/*.zip
+cad/pi5/*.step
+cad/raspberry-pi-4b.step
+cad/LICENSE-Pi-model.txt
+cad/*-layout.png
+cad/*-groove.png
+cad/supplied-parts.png
+*.kicad_prl
+public/assets/enclosure-source.stl

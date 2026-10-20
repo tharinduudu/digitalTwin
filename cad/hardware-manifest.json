@@ -1,0 +1,25 @@
+{
+  "readout": {
+    "source": "gLOWCOST-2v2-mppcInterface-professional/RPi_Hat.kicad_pcb",
+    "sha256": "806712bcf98f9cefd1ffe53d3e4fd456b95491a400c522f05cd807aeacb59b29",
+    "export": "KiCad 10 GLB with pads, silkscreen and soldermask",
+    "indicators": [
+      "D2",
+      "D3",
+      "D4"
+    ]
+  },
+  "pi": {
+    "model": "Raspberry Pi 5",
+    "source": "https://pip.raspberrypi.com/categories/892-raspberry-pi-5",
+    "file": "rpi-5b_no_graphics.step",
+    "sha256": "78164070c1cc7ab854382950d2e85926c6e35432f1e5a146b733397a7c6afb44",
+    "license": "MIT, Raspberry Pi Ltd 2026"
+  },
+  "sipm": {
+    "model": "Hamamatsu S13360-2050VE",
+    "source": "readout component library/S13360-2050VE.stp",
+    "sha256": "30265c4cabfae491c3d5ce377fcd4fe43dff12c34cb109873438ef1b44acde23",
+    "export": "KiCad 10 GLB, component only"
+  }
+}
