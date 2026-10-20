@@ -1,5 +1,8 @@
 # gLOWCOST Digital Twin
 
+The gLOWCOST GSU muon detector is simulated here as a digital twin for STEM
+activities and exhibitions.
+
 This is an exhibition display for our three-tile cosmic muon detector. The
 idea is to show what the detector does while people can also see the instrument
 on the table. Particles move through the surrounding space, the tiles flash
