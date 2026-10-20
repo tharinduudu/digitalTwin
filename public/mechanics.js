@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { STLLoader } from './vendor/loaders/STLLoader.js';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
+import { FibreLight, fibreCurve } from './fibre.js';
+import { createSiPMMount } from './sipm-mount.js';
 import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT, ENGRAVING_OPACITY } from './detector-geometry.js';
 import { socketFastener } from './fasteners.js';
 import { addCornerBrackets } from './corner-brackets.js';
@@ -70,6 +71,7 @@ export async function installMechanicalParts(view) {
   view.cushions = [];
   view.mechanicalSheets = [];
   view.acrylicFastenerCount = 0;
+  view.sensorMounts = [];
   for (const old of view.sandwichPieces) { view.model.remove(old); old.geometry.dispose(); }
   view.tiles.forEach((item, index) => {
     const y = TILE_HEIGHTS[index];
@@ -78,18 +80,12 @@ export async function installMechanicalParts(view) {
     item.edges.geometry.dispose();
     item.edges.geometry = new THREE.EdgesGeometry(tile, 35);
     mesh(holder, view.darkMetal, [0, y, 0]);
-    const sensor = new THREE.Group();
-    const packageModel = sipm.scene.clone(true);
-    // The optical face is the negative-Z face of this component STEP model.
-    packageModel.position.set(0, -0.001615, 0.00135);
-    sensor.add(packageModel);
-    sensor.scale.setScalar(100);
-    const diagonal = Math.SQRT1_2;
-    sensor.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
-      new THREE.Vector3(diagonal, 0, diagonal), new THREE.Vector3(0, 1, 0),
-      new THREE.Vector3(-diagonal, 0, diagonal)));
-    sensor.position.copy(tilePoint(19.021, 19.021, 8.5, y));
-    view.model.add(sensor);
+    const { mount, cablePoints } = createSiPMMount(sipm.scene, y);
+    view.model.add(mount);
+    view.sensorMounts.push(mount);
+    view.sensorLeads[index].geometry.dispose();
+    view.sensorLeads[index].geometry = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(cablePoints), 32, 0.055, 6, false);
     for (const sign of [-1, 1]) {
       const acrylicSheet = mesh(sheet, [view.glass, acrylicSide], [0, y + sign * ACRYLIC_OFFSET, 0]);
       acrylicSheet.rotation.y = ACRYLIC_ANGLE;

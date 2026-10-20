@@ -171,6 +171,7 @@ export class TelescopeScene {
     this.sandwichPieces = [];
     this.readoutLeads = [];
     this.beamCables = [];
+    this.sensorLeads = [];
     TILE_Y.forEach((y, index) => {
       const material = new THREE.MeshPhysicalMaterial({ color: '#6b9d83', transparent: true, opacity: SCINTILLATOR_OPACITY,
         roughness: 0.3, metalness: 0.05, emissive: '#7af1bd', emissiveIntensity: 0.02, depthWrite: false });
@@ -183,8 +184,8 @@ export class TelescopeScene {
       this.tiles.push({ tile, cover, edges });
       this.sandwichPieces.push(this.box(21.8, 0.12, 21.8, 0, y - 0.75, 0, this.glass));
       const portY = READOUT_PORT_Y[index];
-      this.cable([[-8.2, y + 0.35, 8.2], [-9.6, y + 0.35, 9.6],
-        [-10.5, y - 0.7, 10.5], [BEAM.x, y - 0.95, BEAM.z]]);
+      this.sensorLeads.push(this.cable([[-8.2, y + 0.35, 8.2], [-9.6, y + 0.35, 9.6],
+        [-10.5, y - 0.7, 10.5], [BEAM.x, y - 0.95, BEAM.z]], this.black, 0.055));
       this.beamCables.push(this.cable([[BEAM.x, y - 0.95, BEAM.z],
         [BEAM.x, portY, BEAM.z]], this.black, 0.1));
       const initialPort = new THREE.Vector3(-1.65 + READOUT_X, portY, 15.55);

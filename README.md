@@ -64,6 +64,10 @@ storage, traffic and build limits.
 - Full screen gives more room for an exhibition display.
 
 Opening the readout loads the actual KiCad PCB export and Raspberry Pi 5 CAD.
+At each tile corner, the SiPM sits on a carrier PCB in the holder's rectangular
+slot. A U.FL plug connects the back of that board to the coax, which runs through
+the extrusion to an SMA input on the readout. Carrier and connector geometry
+is illustrative; the sensor and holder use the supplied component models.
 The three indicators flash when the illustrated track crosses the corresponding
 tile. These flashes are slowed down and are not a copy of the FPGA's LED logic.
 

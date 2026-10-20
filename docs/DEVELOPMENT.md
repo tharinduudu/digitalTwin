@@ -48,6 +48,8 @@ by the browser must never increment a number labelled as a measurement.
 - Optical layer thickness: the sheet and cushion extrusions in `mechanics.js`.
 - Fibre endpoints and green light: `fibre.js`. Keep the endpoints on the holder
   recess face, and run the fibre tests after changing that position.
+- SiPM carrier PCB and rear U.FL: `sipm-mount.js`. Its cable points replace the
+  temporary tile lead once the supplied holder and sensor models have loaded.
 - Enclosure camera: `setBoxOpen()` in `scene.js`.
 - LED pulse duration: the decay in `hardware.js`. This is a display duration,
   not the electrical pulse width.

@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 30 Node tests pass. They cover the simulation rate near 230/min per
+All 32 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
@@ -17,6 +17,11 @@ optical-efficiency measurement.
 ## Browser and CAD checks
 
 - The supplied frame, tile, holder, acrylic, liner, and enclosure load.
+- All three sensor carriers load in the holder slots. Tests keep each optical
+  face unchanged and place the rear U.FL opposite it, with the coax reaching
+  the existing vertical-beam route.
+- The GitHub Pages simulation loads under its project path with simulated
+  counts and no detector connection. The same simulation is used locally.
 - Acrylic mounting holes face the beam slots. Lettering runs horizontally
   from the readout-box side, accounting for the diagonal source artwork.
 - The 10 mm tile and 15 mm holder sit within each 20 mm beam height. Rendering

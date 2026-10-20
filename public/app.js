@@ -84,6 +84,7 @@ function updateClock() {
     $('scene').dataset.cornerBrackets = String(scene.cornerMounts?.brackets || 0);
     $('scene').dataset.u5GapMm = String(scene.hardware.state.u5GapMm ?? '');
     $('scene').dataset.u5OffsetMm = String(scene.hardware.state.u5OffsetMm ?? '');
+    $('scene').dataset.sensorMounts = String(scene.sensorMounts?.length || 0);
   }
   if (lastMessage && performance.now() - lastMessage > 6000) {
     connected = false;

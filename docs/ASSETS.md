@@ -186,6 +186,23 @@ and OBJ4358 for the RJ45 jack. Plugs and cable jackets are illustrative geometry
 The rubber feet are tapered circular frustums, wider against the extrusion
 and narrower at the table. Their top and bottom heights are unchanged.
 
+## SiPM carrier and coax connection
+
+The SiPM is soldered to a small carrier board, not attached directly to the
+coax. The board fills the rectangular opening in the supplied holder. A
+board-mounted male U.FL sits directly behind the SiPM on the opposite side.
+The cable's mating plug connects there; its other end connects to one of the
+first three SMA inputs on the readout. Most of that cable is hidden in the
+vertical extrusion.
+
+`sipm-mount.js` keeps the original sensor's optical face at the fibre ends.
+The optical opening is 3.8 x 3.8 mm, while the rear rectangular board slot is
+13.8 x 5.9 mm. The displayed board is 13.7 x 5.8 mm with a 0.8 mm assumed
+thickness. The sensor and U.FL are opposite one another near one end of the
+board, not at its geometric centre. Solder joints, the U.FL base, centre contact and
+mating plug are illustrative geometry, not manufacturer CAD or a verified
+mechanical fit. The Hamamatsu sensor itself still uses its component model.
+
 ## Browser libraries and photograph
 
 Three.js, OrbitControls, GLTFLoader, STLLoader, and BufferGeometryUtils are
