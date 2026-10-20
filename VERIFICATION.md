@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 32 Node tests pass. They cover the simulation rate near 230/min per
+All 36 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
@@ -39,8 +39,9 @@ optical-efficiency measurement.
   outside the tile corner have been removed.
 - Room tracks include misses and tile crossings. The acceptance toggle shows
   the labelled square pyramid from the lower selected tile's centre.
-- Opening the cover loads the actual readout and Pi 5 CAD without browser
-  warnings or errors in the final check.
+- The actual readout and Pi 5 CAD load with the cover closed and remain
+  visible through its vents. Opening and closing the cover does not hide
+  the boards. The closed view reports hardware ready before opening.
 - U5 is lowered 4.1 mm without scaling. The loaded model reports a zero
   housing-to-footprint gap. The source KiCad file is unchanged.
 - The scintillator uses 0.36 opacity; the fibre remains visible. Top artwork

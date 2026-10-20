@@ -12,3 +12,8 @@
 .feed-status.live{color:var(--mint)}.source-note p #source-description{color:#dfca97;font-size:12px;margin-top:0}
 .hardware-caption{position:absolute;right:25px;bottom:178px;max-width:260px;color:#c8d7cd;background:#151b17dd;padding:9px 12px;font-size:12px;line-height:1.5;pointer-events:none}
 @media(max-width:700px){.view-tools{right:17px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0}.view-tools .icon-button{width:100%;min-width:0}.geometry-caption{top:139px;right:18px;max-width:210px;font-size:10px}.hardware-caption{bottom:182px;right:18px;max-width:190px;font-size:10px}}
+:root .brand{min-width:0;flex-wrap:wrap;column-gap:18px;row-gap:2px}
+:root .brand-sub{display:block;text-decoration:none;white-space:nowrap}
+.brand-sub:hover{color:var(--mint);text-decoration:underline}
+.brand-sub:focus-visible{outline:2px solid var(--mint);outline-offset:4px}
+@media(max-width:700px){:root .brand{column-gap:9px}:root .brand-sub{font-size:10px}.header-right{flex-shrink:0}.physics-strip div{min-width:0}.physics-strip p{overflow-wrap:break-word}}

@@ -26,6 +26,21 @@ test('lower acrylic screw heads point down and their shafts enter the lower beam
   assert.equal(TILE_HEIGHTS.length * ACRYLIC_MOUNTS.length * 2, 24);
 });
 
+test('bottom layer brackets sit above the rail while higher brackets stay below', () => {
+  const model = new THREE.Group();
+  addCornerBrackets(model, new THREE.MeshStandardMaterial(), TILE_HEIGHTS);
+  const feet = model.children[0];
+  for (let i = 0; i < 24; i++) {
+    const matrix = new THREE.Matrix4();
+    feet.getMatrixAt(i, matrix);
+    const origin = new THREE.Vector3().applyMatrix4(matrix);
+    const vertical = new THREE.Vector3(0, 1, 0).transformDirection(matrix);
+    const bottom = i >= 16;
+    assert.ok(bottom ? vertical.y > 0.999 : vertical.y < -0.999);
+    assert.ok(Math.abs(origin.y - (TILE_HEIGHTS[Math.floor(i / 8)] + (bottom ? 1 : -1))) < 1e-5);
+  }
+});
+
 test('all mount locations share the same socket-head and sliding-nut geometry', () => {
   const material = new THREE.MeshStandardMaterial();
   const acrylic = socketFastener(material, 0.65);

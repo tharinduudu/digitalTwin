@@ -1,6 +1,10 @@
 import * as THREE from './vendor/three.module.js';
 
 export const BEAM = { x: -11.16, z: 11.16 };
+// Three thin coax leads sit just inside the inward-facing extrusion corner.
+export function cableGuide(index = 0) {
+  return { x: BEAM.x + 1.08 + index * 0.13, z: BEAM.z - 1.08 - index * 0.13 };
+}
 export const READOUT_X = -2.2;
 
 // Hole centres from the Pi 5 CAD (metres), at the PCB underside.
@@ -35,12 +39,13 @@ export function headerShift(socket, header) {
   return socket.clone().sub(header);
 }
 
-export function smaLeadPoints(port) {
+export function smaLeadPoints(port, index = 0) {
+  const guide = cableGuide(index);
   // Leave the upright on the connector side. Never pass behind the enclosure.
   return [
-    new THREE.Vector3(BEAM.x, port.y, BEAM.z),
-    new THREE.Vector3(BEAM.x, port.y, 12.3),
-    new THREE.Vector3(BEAM.x + 0.9, port.y, port.z),
+    new THREE.Vector3(guide.x, port.y, guide.z),
+    new THREE.Vector3(guide.x, port.y, 12.3),
+    new THREE.Vector3(guide.x + 0.9, port.y, port.z),
     new THREE.Vector3(port.x - 4, port.y, port.z),
     new THREE.Vector3(port.x - 2.25, port.y, port.z),
   ];

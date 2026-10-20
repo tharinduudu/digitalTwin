@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
 import { createSiPMMount, SENSOR_BOARD } from '../public/sipm-mount.js';
 import { tilePoint } from '../public/fibre.js';
-import { BEAM } from '../public/readout-placement.js';
+import { cableGuide } from '../public/readout-placement.js';
 
 test('carrier PCB fills the holder recess without moving the optical face', () => {
   const { mount } = createSiPMMount(new THREE.Group(), 12.05);
@@ -31,5 +31,17 @@ test('U.FL is opposite the SiPM and the coax joins the vertical beam route', () 
   const start = mount.worldToLocal(cablePoints[0].clone());
   assert.ok(Math.abs(start.z - plug.position.z) < 1e-9);
   const end = cablePoints.at(-1);
-  assert.deepEqual(end.toArray(), [BEAM.x, -1.9, BEAM.z]);
+  assert.deepEqual(end.toArray(), [cableGuide().x, -1.9, cableGuide().z]);
+});
+
+test('coax leaves through the holder cable groove instead of crossing its walls', () => {
+  const { mount, cablePoints } = createSiPMMount(new THREE.Group(), 0);
+  const points = cablePoints.slice(1, 6).map(point => mount.worldToLocal(point.clone()));
+  for (const point of points) {
+    assert.ok(Math.abs(19.021 * Math.SQRT2 - point.z * 10 - 23.85) < 1e-9);
+    assert.ok(Math.abs(point.y) < 1e-9);
+  }
+  assert.ok(points.every((point, i) => !i || point.x > points[i - 1].x));
+  assert.ok(points.at(-1).x > 2.4);
+  assert.ok(Math.abs(cablePoints[5].z - cableGuide().z) < 1e-9);
 });

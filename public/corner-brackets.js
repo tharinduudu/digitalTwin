@@ -48,10 +48,12 @@ export function addCornerBrackets(model, material, heights) {
       intoPost.position.set(0.27, 1.2, 0);
       bracket.add(underRail, intoPost);
       const inward = alongX ? new THREE.Vector3(-sx, 0, 0) : new THREE.Vector3(0, 0, -sz);
-      const down = new THREE.Vector3(0, -1, 0);
-      bracket.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(inward, down,
-        new THREE.Vector3().crossVectors(inward, down)));
-      bracket.position.set(sx * (alongX ? 10.16 : 11.16), height - 1,
+      // The bottom rail is supported from above; the other levels from below.
+      const side = height === Math.min(...heights) ? 1 : -1;
+      const verticalDirection = new THREE.Vector3(0, side, 0);
+      bracket.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(inward, verticalDirection,
+        new THREE.Vector3().crossVectors(inward, verticalDirection)));
+      bracket.position.set(sx * (alongX ? 10.16 : 11.16), height + side,
         sz * (alongX ? 11.16 : 10.16));
       bracket.updateMatrixWorld(true);
       bracket.traverse(part => {

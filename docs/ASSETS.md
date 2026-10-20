@@ -102,6 +102,8 @@ T-nuts. The 20 mm bracket legs, gussets, and clearance holes are illustrative
 geometry, not CAD for a particular supplier's bracket. Screw heads, washers,
 and nuts share the same geometry throughout; shaft length follows the mount.
 The repeated bracket parts are instanced in eight GPU batches.
+The bottom eight brackets face upwards above their rails. The top and middle
+brackets stay underneath their rails.
 
 The sheets' 2 mm profiles sit just outside the beam height. Their broad faces
 are more transparent than their edges. The cushioning is shown translucent
@@ -176,8 +178,10 @@ the clear acrylic. The scintillator opacity is 0.36 so its body is easier to
 see without hiding the fibre. These are display choices, not optical properties.
 
 The signal cables use the first three SMA ports, J3, J4, and J5. J6 has a
-yellow cap. Each cable runs inside the vertical extrusion, then comes out
-at its connector height. No signal cable is routed behind the box.
+yellow cap. Each cable follows the inward-facing corner of the vertical
+extrusion, then comes out at its connector height. The three cable centres
+are separated, not hidden in the solid extrusion centre. No signal cable is
+routed behind the box.
 
 The box is horizontally centered as one group, keeping the Pi, readout, header,
 mounts, and ports aligned inside it. The black USB-C lead and blue Ethernet
@@ -192,8 +196,12 @@ The SiPM is soldered to a small carrier board, not attached directly to the
 coax. The board fills the rectangular opening in the supplied holder. A
 board-mounted male U.FL sits directly behind the SiPM on the opposite side.
 The cable's mating plug connects there; its other end connects to one of the
-first three SMA inputs on the readout. Most of that cable is hidden in the
-vertical extrusion.
+first three SMA inputs on the readout. The holder's groove has its arc centre
+at transverse coordinate 2.4 mm and height 8.5 mm in the STL, with a 2.4 mm
+radius. From that opening, the lead follows the full long channel along the
+adapter to the horizontal beam. It then follows the beam to the inside corner
+of the upright. Rounded line segments keep the lead on this route without
+the overshoot of an unconstrained spline through the holder walls.
 
 `sipm-mount.js` keeps the original sensor's optical face at the fibre ends.
 The optical opening is 3.8 x 3.8 mm, while the rear rectangular board slot is

@@ -80,12 +80,12 @@ export async function installMechanicalParts(view) {
     item.edges.geometry.dispose();
     item.edges.geometry = new THREE.EdgesGeometry(tile, 35);
     mesh(holder, view.darkMetal, [0, y, 0]);
-    const { mount, cablePoints } = createSiPMMount(sipm.scene, y);
+    const { mount, cableCurve } = createSiPMMount(sipm.scene, y, index);
     view.model.add(mount);
     view.sensorMounts.push(mount);
     view.sensorLeads[index].geometry.dispose();
     view.sensorLeads[index].geometry = new THREE.TubeGeometry(
-      new THREE.CatmullRomCurve3(cablePoints), 32, 0.055, 6, false);
+      cableCurve, 80, 0.055, 6, false);
     for (const sign of [-1, 1]) {
       const acrylicSheet = mesh(sheet, [view.glass, acrylicSide], [0, y + sign * ACRYLIC_OFFSET, 0]);
       acrylicSheet.rotation.y = ACRYLIC_ANGLE;

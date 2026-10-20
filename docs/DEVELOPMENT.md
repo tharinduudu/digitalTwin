@@ -38,6 +38,8 @@ by the browser must never increment a number labelled as a measurement.
   edge and cushion materials are in `mechanics.js`. Both liner opacity values
   must also agree with `setCutaway()`.
 - Rubber feet and floor height: `RUBBER_FOOT` and `FLOOR_Y` in the geometry module.
+- Axis rulers: `rulers.js`. Scene units are centimetres. The scales share an
+  origin outside the frame; their lengths are not labels for frame dimensions.
 - Scintillator opacity: `SCINTILLATOR_OPACITY` in `detector-geometry.js` (0.36).
   Particle flashes temporarily increase it. Acrylic and cushion opacity are separate.
 - Top artwork: `ENGRAVING_OPACITY` stays at 0.95 in both tile views.
@@ -50,6 +52,8 @@ by the browser must never increment a number labelled as a measurement.
   recess face, and run the fibre tests after changing that position.
 - SiPM carrier PCB and rear U.FL: `sipm-mount.js`. Its cable points replace the
   temporary tile lead once the supplied holder and sensor models have loaded.
+  `cableGuide()` in `readout-placement.js` positions the bundle along the
+  upright's inside corner. Use the same guide for the tile, vertical and SMA leads.
 - Enclosure camera: `setBoxOpen()` in `scene.js`.
 - LED pulse duration: the decay in `hardware.js`. This is a display duration,
   not the electrical pulse width.

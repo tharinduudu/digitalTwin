@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111514">
-  <title>gLOWCOST | Cosmic Muon Telescope</title>
+  <title>gLOWCOST | Cosmic Muon Detector</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
   <script defer src="./vendor/lucide.min.js"></script>
@@ -12,13 +12,13 @@
 </head>
 <body>
   <header class="masthead">
-    <div class="brand"><h1>g<span>LOW</span>COST</h1><span class="brand-sub">Georgia State University</span></div>
+    <div class="brand"><h1>g<span>LOW</span>COST</h1><a class="brand-sub" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener noreferrer">cosmic.gsu.edu</a></div>
     <div class="header-right"><span class="feed-status" id="feed-status"><b></b>Simulation</span><time id="clock"></time><button class="icon-button" id="fullscreen" aria-label="Enter full screen" title="Full screen"><i data-lucide="maximize"></i></button></div>
   </header>
   <main>
-    <section class="detector-space" aria-label="Animated three-plate cosmic muon telescope">
+    <section class="detector-space" aria-label="Animated three-plate cosmic muon detector">
       <div id="scene" role="img" aria-label="Three scintillator tiles in an aluminium frame. Simulated particle tracks make the tiles flash."></div>
-      <div class="scene-heading"><span class="eyebrow" id="scene-source">Particles from the sky</span><h2>Cosmic muon telescope</h2><span class="geometry">3 scintillator tiles <span> / </span> 20 × 20 cm</span></div>
+      <div class="scene-heading"><span class="eyebrow" id="scene-source">Particles from the sky</span><h2>Cosmic Muon Detector</h2><span class="geometry">3 scintillator tiles <span> / </span> 20 × 20 cm</span></div>
       <div class="view-tools" aria-label="Detector view controls">
         <button class="icon-button" id="cutaway" aria-label="Show wrapped tiles" aria-pressed="true" title="Transparent / wrapped tiles"><i data-lucide="layers-2"></i></button>
         <button class="icon-button" id="acceptance" aria-label="Show geometric acceptance" aria-pressed="false" title="Geometric acceptance"><i data-lucide="pyramid"></i></button>
@@ -32,7 +32,7 @@
       <div class="hardware-caption" id="hardware-caption" hidden>Loading readout PCB + Raspberry Pi 5 CAD</div>
       <div id="tile-labels" aria-hidden="true"><span data-tile="0"><b>0</b>Top tile</span><span data-tile="1"><b>1</b>Middle tile</span><span data-tile="2"><b>2</b>Bottom tile</span></div>
       <div class="track-key"><span class="track-swatch"></span><span id="track-label">Coincidences + room particle field</span><span class="subtle">Motion slowed</span></div>
-      <div class="physics-strip"><div><span>01</span><p>Particle crosses plastic</p></div><i data-lucide="chevron-right"></i><div><span>02</span><p>A tiny flash of light</p></div><i data-lucide="chevron-right"></i><div><span>03</span><p>SiPM makes a pulse</p></div></div>
+      <div class="physics-strip"><div><span>01</span><p>Particle crosses a plastic scintillator</p></div><i data-lucide="chevron-right"></i><div><span>02</span><p>A tiny flash of light</p></div><i data-lucide="chevron-right"></i><div><span>03</span><p>Silicon photomultiplier makes an electrical pulse</p></div></div>
       <div class="render-error" id="render-error" hidden>3D view unavailable. Please enable hardware acceleration. The counts remain available.</div>
     </section>
     <aside class="readout" aria-label="Last minute coincidence counts">
@@ -48,6 +48,6 @@
   </main>
   <footer><span>A global, low-cost cosmic-ray muon detector network</span><span id="connection-note" role="status">Connecting to simulation</span></footer>
   <dialog id="details"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><span class="eyebrow">About this display</span><h2>A particle, a flash, a count.</h2><p>When a charged particle crosses a scintillator tile, it can produce light. A silicon photomultiplier (SiPM) turns that light into an electrical pulse. Pulses in two tiles at nearly the same time form a coincidence.</p><h3>Counts and illustrated tracks</h3><p>When connected, the numbers and history are read from the detector's latest minute log, without changing its settings. The status shows whether that data is fresh. No simulated counts replace missing detector records. When run without a detector source, the display is explicitly labelled Simulation.</p><p>The room field is a geometric illustration, not recorded particle positions. Tracks that miss every tile do not create detector counts or LED flashes. A track through one tile lights that tile's indicator but makes no coincidence. LED flashes follow the illustrated intersections, not measured hardware timestamps.</p><p>The three aligned 20 × 20 cm tiles have 13 cm centre spacing. Directions follow an assumed cos² angular intensity. Unrelated room tracks are thinned for display. Detection efficiency, noise, scattering and photon transport are not calculated. Raw singles include noise and are not interpreted as a physical muon flux.</p><h3>Geometric acceptance</h3><p>The yellow square pyramid shows allowed directions from the centre of the lower selected tile to the full upper tile. It is not the acceptance for every possible starting position. For All pairs, the reference is the bottom-tile centre and the upper plane is the top tile.</p><p>A track through all three tiles contributes to all three pair counts. Do not add these counts to obtain a unique particle total. The CAD readout is exported from the local KiCad PCB. The Raspberry Pi 5 model is from Raspberry Pi's manufacturer STEP file. Cover opening and slowed LED flashes are display animations, not a firmware timing model.</p><div class="detail-stat"><span>20 × 20 cm tiles</span><span>13 cm spacing</span><span>60 s count bins</span></div></dialog>
-  <dialog id="photo-dialog"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><img src="./assets/detector.jpg" alt="The actual GSU cosmic muon telescope, with three wrapped tiles in an aluminium frame."><p>GSU cosmic muon telescope · Exhibition detector</p></dialog>
+  <dialog id="photo-dialog"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><img src="./assets/detector.jpg" alt="The actual GSU cosmic muon detector, with three wrapped tiles in an aluminium frame."><p>GSU cosmic muon detector · Exhibition detector</p></dialog>
 </body>
 </html>

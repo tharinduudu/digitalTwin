@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
-import { BEAM, headerShift, smaLeadPoints, PI_HOLES, caseMounts, mountingShift, READOUT_X, piCableAnchors } from '../public/readout-placement.js';
+import { BEAM, cableGuide, headerShift, smaLeadPoints, PI_HOLES, caseMounts, mountingShift, READOUT_X, piCableAnchors } from '../public/readout-placement.js';
 
 test('readout enclosure is horizontally centred without moving boards within the case', () => {
   assert.equal(2.2 + READOUT_X, 0);
@@ -35,9 +35,19 @@ test('Pi placement aligns its GPIO housing with the readout socket', () => {
 test('SMA leads exit the vertical beam and stay beside, not behind, the box', () => {
   const port = new THREE.Vector3(-1.6, -3, 15.5);
   const points = smaLeadPoints(port);
-  assert.equal(points[0].x, BEAM.x);
-  assert.equal(points[0].z, BEAM.z);
+  assert.equal(points[0].x, cableGuide().x);
+  assert.equal(points[0].z, cableGuide().z);
   assert.ok(points.every(p => p.y === port.y && p.x <= port.x - 2.25));
   assert.equal(points.at(-1).z, port.z);
   assert.equal(points.at(-1).x, port.x - 2.25);
+});
+
+test('coax guides follow the inner extrusion corner with separate cable centres', () => {
+  for (let i = 0; i < 3; i++) {
+    const guide = cableGuide(i);
+    assert.ok(guide.x > BEAM.x + 1 && guide.x < BEAM.x + 1.4);
+    assert.ok(guide.z < BEAM.z - 1 && guide.z > BEAM.z - 1.4);
+    if (i) assert.ok(Math.hypot(guide.x - cableGuide(i - 1).x,
+      guide.z - cableGuide(i - 1).z) > 0.11);
+  }
 });

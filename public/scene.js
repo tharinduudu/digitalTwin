@@ -3,7 +3,8 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 import { ReadoutHardware } from './hardware.js';
 import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';
-import { BEAM, smaLeadPoints, READOUT_X, piCableAnchors } from './readout-placement.js';
+import { cableGuide, smaLeadPoints, READOUT_X, piCableAnchors } from './readout-placement.js';
+import { createRulers } from './rulers.js';
 import { TILE_HEIGHTS, FLOOR_Y, ENGRAVING_OPACITY, SCINTILLATOR_OPACITY } from './detector-geometry.js';
 
 const TILE_Y = TILE_HEIGHTS;
@@ -97,7 +98,9 @@ export class TelescopeScene {
     this.buildElectronics();
     this.buildRoomField();
     this.buildAcceptance();
-    installMechanicalParts(this).catch(error => console.error('Mechanical CAD', error));
+    this.model.add(createRulers());
+    installMechanicalParts(this).catch(error => console.error('Mechanical CAD', error))
+      .then(() => this.hardware.load());
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#080a09', roughness: 1 }));
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = FLOOR_Y;
@@ -184,12 +187,13 @@ export class TelescopeScene {
       this.tiles.push({ tile, cover, edges });
       this.sandwichPieces.push(this.box(21.8, 0.12, 21.8, 0, y - 0.75, 0, this.glass));
       const portY = READOUT_PORT_Y[index];
+      const guide = cableGuide(index);
       this.sensorLeads.push(this.cable([[-8.2, y + 0.35, 8.2], [-9.6, y + 0.35, 9.6],
-        [-10.5, y - 0.7, 10.5], [BEAM.x, y - 0.95, BEAM.z]], this.black, 0.055));
-      this.beamCables.push(this.cable([[BEAM.x, y - 0.95, BEAM.z],
-        [BEAM.x, portY, BEAM.z]], this.black, 0.1));
+        [-10.5, y - 0.7, 10.5], [guide.x, y - 0.95, guide.z]], this.black, 0.055));
+      this.beamCables.push(this.cable([[guide.x, y - 0.95, guide.z],
+        [guide.x, portY, guide.z]], this.black, 0.055));
       const initialPort = new THREE.Vector3(-1.65 + READOUT_X, portY, 15.55);
-      this.readoutLeads.push(this.cable(smaLeadPoints(initialPort).map(p => p.toArray())));
+      this.readoutLeads.push(this.cable(smaLeadPoints(initialPort, index).map(p => p.toArray()), this.black, 0.055));
     });
     this.topText = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({ map: surfaceTexture('label'), transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }));
     this.topText.rotation.x = -Math.PI / 2;
@@ -354,13 +358,14 @@ export class TelescopeScene {
       this.readoutBoots[i].position.set(port.x - 1.35, port.y, port.z);
       this.readoutSockets[i].position.set(port.x - 0.45, port.y, port.z);
       const world = this.readout.localToWorld(port.clone());
-      const points = smaLeadPoints(world);
+      const points = smaLeadPoints(world, i);
       this.readoutLeads[i].geometry.dispose();
-      this.readoutLeads[i].geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 30, 0.13, 6, false);
+      this.readoutLeads[i].geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 30, 0.055, 6, false);
       this.beamCables[i].geometry.dispose();
-      const vertical = [new THREE.Vector3(BEAM.x, TILE_Y[i] - 0.95, BEAM.z),
-        new THREE.Vector3(BEAM.x, world.y, BEAM.z)];
-      this.beamCables[i].geometry = new THREE.TubeGeometry(new THREE.LineCurve3(...vertical), 1, 0.1, 6, false);
+      const guide = cableGuide(i);
+      const vertical = [new THREE.Vector3(guide.x, TILE_Y[i] - 0.95, guide.z),
+        new THREE.Vector3(guide.x, world.y, guide.z)];
+      this.beamCables[i].geometry = new THREE.TubeGeometry(new THREE.LineCurve3(...vertical), 1, 0.055, 6, false);
     });
     this.terminator.position.copy(ports[3]).add(new THREE.Vector3(-0.5, 0, 0));
     this.portsAligned = true;
@@ -510,7 +515,6 @@ export class TelescopeScene {
       this.lid.rotation.y = 0;
       this.lid.rotation.x = Math.PI - this.lidAngle;
     } else this.lid.rotation.y = this.lidAngle;
-    this.hardware.visible = this.lidAngle > 0.1;
     this.alignReadoutPorts();
     if (!this.paused) this.hardware.update(dt);
     this.updateLabels();

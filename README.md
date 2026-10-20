@@ -48,6 +48,8 @@ Push to `main`. The Pages workflow runs the tests, copies `public/` into a
 static website, and publishes it. `scripts/build-pages.mjs` marks that copy as
 simulation-only. SSH code, the Node server, and local settings are not included
 in the published website. Asset paths work beneath the `/digitalTwin/` address.
+Each deployment gives the assets a revision directory, so a cached script
+from an older version is not mixed with the new models or interface.
 
 GitHub Pages is enabled with **GitHub Actions** as the build source. There are
 no paid services in this setup. The free service still has GitHub's normal
@@ -63,10 +65,12 @@ storage, traffic and build limits.
 - The camera button shows a photograph of the physical detector.
 - Full screen gives more room for an exhibition display.
 
-Opening the readout loads the actual KiCad PCB export and Raspberry Pi 5 CAD.
+The actual KiCad PCB export and Raspberry Pi 5 CAD load at startup and remain
+inside the enclosure when it is closed. The boards can be seen through its
+vents; opening the cover exposes the same assembly.
 At each tile corner, the SiPM sits on a carrier PCB in the holder's rectangular
 slot. A U.FL plug connects the back of that board to the coax, which runs through
-the extrusion to an SMA input on the readout. Carrier and connector geometry
+the inside corner of the extrusion to an SMA input on the readout. Carrier and connector geometry
 is illustrative; the sensor and holder use the supplied component models.
 The three indicators flash when the illustrated track crosses the corresponding
 tile. These flashes are slowed down and are not a copy of the FPGA's LED logic.
@@ -148,6 +152,9 @@ protrudes in a level side view. Four socket-head screws and sliding T-nuts
 secure each upper sheet, and four face downwards beneath each lower sheet.
 Gusseted angle brackets join the horizontal extrusions to the posts. The
 brackets and readout mounts use the same screw-head and T-nut style.
+The bottom layer's brackets sit above its rails; the other layers' brackets
+sit below them. Faint centimetre rulers run along the three scene axes, with
+one-centimetre ticks and labels every five centimetres.
 Fastener dimensions are illustrative M4-sized hardware.
 
 The clear sheets extend just beyond the beam height, so their 2 mm profiles
@@ -170,8 +177,9 @@ dimensions, and instructions for making the browser files again.
 The assembly explains the detector. It is not a clearance check for
 manufacturing the enclosure. The Pi sits on the enclosure's four standoffs,
 using the 49 x 58 mm mounting pattern. The readout's J2 socket is then aligned
-to the Pi GPIO header using their CAD positions. The three SMA leads run inside the
-vertical extrusion and leave it beside their connectors, not behind the box.
+to the Pi GPIO header using their CAD positions. The three coax leads follow
+the holder grooves and the inward-facing corner of the vertical extrusion.
+They leave beside the SMA connectors, not behind the box.
 
 ## How the particle animation works
 

@@ -76,7 +76,7 @@ export class ReadoutHardware extends THREE.Group {
     this.pulses = [0, 0, 0];
     this.flashCounts = [0, 0, 0];
     this.leds = [];
-    this.visible = false;
+    this.visible = true;
   }
 
   async load() {
