@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111514">
   <title>gLOWCOST | Cosmic Muon Telescope</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script type="importmap">{"imports":{"three":"/vendor/three.module.js"}}</script>
-  <script defer src="/vendor/lucide.min.js"></script>
-  <script type="module" src="/app.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script defer src="./vendor/lucide.min.js"></script>
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
   <header class="masthead">
@@ -48,6 +48,6 @@
   </main>
   <footer><span>A global, low-cost cosmic-ray muon detector network</span><span id="connection-note" role="status">Connecting to simulation</span></footer>
   <dialog id="details"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><span class="eyebrow">About this display</span><h2>A particle, a flash, a count.</h2><p>When a charged particle crosses a scintillator tile, it can produce light. A silicon photomultiplier (SiPM) turns that light into an electrical pulse. Pulses in two tiles at nearly the same time form a coincidence.</p><h3>Counts and illustrated tracks</h3><p>When connected, the numbers and history are read from the detector's latest minute log, without changing its settings. The status shows whether that data is fresh. No simulated counts replace missing detector records. When run without a detector source, the display is explicitly labelled Simulation.</p><p>The room field is a geometric illustration, not recorded particle positions. Tracks that miss every tile do not create detector counts or LED flashes. A track through one tile lights that tile's indicator but makes no coincidence. LED flashes follow the illustrated intersections, not measured hardware timestamps.</p><p>The three aligned 20 × 20 cm tiles have 13 cm centre spacing. Directions follow an assumed cos² angular intensity. Unrelated room tracks are thinned for display. Detection efficiency, noise, scattering and photon transport are not calculated. Raw singles include noise and are not interpreted as a physical muon flux.</p><h3>Geometric acceptance</h3><p>The yellow square pyramid shows allowed directions from the centre of the lower selected tile to the full upper tile. It is not the acceptance for every possible starting position. For All pairs, the reference is the bottom-tile centre and the upper plane is the top tile.</p><p>A track through all three tiles contributes to all three pair counts. Do not add these counts to obtain a unique particle total. The CAD readout is exported from the local KiCad PCB. The Raspberry Pi 5 model is from Raspberry Pi's manufacturer STEP file. Cover opening and slowed LED flashes are display animations, not a firmware timing model.</p><div class="detail-stat"><span>20 × 20 cm tiles</span><span>13 cm spacing</span><span>60 s count bins</span></div></dialog>
-  <dialog id="photo-dialog"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><img src="/assets/detector.jpg" alt="The actual GSU cosmic muon telescope, with three wrapped tiles in an aluminium frame."><p>GSU cosmic muon telescope · Exhibition detector</p></dialog>
+  <dialog id="photo-dialog"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><img src="./assets/detector.jpg" alt="The actual GSU cosmic muon telescope, with three wrapped tiles in an aluminium frame."><p>GSU cosmic muon telescope · Exhibition detector</p></dialog>
 </body>
 </html>

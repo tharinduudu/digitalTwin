@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { STLLoader } from '/vendor/loaders/STLLoader.js';
-import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
+import { STLLoader } from './vendor/loaders/STLLoader.js';
+import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
 import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT, ENGRAVING_OPACITY } from './detector-geometry.js';
 import { socketFastener } from './fasteners.js';
@@ -24,10 +24,10 @@ function acrylicShape(data) {
 export async function installMechanicalParts(view) {
   const loader = new STLLoader();
   const [post, rail, tile, holder, base, lid, acrylic, fibre, sipm] = await Promise.all([
-    ...['extrusion-post', 'extrusion-rail', 'tile', 'holder', 'case-base', 'case-lid'].map(name => loader.loadAsync(`/assets/${name}.stl`)),
-    fetch('/assets/acrylic.json').then(r => r.json()),
-    fetch('/assets/fibre-path.json').then(r => r.json()),
-    new GLTFLoader().loadAsync('/assets/sipm.glb'),
+    ...['extrusion-post', 'extrusion-rail', 'tile', 'holder', 'case-base', 'case-lid'].map(name => loader.loadAsync(`./assets/${name}.stl`)),
+    fetch('./assets/acrylic.json').then(r => r.json()),
+    fetch('./assets/fibre-path.json').then(r => r.json()),
+    new GLTFLoader().loadAsync('./assets/sipm.glb'),
   ]);
   const mesh = (geometry, material, position) => {
     const object = new THREE.Mesh(geometry, material);
@@ -120,7 +120,7 @@ export async function installMechanicalParts(view) {
     light.update(0, view.cutaway);
   });
   // The supplied artwork is kept as an etching mask, without redrawing the logo.
-  const artwork = await new THREE.TextureLoader().loadAsync('/assets/acrylic-engraving.png');
+  const artwork = await new THREE.TextureLoader().loadAsync('./assets/acrylic-engraving.png');
   artwork.colorSpace = THREE.SRGBColorSpace;
   artwork.anisotropy = view.renderer.capabilities.getMaxAnisotropy();
   view.topText.geometry.dispose();

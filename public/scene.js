@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from '/vendor/OrbitControls.js';
+import { OrbitControls } from './vendor/OrbitControls.js';
 import { ReadoutHardware } from './hardware.js';
 import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';

@@ -1,6 +1,7 @@
 server.log
 screenshots/
 node_modules/
+dist/
 .DS_Store
 .env
 cad/*.step

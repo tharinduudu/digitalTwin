@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
-import { mergeGeometries } from '/vendor/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
+import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 import { headerShift, PI_HOLES, caseMounts, mountingShift } from './readout-placement.js';
 import { seatConverter } from './hardware-adjustments.js';
 
@@ -83,8 +83,8 @@ export class ReadoutHardware extends THREE.Group {
     if (this.loading) return this.loading;
     this.loading = (async () => {
       const [readout, pi] = await Promise.all([
-        loadBoard('/assets/readout-assembly.glb', [2.2, -5.1, 13.15], ['D2', 'D3', 'D4'], 'J2'),
-        loadBoard('/assets/raspberry-pi.glb', [2.2, -5.1, 11.8], [], 'OBJ3742'),
+        loadBoard('./assets/readout-assembly.glb', [2.2, -5.1, 13.15], ['D2', 'D3', 'D4'], 'J2'),
+        loadBoard('./assets/raspberry-pi.glb', [2.2, -5.1, 11.8], [], 'OBJ3742'),
       ]);
       // The enclosure is the reference: seat the Pi first, then its HAT.
       const targets = caseMounts();

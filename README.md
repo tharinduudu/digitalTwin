@@ -16,6 +16,14 @@ it does not tell us where each particle passed or when each LED flashed.
 
 ## Start the display
 
+**Public simulation:** [tharinduudu.github.io/digitalTwin](https://tharinduudu.github.io/digitalTwin/)
+
+The public version is hosted on GitHub Pages. It runs entirely in the visitor's
+browser and shows simulated counts, not live measurements. No paid server,
+account, or connection to the lab network is needed to view it.
+
+### Run locally
+
 Install [Node.js](https://nodejs.org/) 20 or newer, then run:
 
 ```sh
@@ -30,6 +38,20 @@ assets are included, so simulation mode works without internet access.
 
 Without a detector connection, the heading says **Simulation**. Each adjacent
 pair averages about 230 counts per minute. Individual minutes fluctuate.
+
+To preview simulated data while a local detector feed is configured, open
+**http://127.0.0.1:8791/?source=simulation**. This does not change the detector.
+
+### Publish an update
+
+Push to `main`. The Pages workflow runs the tests, copies `public/` into a
+static website, and publishes it. `scripts/build-pages.mjs` marks that copy as
+simulation-only. SSH code, the Node server, and local settings are not included
+in the published website. Asset paths work beneath the `/digitalTwin/` address.
+
+GitHub Pages is enabled with **GitHub Actions** as the build source. There are
+no paid services in this setup. The free service still has GitHub's normal
+storage, traffic and build limits.
 
 ## What can be opened or changed?
 

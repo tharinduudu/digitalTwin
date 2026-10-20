@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 28 Node tests pass. They cover the simulation rate near 230/min per
+All 30 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,

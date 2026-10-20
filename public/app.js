@@ -93,21 +93,35 @@ function updateClock() {
   }
 }
 
-const feed = new EventSource('/api/events');
-feed.addEventListener('snapshot', event => {
-  try { update(JSON.parse(event.data)); }
-  catch (error) { console.error('Invalid simulation snapshot', error); }
-});
-feed.addEventListener('tracks', event => {
-  try { addEvents(JSON.parse(event.data)); }
-  catch (error) { console.error('Invalid track packet', error); }
-});
-feed.onerror = () => {
-  connected = false;
-  $('feed-status').innerHTML = '<b></b>Reconnecting';
-  $('connection-note').textContent = 'Feed disconnected · last counts held';
-  $('connection-note').classList.add('disconnected');
-};
+const simulated = document.documentElement.dataset.feed === 'simulation'
+  || new URLSearchParams(location.search).get('source') === 'simulation';
+if (simulated) {
+  // No server or detector credentials are needed for the public demonstration.
+  const { Simulation } = await import('./simulation.js');
+  const simulation = new Simulation();
+  update(simulation.snapshot());
+  let ticks = 0;
+  setInterval(() => {
+    addEvents(simulation.advance(Date.now()));
+    if (++ticks % 7 === 0) update(simulation.snapshot());
+  }, 150);
+} else {
+  const feed = new EventSource('./api/events');
+  feed.addEventListener('snapshot', event => {
+    try { update(JSON.parse(event.data)); }
+    catch (error) { console.error('Invalid feed snapshot', error); }
+  });
+  feed.addEventListener('tracks', event => {
+    try { addEvents(JSON.parse(event.data)); }
+    catch (error) { console.error('Invalid track packet', error); }
+  });
+  feed.onerror = () => {
+    connected = false;
+    $('feed-status').innerHTML = '<b></b>Reconnecting';
+    $('connection-note').textContent = 'Feed disconnected · last counts held';
+    $('connection-note').classList.add('disconnected');
+  };
+}
 
 document.querySelectorAll('[data-pair]').forEach(button => button.addEventListener('click', () => {
   const pair = button.dataset.pair;
