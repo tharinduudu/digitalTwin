@@ -119,8 +119,10 @@ measurements taken from the artwork.
 
 The scintillator and its holder sit within the horizontal beams, so neither
 protrudes in a level side view. Four socket-head screws and sliding T-nuts
-secure each acrylic assembly. The readout uses its three existing mounting
-wing slots. Fastener dimensions are illustrative M4-sized hardware.
+secure each upper sheet, and four face downwards beneath each lower sheet.
+Gusseted angle brackets join the horizontal extrusions to the posts. The
+brackets and readout mounts use the same screw-head and T-nut style.
+Fastener dimensions are illustrative M4-sized hardware.
 
 The clear sheets extend just beyond the beam height, so their 2 mm profiles
 can be seen from the side. In the transparent view, the acrylic faces and
@@ -179,6 +181,7 @@ these illustrated intersections are added to the measured numbers.
 | `public/readout-placement.js` | Aligns the GPIO header and defines the side cable route |
 | `public/detector-geometry.js` | Shares the recessed tile heights and acrylic orientation |
 | `public/fasteners.js` | Draws socket-head screws, washers and sliding T-nuts |
+| `public/corner-brackets.js` | Places and batches the gusseted extrusion brackets |
 | `public/hardware.js` | Loads the PCB and Pi CAD and flashes the indicators |
 | `public/acceptance.js` | Defines the selected-pair acceptance geometry |
 | `public/charts.js` | Draws the count history |

@@ -4,6 +4,7 @@ import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
 import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
 import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT } from './detector-geometry.js';
 import { socketFastener } from './fasteners.js';
+import { addCornerBrackets } from './corner-brackets.js';
 
 function acrylicShape(data) {
   const shape = new THREE.Shape(data.outline.map(p => new THREE.Vector2(...p)));
@@ -52,6 +53,7 @@ export async function installMechanicalParts(view) {
       side.rotation.y = Math.PI / 2;
     }
   }
+  view.cornerMounts = addCornerBrackets(view.model, view.silver, TILE_HEIGHTS);
 
   tile.translate(-100, -100, -5).scale(0.1, 0.1, 0.1).rotateX(-Math.PI / 2);
   holder.translate(-100, -100, -5).scale(0.1, 0.1, 0.1).rotateX(-Math.PI / 2);
@@ -67,6 +69,7 @@ export async function installMechanicalParts(view) {
   view.fibreLights = [];
   view.cushions = [];
   view.mechanicalSheets = [];
+  view.acrylicFastenerCount = 0;
   for (const old of view.sandwichPieces) { view.model.remove(old); old.geometry.dispose(); }
   view.tiles.forEach((item, index) => {
     const y = TILE_HEIGHTS[index];
@@ -101,13 +104,14 @@ export async function installMechanicalParts(view) {
       lining.castShadow = false;
       view.cushions.push(lining);
     }
-    for (const [x, z] of ACRYLIC_MOUNTS) {
+    for (const sign of [-1, 1]) for (const [x, z] of ACRYLIC_MOUNTS) {
       const screw = socketFastener(view.silver, 0.65);
-      screw.rotation.x = -Math.PI / 2;
-      screw.position.set(x, y + ACRYLIC_OFFSET + 0.13, z);
+      screw.rotation.x = -sign * Math.PI / 2;
+      screw.position.set(x, y + sign * (ACRYLIC_OFFSET + 0.13), z);
       // The sliding nut follows the longitudinal slot of each beam.
       if (x) screw.rotateZ(Math.PI / 2);
       view.model.add(screw);
+      view.acrylicFastenerCount++;
     }
     const light = new FibreLight(fibreCurve(fibre, y), fibre.diameter_mm / 20);
     view.model.add(light.core, light.glow);

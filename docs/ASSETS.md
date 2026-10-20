@@ -90,10 +90,18 @@ of a woven cushion, not a scanned surface.
 The tile planes coincide with the horizontal beam centre heights. A tile is
 10 mm thick and the supplied holder spans 15 mm vertically; both fit within
 the 20 mm extrusion height. The clear sheets sit above and below the tile.
-Four illustrated socket-head screws, washers, and sliding T-nuts sit over the
-beam slots at each level. The supplied box has three mounting-wing slots,
+Four illustrated socket-head screws, washers, and sliding T-nuts sit above
+each upper sheet; another four face down under each lower sheet. The supplied box has three mounting-wing slots,
 which receive the same type of hardware. The M4-sized fasteners are drawn
 for the display, not taken from a manufacturer CAD model.
+
+Each post-to-rail joint has a gusseted right-angle extrusion bracket. There
+are two at each corner, one for each horizontal rail, giving 24 brackets
+across the three levels. Each has two M4-style socket-head screws and sliding
+T-nuts. The 20 mm bracket legs, gussets, and clearance holes are illustrative
+geometry, not CAD for a particular supplier's bracket. Screw heads, washers,
+and nuts share the same geometry throughout; shaft length follows the mount.
+The repeated bracket parts are instanced in eight GPU batches.
 
 The sheets' 2 mm profiles sit just outside the beam height. Their broad faces
 are more transparent than their edges. The cushioning is shown translucent

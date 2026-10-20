@@ -80,6 +80,8 @@ function updateClock() {
     $('scene').dataset.portsAligned = String(!!scene.portsAligned);
     $('scene').dataset.headerErrorMm = String(scene.hardware.headerErrorMm ?? '');
     $('scene').dataset.mountingErrorMm = String(scene.hardware.mountingErrorMm ?? '');
+    $('scene').dataset.acrylicFasteners = String(scene.acrylicFastenerCount || 0);
+    $('scene').dataset.cornerBrackets = String(scene.cornerMounts?.brackets || 0);
   }
   if (lastMessage && performance.now() - lastMessage > 6000) {
     connected = false;

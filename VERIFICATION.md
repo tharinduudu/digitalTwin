@@ -4,7 +4,7 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 23 Node tests pass. They cover the simulation rate near 230/min per
+All 26 Node tests pass. They cover the simulation rate near 230/min per
 adjacent pair, track intersections, misses and single hits, completed bins,
 reproducible IDs, log column order, partial lines, stale data, square-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
@@ -22,6 +22,10 @@ optical-efficiency measurement.
 - The 10 mm tile and 15 mm holder sit within each 20 mm beam height. Rendering
   and track intersections share the same recessed plane heights.
 - Socket-head screws, washers and sliding T-nuts secure the acrylic and box.
+- The scene contains 24 acrylic fasteners: four above and four below each
+  level. Lower screw heads face downwards. There are 24 gusseted corner
+  brackets with 48 screws, using the same head and nut geometry as the other
+  mounts. These repeated bracket parts use eight instanced draw batches.
 - Clear acrylic profiles extend outside the beams, while translucent broad
   faces and cushioning leave the scintillator and fibre visible.
 - The centered enclosure has USB-C and Ethernet connections located from the
@@ -41,7 +45,7 @@ optical-efficiency measurement.
 - All three illustrative LED flash counters advance. Their markers are red.
 - Wrapped/transparent tiles, acceptance, and cover controls work.
 - Desktop and 390 x 844 phone screenshots show a nonblank scene. Scene-region
-  pixel standard deviations were 46.4 and 46.6 respectively. Earlier successive
+  pixel standard deviations were 47.3 and 47.1 respectively. Earlier successive
   desktop captures changed more than 200,000 pixels in the checked region.
 - Phone layouts at 390 x 844 and 320 x 700 have no horizontal page overflow.
 

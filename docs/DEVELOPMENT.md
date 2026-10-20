@@ -31,6 +31,9 @@ by the browser must never increment a number labelled as a measurement.
   sheets and lettering together without turning the scintillator or fibre.
 - Socket-head screws and T-nuts: `fasteners.js`; mounting positions are in
   `mechanics.js` and `detector-geometry.js`.
+- Extrusion corner brackets: `corner-brackets.js`. The same fastener helper
+  is used on both bracket legs. Geometry and materials are shared so repeated
+  parts can be instanced instead of adding a draw call for every screw.
 - Acrylic profile height: `ACRYLIC_OFFSET`. Face opacity is set in `scene.js`;
   edge and cushion materials are in `mechanics.js`. Both liner opacity values
   must also agree with `setCutaway()`.
