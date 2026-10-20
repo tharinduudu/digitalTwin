@@ -3,8 +3,8 @@ import { OrbitControls } from '/vendor/OrbitControls.js';
 import { ReadoutHardware } from './hardware.js';
 import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';
-import { BEAM, smaLeadPoints } from './readout-placement.js';
-import { TILE_HEIGHTS } from './detector-geometry.js';
+import { BEAM, smaLeadPoints, READOUT_X, piCableAnchors } from './readout-placement.js';
+import { TILE_HEIGHTS, FLOOR_Y } from './detector-geometry.js';
 
 const TILE_Y = TILE_HEIGHTS;
 const READOUT_PORT_Y = [-2.5, -4.5, -6.5];
@@ -100,7 +100,7 @@ export class TelescopeScene {
     installMechanicalParts(this).catch(error => console.error('Mechanical CAD', error));
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#080a09', roughness: 1 }));
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -18;
+    ground.position.y = FLOOR_Y;
     ground.receiveShadow = true;
     this.scene.add(ground);
     this.labels = [...document.querySelectorAll('[data-tile]')];
@@ -121,7 +121,7 @@ export class TelescopeScene {
     this.pcb = new THREE.MeshStandardMaterial({ color: '#075846', roughness: 0.6, metalness: 0.15 });
     this.red = new THREE.MeshStandardMaterial({ color: '#df493a', roughness: 0.5 });
     this.gold = new THREE.MeshStandardMaterial({ color: '#b3a764', roughness: 0.28, metalness: 0.8 });
-    this.glass = new THREE.MeshPhysicalMaterial({ color: '#d8eee1', transparent: true, opacity: 0.1, roughness: 0.15, metalness: 0.1, depthWrite: false });
+    this.glass = new THREE.MeshPhysicalMaterial({ color: '#d8eee1', transparent: true, opacity: 0.045, roughness: 0.12, metalness: 0, depthWrite: false });
     this.dotGeometry = new THREE.SphereGeometry(0.12, 8, 6);
   }
 
@@ -187,7 +187,7 @@ export class TelescopeScene {
         [-10.5, y - 0.7, 10.5], [BEAM.x, y - 0.95, BEAM.z]]);
       this.beamCables.push(this.cable([[BEAM.x, y - 0.95, BEAM.z],
         [BEAM.x, portY, BEAM.z]], this.black, 0.1));
-      const initialPort = new THREE.Vector3(-1.65, portY, 15.55);
+      const initialPort = new THREE.Vector3(-1.65 + READOUT_X, portY, 15.55);
       this.readoutLeads.push(this.cable(smaLeadPoints(initialPort).map(p => p.toArray())));
     });
     this.topText = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({ map: surfaceTexture('label'), transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }));
@@ -198,6 +198,7 @@ export class TelescopeScene {
 
   buildElectronics() {
     this.readout = new THREE.Group();
+    this.readout.position.x = READOUT_X;
     this.readout.position.z = 1.75;
     this.model.add(this.readout);
     const start = this.model.children.length;
@@ -264,8 +265,32 @@ export class TelescopeScene {
     terminator.position.set(-2, -8.3, 13.8);
     this.model.add(terminator);
     this.terminator = terminator;
-    this.cable([[3.5, -9.6, 14], [4, -17.4, 17], [-2, -17.7, 19], [-9, -17.7, 16]], this.black, 0.2);
     for (const child of this.model.children.slice(start)) this.readout.add(child);
+    this.buildPiCables();
+  }
+
+  buildPiCables() {
+    const { usbC, ethernet } = piCableAnchors();
+    const blue = new THREE.MeshStandardMaterial({ color: '#327cb1', roughness: 0.65 });
+    const clearPlug = new THREE.MeshPhysicalMaterial({ color: '#c7d9d5',
+      transparent: true, opacity: 0.55, roughness: 0.25, depthWrite: false });
+    const plug = (size, point, material) => {
+      const object = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+      object.position.copy(point);
+      this.readout.add(object);
+    };
+    // Pi CAD is vertical here: USB-C faces left and Ethernet faces downwards.
+    plug([0.45, 0.82, 0.32], usbC.clone().add(new THREE.Vector3(-0.15, 0, 0)), this.silver);
+    plug([1.2, 0.95, 0.5], usbC.clone().add(new THREE.Vector3(-0.9, 0, 0)), this.black);
+    plug([1.17, 1.2, 0.85], ethernet.clone().add(new THREE.Vector3(0, -0.5, 0)), clearPlug);
+    plug([1.3, 0.85, 0.95], ethernet.clone().add(new THREE.Vector3(0, -1.4, 0)), blue);
+    const power = this.cable([[usbC.x - 1.5, usbC.y, usbC.z],
+      [-5.2, usbC.y, usbC.z], [-6, -11, usbC.z + 0.3],
+      [-7, -17.4, 16], [-5, FLOOR_Y + 0.2, 19], [5, FLOOR_Y + 0.2, 21]], this.black, 0.18);
+    const network = this.cable([[ethernet.x, ethernet.y - 1.8, ethernet.z],
+      [ethernet.x, -16, ethernet.z + 0.2], [ethernet.x + 1, FLOOR_Y + 0.26, 16],
+      [8, FLOOR_Y + 0.26, 18], [15, FLOOR_Y + 0.26, 16]], blue, 0.24);
+    this.readout.add(power, network);
   }
 
   buildRoomField() {
@@ -360,7 +385,7 @@ export class TelescopeScene {
     for (const item of this.tiles) { item.cover.visible = !value; item.tile.visible = value; }
     this.topText.material.opacity = value ? 0.22 : 0.9;
     for (const fibre of this.fibres || []) fibre.visible = value;
-    for (const padding of this.cushions || []) padding.material.opacity = value ? 0.15 : 1;
+    for (const padding of this.cushions || []) padding.material.opacity = value ? 0.055 : 0.2;
   }
 
   setPair(pair) {

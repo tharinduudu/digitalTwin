@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
-import { TILE_HEIGHTS, RAIL_HALF_HEIGHT, ACRYLIC_ANGLE, ACRYLIC_MOUNTS } from '../public/detector-geometry.js';
+import { TILE_HEIGHTS, RAIL_HALF_HEIGHT, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT, FLOOR_Y } from '../public/detector-geometry.js';
 import { GEOMETRY, sampleTrack, randomGenerator } from '../simulation.mjs';
 import { socketFastener } from '../public/fasteners.js';
 
@@ -13,6 +13,16 @@ test('tile and holder fit fully within each horizontal beam height', () => {
       assert.ok(height - halfHeight > height - RAIL_HALF_HEIGHT);
     }
   }
+});
+
+test('the 2 mm acrylic sheets remain visible outside the beam height', () => {
+  assert.ok(ACRYLIC_OFFSET - 0.1 > RAIL_HALF_HEIGHT);
+  assert.ok(-ACRYLIC_OFFSET + 0.1 < -RAIL_HALF_HEIGHT);
+});
+
+test('rubber feet taper towards the posts and sit on the floor', () => {
+  assert.ok(RUBBER_FOOT.bottomRadius > RUBBER_FOOT.topRadius);
+  assert.ok(Math.abs(RUBBER_FOOT.topY - RUBBER_FOOT.height - FLOOR_Y) < 1e-9);
 });
 
 test('diagonal artwork reads along the X axis from the readout-box side', () => {

@@ -95,6 +95,11 @@ beam slots at each level. The supplied box has three mounting-wing slots,
 which receive the same type of hardware. The M4-sized fasteners are drawn
 for the display, not taken from a manufacturer CAD model.
 
+The sheets' 2 mm profiles sit just outside the beam height. Their broad faces
+are more transparent than their edges. The cushioning is shown translucent
+in the explanatory view, not as a claim that the real drawer liner is clear.
+Neither layer casts a solid shadow over the scintillator in this view.
+
 ## Readout PCB
 
 `readout-assembly.glb` was exported from the local four-channel gLOWCOST 2v2
@@ -155,8 +160,13 @@ enclosure clearance or manufacturing check.
 
 The signal cables use the first three SMA ports, J3, J4, and J5. J6 has a
 yellow cap. Each cable runs inside the vertical extrusion, then comes out
-at its connector height. No signal cable is routed behind the box. The power
-lead remains a separate cable below the enclosure.
+at its connector height. No signal cable is routed behind the box.
+
+The box is horizontally centered as one group, keeping the Pi, readout, header,
+mounts, and ports aligned inside it. The black USB-C lead and blue Ethernet
+cable use opening-face centres extracted from the Pi CAD: OBJ5144 for USB-C
+and OBJ4358 for the RJ45 jack. Plugs and cable jackets are illustrative geometry.
+The rubber feet are tapered circular frustums rather than square blocks.
 
 ## Browser libraries and photograph
 

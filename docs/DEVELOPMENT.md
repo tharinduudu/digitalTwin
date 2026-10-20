@@ -31,6 +31,12 @@ by the browser must never increment a number labelled as a measurement.
   sheets and lettering together without turning the scintillator or fibre.
 - Socket-head screws and T-nuts: `fasteners.js`; mounting positions are in
   `mechanics.js` and `detector-geometry.js`.
+- Acrylic profile height: `ACRYLIC_OFFSET`. Face opacity is set in `scene.js`;
+  edge and cushion materials are in `mechanics.js`. Both liner opacity values
+  must also agree with `setCutaway()`.
+- Rubber feet and floor height: `RUBBER_FOOT` and `FLOOR_Y` in the geometry module.
+- Centered enclosure and Pi cable anchors: `readout-placement.js`; plugs and
+  cable paths are drawn by `buildPiCables()` in `scene.js`.
 - Optical layer thickness: the sheet and cushion extrusions in `mechanics.js`.
 - Fibre endpoints and green light: `fibre.js`. Keep the endpoints on the holder
   recess face, and run the fibre tests after changing that position.

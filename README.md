@@ -122,6 +122,12 @@ protrudes in a level side view. Four socket-head screws and sliding T-nuts
 secure each acrylic assembly. The readout uses its three existing mounting
 wing slots. Fastener dimensions are illustrative M4-sized hardware.
 
+The clear sheets extend just beyond the beam height, so their 2 mm profiles
+can be seen from the side. In the transparent view, the acrylic faces and
+cushioning are faint enough to see the scintillator and fibre underneath.
+The centered readout has USB-C power and Ethernet cables connected to the Pi.
+Four tapered rubber feet support the frame.
+
 The Hamamatsu S13360-2050VE component model sits in the corner holder's
 recess. Both ends of the fibre stop at its sensing face. Green light moves
 along the fibre towards those ends after a tile crossing. The light is slowed

@@ -1,7 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
-import { BEAM, headerShift, smaLeadPoints, PI_HOLES, caseMounts, mountingShift } from '../public/readout-placement.js';
+import { BEAM, headerShift, smaLeadPoints, PI_HOLES, caseMounts, mountingShift, READOUT_X, piCableAnchors } from '../public/readout-placement.js';
+
+test('readout enclosure is horizontally centred without moving boards within the case', () => {
+  assert.equal(2.2 + READOUT_X, 0);
+});
+
+test('USB-C and Ethernet anchors follow the mounted Pi CAD', () => {
+  const { usbC, ethernet } = piCableAnchors();
+  assert.ok(Math.abs(usbC.x + 1.02) < 1e-9);
+  assert.ok(Math.abs(usbC.y + 2.17) < 1e-9);
+  assert.ok(Math.abs(ethernet.y + 9.855) < 1e-9);
+  assert.ok(ethernet.z > usbC.z);
+});
 
 test('all four Pi mounting holes align with the enclosure standoffs', () => {
   const axes = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, -1, 0),

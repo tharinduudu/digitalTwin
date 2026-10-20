@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { STLLoader } from '/vendor/loaders/STLLoader.js';
 import { GLTFLoader } from '/vendor/loaders/GLTFLoader.js';
 import { FibreLight, fibreCurve, tilePoint } from './fibre.js';
-import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS } from './detector-geometry.js';
+import { TILE_HEIGHTS, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT } from './detector-geometry.js';
 import { socketFastener } from './fasteners.js';
 
 function acrylicShape(data) {
@@ -38,10 +38,12 @@ export async function installMechanicalParts(view) {
   };
   for (const old of view.frameMeshes) { view.model.remove(old); old.geometry.dispose(); }
   const top = 13.05, bottom = -17.85;
+  const footGeometry = new THREE.CylinderGeometry(RUBBER_FOOT.topRadius,
+    RUBBER_FOOT.bottomRadius, RUBBER_FOOT.height, 24);
   for (const x of [-11.16, 11.16]) for (const z of [-11.16, 11.16]) {
     const upright = mesh(post, view.silver, [x, (top + bottom) / 2, z]);
     upright.scale.y = (top - bottom) / 38.1;
-    view.box(2.2, 0.5, 2.2, x, -18, z, view.black);
+    mesh(footGeometry, view.black, [x, RUBBER_FOOT.topY - RUBBER_FOOT.height / 2, z]);
   }
   for (const y of TILE_HEIGHTS) {
     for (const z of [-11.16, 11.16]) mesh(rail, view.silver, [0, y, z]);
@@ -55,6 +57,10 @@ export async function installMechanicalParts(view) {
   holder.translate(-100, -100, -5).scale(0.1, 0.1, 0.1).rotateX(-Math.PI / 2);
   const sheet = new THREE.ExtrudeGeometry(acrylicShape(acrylic), { depth: 0.2, bevelEnabled: false, curveSegments: 12 });
   sheet.translate(0, 0, -0.1).rotateX(-Math.PI / 2);
+  const sheetEdges = new THREE.EdgesGeometry(sheet, 30);
+  const edgeMaterial = new THREE.LineBasicMaterial({ color: '#d8eeeb', transparent: true, opacity: 0.5 });
+  const acrylicSide = view.glass.clone();
+  acrylicSide.opacity = 0.25;
   const cushion = new THREE.ExtrudeGeometry(acrylicShape(acrylic), { depth: 0.1, bevelEnabled: false, curveSegments: 8 });
   cushion.translate(0, 0, -0.05).rotateX(-Math.PI / 2);
   view.fibres = [];
@@ -82,19 +88,23 @@ export async function installMechanicalParts(view) {
     sensor.position.copy(tilePoint(19.021, 19.021, 8.5, y));
     view.model.add(sensor);
     for (const sign of [-1, 1]) {
-      const acrylicSheet = mesh(sheet, view.glass, [0, y + sign * 0.9, 0]);
+      const acrylicSheet = mesh(sheet, [view.glass, acrylicSide], [0, y + sign * ACRYLIC_OFFSET, 0]);
       acrylicSheet.rotation.y = ACRYLIC_ANGLE;
+      // Keep a visible sheet profile without casting an opaque shadow over the tile.
+      acrylicSheet.castShadow = false;
+      acrylicSheet.add(new THREE.LineSegments(sheetEdges, edgeMaterial));
       view.mechanicalSheets.push(acrylicSheet);
-      const padding = new THREE.MeshStandardMaterial({ map: view.wrap.map, color: '#303630',
-        transparent: true, opacity: view.cutaway ? 0.15 : 1, roughness: 1, depthWrite: false });
+      const padding = new THREE.MeshStandardMaterial({ map: view.wrap.map, color: '#7b857f',
+        transparent: true, opacity: view.cutaway ? 0.055 : 0.2, roughness: 1, depthWrite: false });
       const lining = mesh(cushion, padding, [0, y + sign * 0.55, 0]);
       lining.rotation.y = ACRYLIC_ANGLE;
+      lining.castShadow = false;
       view.cushions.push(lining);
     }
     for (const [x, z] of ACRYLIC_MOUNTS) {
-      const screw = socketFastener(view.silver, 0.45);
+      const screw = socketFastener(view.silver, 0.65);
       screw.rotation.x = -Math.PI / 2;
-      screw.position.set(x, y + 1.03, z);
+      screw.position.set(x, y + ACRYLIC_OFFSET + 0.13, z);
       // The sliding nut follows the longitudinal slot of each beam.
       if (x) screw.rotateZ(Math.PI / 2);
       view.model.add(screw);
@@ -110,7 +120,7 @@ export async function installMechanicalParts(view) {
   artwork.colorSpace = THREE.SRGBColorSpace;
   view.topText.geometry.dispose();
   view.topText.geometry = new THREE.PlaneGeometry(19.81, 19.81);
-  view.topText.position.y = TILE_HEIGHTS[0] + 1.01;
+  view.topText.position.y = TILE_HEIGHTS[0] + ACRYLIC_OFFSET + 0.11;
   view.topText.rotation.z = ACRYLIC_ANGLE;
   view.topText.material.dispose();
   view.topText.material = new THREE.MeshBasicMaterial({ map: artwork, transparent: true,
