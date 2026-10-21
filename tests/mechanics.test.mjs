@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
 import { TILE_HEIGHTS, RAIL_HALF_HEIGHT, ACRYLIC_ANGLE, ACRYLIC_MOUNTS, ACRYLIC_OFFSET, RUBBER_FOOT, FLOOR_Y } from '../public/detector-geometry.js';
-import { GEOMETRY, sampleTrack, randomGenerator } from '../simulation.mjs';
+import { GEOMETRY, randomGenerator } from '../simulation.mjs';
+import { tileIntersection } from '../public/muon-transport.js';
 import { socketFastener } from '../public/fasteners.js';
 
 test('tile and holder fit fully within each horizontal beam height', () => {
@@ -38,11 +39,15 @@ test('diagonal artwork reads along the X axis from the readout-box side', () => 
 test('track intersections agree with the recessed visual tile planes', () => {
   const random = randomGenerator(137);
   for (let i = 0; i < 1000; i++) {
-    const track = sampleTrack(random);
+    const x = (random() - 0.5) * 30, z = (random() - 0.5) * 30;
     TILE_HEIGHTS.forEach((height, index) => {
-      const inside = Math.abs(track.x - height * track.dx) <= 10
-        && Math.abs(track.z - height * track.dz) <= 10;
-      assert.equal(track.hits[index], inside);
+      const interval = tileIntersection([x, 28, z], [0, -1, 0], index);
+      const inside = Math.abs(x) <= 10 && Math.abs(z) <= 10 && -x + z <= 16.1958;
+      assert.equal(!!interval, inside);
+      if (interval) {
+        assert.ok(Math.abs(28 - (interval.enter + interval.exit) / 2 - height) < 1e-10);
+        assert.ok(Math.abs(interval.exit - interval.enter - 1) < 1e-10);
+      }
     });
   }
 });

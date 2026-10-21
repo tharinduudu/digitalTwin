@@ -4,9 +4,10 @@ Checked locally on 20 October 2026.
 
 ## Automated tests
 
-All 36 Node tests pass. They cover the simulation rate near 230/min per
-adjacent pair, track intersections, misses and single hits, completed bins,
-reproducible IDs, log column order, partial lines, stale data, square-pyramid
+All 46 Node tests pass. They cover absolute flux integration, projected-area
+sampling, generation-box invariance, finite-volume intersections, energy
+conservation, stopping, flight time, completed bins, reproducible IDs,
+log column order, partial lines, stale data, cut-corner-pyramid
 boundaries, fibre endpoints, green light, mounting holes, GPIO placement,
 and the SMA cable route.
 
@@ -16,6 +17,12 @@ optical-efficiency measurement.
 
 ## Browser and CAD checks
 
+- The new physics source was checked at desktop size and 390 x 844. The
+  source label reports Guan et al., the phone has no horizontal overflow,
+  and the browser reports no warnings or errors. Two desktop captures
+  changed 64,098 pixels in the scene region; its pixel standard deviation
+  was 41.8. All three LED counters advanced. Acceptance, pair selection,
+  opening the readout and the model-details dialog were checked again.
 - The supplied frame, tile, holder, acrylic, liner, and enclosure load.
 - All three sensor carriers load in the holder slots. Tests keep each optical
   face unchanged and place the rear U.FL opposite it, with the coax reaching
@@ -38,7 +45,8 @@ optical-efficiency measurement.
 - Green light follows the fibre. The placeholder box and exposed green lead
   outside the tile corner have been removed.
 - Room tracks include misses and tile crossings. The acceptance toggle shows
-  the labelled square pyramid from the lower selected tile's centre.
+  the labelled straight-line pyramid from the lower selected tile's centre,
+  including the tile's cut corner.
 - The actual readout and Pi 5 CAD load with the cover closed and remain
   visible through its vents. Opening and closing the cover does not hide
   the boards. The closed view reports hardware ready before opening.
@@ -71,8 +79,11 @@ records. The order is 01, 02, 12, triple, then three singles. Records update
 without changing acquisition. Failed reads hold the last measurements rather
 than substituting simulated values.
 
-Only minute totals are measured. Tracks, green light, and LED timing remain
-illustrations. The acceptance shape is geometric, not particle transport.
+Only minute totals are measured in detector mode. In simulation mode, the
+source and approximate muon transport supply the counts and trajectories;
+green light and LED timing remain illustrations. The acceptance overlay is
+geometric, not a scattering envelope. See [the physics check](docs/PHYSICS.md)
+for the 600-minute numerical run, model assumptions and limitations.
 
 The server listens on localhost, port 8791. Rendering is capped near 30 frames/s,
 and static CAD bodies are merged by appearance. Sustained performance on the

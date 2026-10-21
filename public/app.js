@@ -47,9 +47,9 @@ function update(state) {
   $('connection-note').classList.toggle('disconnected', live && !fresh);
   $('feed-status').innerHTML = `<b></b>${live ? fresh ? 'Live counts' : 'Data ' + state.status : 'Simulation'}`;
   $('feed-status').classList.toggle('live', live && fresh);
-  $('source-description').textContent = live ? `Detector · ${state.detector.name || state.detector.host}` : 'Simulated data';
-  $('source-detail').textContent = live ? 'SSH read-only · paths illustrated' : 'Adjacent-pair target: 230 / min';
-  $('scene-source').textContent = live ? 'Measured counts · illustrated tracks' : 'Particles from the sky';
+  $('source-description').textContent = live ? `Detector · ${state.detector.name || state.detector.host}` : 'Sea-level muon model';
+  $('source-detail').textContent = live ? 'SSH read-only · paths illustrated' : 'Open sky · ideal detection · no rate tuning';
+  $('scene-source').textContent = live ? 'Measured counts · illustrated tracks' : 'Sea-level cosmic muons';
   if (state.last) {
     for (const pair of ['c01', 'c12', 'c02']) $(pair).textContent = state.last[pair].toLocaleString();
     $('minute-range').textContent = `${formatTime(state.last.start)} – ${formatTime(state.last.end)}`;
@@ -85,6 +85,7 @@ function updateClock() {
     $('scene').dataset.u5GapMm = String(scene.hardware.state.u5GapMm ?? '');
     $('scene').dataset.u5OffsetMm = String(scene.hardware.state.u5OffsetMm ?? '');
     $('scene').dataset.sensorMounts = String(scene.sensorMounts?.length || 0);
+    $('scene').dataset.sourceModel = latest?.model?.name || latest?.source || '';
   }
   if (lastMessage && performance.now() - lastMessage > 6000) {
     connected = false;

@@ -5,7 +5,8 @@ import { acceptanceProfile } from './acceptance.js';
 import { installMechanicalParts } from './mechanics.js';
 import { cableGuide, smaLeadPoints, READOUT_X, piCableAnchors } from './readout-placement.js';
 import { createRulers } from './rulers.js';
-import { TILE_HEIGHTS, FLOOR_Y, ENGRAVING_OPACITY, SCINTILLATOR_OPACITY } from './detector-geometry.js';
+import { TILE_HEIGHTS, TILE_OUTLINE, FLOOR_Y, ENGRAVING_OPACITY, SCINTILLATOR_OPACITY } from './detector-geometry.js';
+import { DISPLAY_NS_PER_SECOND, pointAtTime } from './muon-transport.js';
 
 const TILE_Y = TILE_HEIGHTS;
 const READOUT_PORT_Y = [-2.5, -4.5, -6.5];
@@ -317,7 +318,7 @@ export class TelescopeScene {
     this.acceptance = new THREE.Group();
     const profile = acceptanceProfile(this.selectedPair);
     const apex = new THREE.Vector3(0, profile.lower + 0.02, 0);
-    const corners = [[-10, -10], [10, -10], [10, 10], [-10, 10]].map(([x, z]) => new THREE.Vector3(x, profile.upper, z));
+    const corners = TILE_OUTLINE.map(([x, z]) => new THREE.Vector3(x, profile.upper, z));
     const triangles = [];
     const lines = [];
     corners.forEach((corner, i) => {
@@ -412,27 +413,30 @@ export class TelescopeScene {
 
   addTrack(event) {
     if (this.paused || document.hidden) return;
+    const age = Math.max(0, (Date.now() - event.at) / 1000);
+    if (!event.path || age * DISPLAY_NS_PER_SECOND > event.durationNs) return;
     if (!event.hits.some(Boolean)) {
-      if (this.roomTracks.length < this.roomCapacity) this.roomTracks.push({ event, age: 0 });
+      if (this.roomTracks.length < this.roomCapacity) this.roomTracks.push({ event, age });
       return;
     }
     if (this.tracks.length >= 90) return;
     const selected = this.selectedPair === 'all' || event.pairs[this.selectedPair];
     const color = !selected ? '#83998c' : event.pairs.c02 ? PAIR_COLORS.c02 : event.pairs.c01 ? PAIR_COLORS.c01
       : event.pairs.c12 ? PAIR_COLORS.c12 : '#b5c8bb';
-    const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array((event.path.length + 2) * 3), 3));
     const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65, depthTest: true }));
     line.frustumCulled = false;
     const head = new THREE.Mesh(this.dotGeometry, new THREE.MeshBasicMaterial({ color }));
     this.scene.add(line, head);
-    this.tracks.push({ line, head, event, age: 0, hit: [false, false, false], color });
+    this.tracks.push({ line, head, event, age, hit: [false, false, false], color });
   }
 
   flash(track, index) {
     this.hardware.flash(index);
     const y = TILE_Y[index];
-    const x = track.event.x - y * track.event.dx;
-    const z = track.event.z - y * track.event.dz;
+    const crossing = track.event.crossings.find(hit => hit.index === index);
+    const [x, , z] = crossing.point;
     this.flashes[index] = 1;
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.3, 0.4, 28), new THREE.MeshBasicMaterial({ color: track.color, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
     ring.rotation.x = -Math.PI / 2;
@@ -445,32 +449,35 @@ export class TelescopeScene {
   updateTracks(dt) {
     for (let i = this.roomTracks.length - 1; i >= 0; i--) {
       this.roomTracks[i].age += dt;
-      if (this.roomTracks[i].age > 2.45) this.roomTracks.splice(i, 1);
+      if (this.roomTracks[i].age * DISPLAY_NS_PER_SECOND > this.roomTracks[i].event.durationNs) this.roomTracks.splice(i, 1);
     }
     const positions = this.roomLines.geometry.attributes.position;
     this.roomTracks.forEach(({ event, age }, i) => {
-      const y = 27 - age * 25;
-      positions.setXYZ(i * 2, event.x - y * event.dx, y, event.z - y * event.dz);
-      positions.setXYZ(i * 2 + 1, event.x - (y + 5) * event.dx, y + 5, event.z - (y + 5) * event.dz);
+      const time = age * DISPLAY_NS_PER_SECOND;
+      positions.setXYZ(i * 2, ...pointAtTime(event.path, time));
+      positions.setXYZ(i * 2 + 1, ...pointAtTime(event.path, Math.max(0, time - 0.2)));
     });
     positions.needsUpdate = true;
     this.roomLines.geometry.setDrawRange(0, this.roomTracks.length * 2);
     for (let i = this.tracks.length - 1; i >= 0; i--) {
       const track = this.tracks[i];
       track.age += dt;
-      const y = 27 - track.age * 25;
-      const tailY = Math.min(27, y + 8);
+      const time = track.age * DISPLAY_NS_PER_SECOND;
+      const tailTime = Math.max(0, time - 0.28);
+      const visible = [pointAtTime(track.event.path, tailTime),
+        ...track.event.path.filter(p => p.timeNs > tailTime && p.timeNs < time).map(p => p.position),
+        pointAtTime(track.event.path, time)];
       const p = track.line.geometry.attributes.position;
-      p.setXYZ(0, track.event.x - y * track.event.dx, y, track.event.z - y * track.event.dz);
-      p.setXYZ(1, track.event.x - tailY * track.event.dx, tailY, track.event.z - tailY * track.event.dz);
+      visible.forEach((point, j) => p.setXYZ(j, ...point));
+      track.line.geometry.setDrawRange(0, visible.length);
       p.needsUpdate = true;
-      track.head.position.set(p.getX(0), y, p.getZ(0));
-      for (let index = 0; index < 3; index++) if (!track.hit[index] && y <= TILE_Y[index]) {
-        track.hit[index] = true;
-        if (track.event.hits[index]) this.flash(track, index);
+      track.head.position.set(...visible.at(-1));
+      for (const crossing of track.event.crossings) if (!track.hit[crossing.index] && time >= crossing.timeNs) {
+        track.hit[crossing.index] = true;
+        if (track.event.hits[crossing.index]) this.flash(track, crossing.index);
       }
-      track.line.material.opacity = Math.min(0.7, Math.max(0, (-y + 28) / 5)) * (y < -24 ? Math.max(0, (y + 33) / 9) : 1);
-      if (y < -34) {
+      track.line.material.opacity = 0.65;
+      if (time > track.event.durationNs) {
         this.scene.remove(track.line, track.head);
         track.line.geometry.dispose(); track.line.material.dispose(); track.head.material.dispose();
         this.tracks.splice(i, 1);

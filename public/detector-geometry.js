@@ -1,4 +1,7 @@
 export const TILE_HEIGHTS = [12.05, -0.95, -13.95];
+// Convex outline of the supplied tile STL, transformed into scene centimetres.
+export const TILE_OUTLINE = [[-10, -10], [-10, 6.1958], [-6.1958, 10], [10, 10], [10, -10]];
+export const TILE_THICKNESS = 1;
 export const RAIL_HALF_HEIGHT = 1;
 // The source artwork and its four mounting holes are diagonal to the tile.
 export const ACRYLIC_ANGLE = Math.PI / 4;

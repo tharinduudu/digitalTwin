@@ -36,8 +36,10 @@ Open **http://127.0.0.1:8791/**. On a Mac, `start.command` does the same thing.
 There is no npm install or build step. Three.js, the CAD models, and the other
 assets are included, so simulation mode works without internet access.
 
-Without a detector connection, the heading says **Simulation**. Each adjacent
-pair averages about 230 counts per minute. Individual minutes fluctuate.
+Without a detector connection, the heading says **Simulation**. Counts now
+come from an absolute sea-level muon source and the tile geometry. They are
+not adjusted to the earlier 230/min demonstration value. Individual minutes
+fluctuate because arrivals are sampled as a Poisson process.
 
 To preview simulated data while a local detector feed is configured, open
 **http://127.0.0.1:8791/?source=simulation**. This does not change the detector.
@@ -183,23 +185,36 @@ They leave beside the SMA connectors, not behind the box.
 
 ## How the particle animation works
 
-Positions are sampled across a 120 x 120 cm horizontal area, rather than only
-over the detector. Directions use a simple cosmic-muon angular model. Each
-straight line is checked against all three tile planes. A miss produces no
-tile flash. A single hit can flash one tile but cannot create a coincidence.
+The source uses the sea-level energy and angular spectrum of
+[Guan et al.](https://arxiv.org/abs/1509.06176). Muons enter the top and side
+faces of a surrounding 120 x 120 x 62 cm volume, with the correct projected
+area weighting. Energies span 0.1 GeV to 10 TeV. The published normalization,
+not a target detector rate, sets their arrival rate.
+
+Each muon is checked against the 1 cm thick tiles, including their cut corner.
+Mean energy loss and stopping use PDG polystyrene tables. Relativistic speeds,
+proper lifetime and a Gaussian thin-slab scattering approximation are included.
+A miss produces no tile flash. A single hit can flash one tile but cannot
+create a coincidence. The same transported muon supplies the counts and picture.
 
 Unrelated tracks are thinned for drawing so the scene stays responsive. This
-thinning does not change the simulation counters. The room field is still an
-illustration, not a measured room flux or a particle-transport calculation.
+thinning does not change the simulation counters. Playback shows 2 ns of
+muon flight per second. Real muons do not take seconds to cross the detector.
 
-The yellow acceptance shape is a **square pyramid from one reference point**:
-the centre of the lower selected tile. Its upper boundary is the square upper
-tile. It is not a circular cone, nor is it the acceptance for every possible
+The yellow acceptance shape is a **cut-corner pyramid from one reference point**:
+the centre of the lower selected tile. Its upper boundary follows the upper
+tile outline. It is not a circular cone, nor is it the acceptance for every possible
 hit position. [The geometry notes](docs/GEOMETRY.md) explain this distinction.
 
-The animation does not calculate energy deposition, light yield, scattering,
-dark pulses, SiPM PDE, or real electronics timing. In live-count mode, none of
-these illustrated intersections are added to the measured numbers.
+This is an open-sky, sea-level model with ideal detection, not a validated model
+of the indoor apparatus. Building shielding, altitude and weather corrections,
+transport in passive parts, secondary particles, energy-loss fluctuations,
+optical transport, dark pulses, SiPM PDE and discriminator thresholds are not
+included. It is not a Geant4 calculation. In live-count mode, no simulated
+intersection is added to the measured numbers.
+
+See [the physics model and checks](docs/PHYSICS.md) for equations, assumptions,
+validation results and the limits of the material approximations.
 
 ## Find your way through the code
 
@@ -207,7 +222,11 @@ these illustrated intersections are added to the measured numbers.
 | --- | --- |
 | `server.mjs` | Serves the page and sends updates to browsers |
 | `detector-source.mjs` | Reads and checks completed minute records over SSH |
-| `simulation.mjs` | Generates straight tracks and simulated count bins |
+| `simulation.mjs` | Exports the shared browser/server simulation |
+| `public/simulation.js` | Samples arrivals, transports muons and accumulates count bins |
+| `public/muon-source.js` | Samples the published sea-level energy/angle spectrum |
+| `public/muon-transport.js` | Intersects tiles, calculates energy loss, scattering and flight |
+| `public/polystyrene-data.js` | Bundled PDG stopping-power and range data |
 | `public/app.js` | Connects the buttons, status, and incoming data |
 | `public/scene.js` | Draws and animates the detector |
 | `public/mechanics.js` | Places the supplied STL parts, acrylic, liner, and fibre |
@@ -223,8 +242,8 @@ these illustrated intersections are added to the measured numbers.
 | `tests/` | Checks rates, column mapping, timestamps, and geometry |
 
 The code uses ordinary JavaScript modules. Static CAD bodies with the same
-appearance are merged after loading. The heavy PCB/Pi models load only when
-the box is first opened. Rendering is capped near 30 frames per second,
+appearance are merged after loading. The PCB/Pi models load in the background
+and remain present inside the closed box. Rendering is capped near 30 frames per second,
 and hidden tabs stop drawing.
 
 ## Tests
@@ -233,9 +252,10 @@ and hidden tabs stop drawing.
 node --test tests/*.test.mjs
 ```
 
-The tests check the target simulation rate, coincidence accounting, misses and
-single hits, completed bins, log column order, timestamps, and square-pyramid
-boundaries. See [verification notes](VERIFICATION.md) for browser checks.
+The tests check source normalization, projected-area sampling, generation-box
+invariance, energy conservation, stopping, flight time, tile geometry,
+coincidence accounting, completed bins, log mapping and mechanical placement.
+See [verification notes](VERIFICATION.md) for browser checks.
 
 Third-party CAD and libraries retain their own licences. No login credentials
 or detector data files are included in this repository.

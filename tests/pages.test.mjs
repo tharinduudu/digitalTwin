@@ -8,7 +8,8 @@ test('public and local demonstrations share the tested simulation', () => {
   assert.equal(BrowserSimulation, ServerSimulation);
   const state = new BrowserSimulation({ now: 6000000 }).snapshot(6000000);
   assert.equal(state.source, 'simulation');
-  assert.equal(state.target, 230);
+  assert.equal(state.target, undefined);
+  assert.equal(state.model.name, 'Guan et al. sea-level muons');
   assert.equal(state.history.length, 15);
 });
 

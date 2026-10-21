@@ -6,12 +6,14 @@ HTML. There is no bundler and no generated application code to debug.
 
 ## Follow one update through the program
 
-1. `simulation.mjs` generates candidate straight tracks and checks tile hits.
+1. `muon-source.js` samples energy, direction and boundary entry from the flux.
+   `muon-transport.js` transports it; `simulation.js` counts the resulting hits.
 2. `server.mjs` sends track packets and count snapshots over Server-Sent Events.
 3. If `DETECTOR_HOST` is set, `detector-source.mjs` supplies the measured count
    records in place of simulated count bins. The track packets remain drawings.
 4. `app.js` updates the numbers and gives tracks to `scene.js`.
-5. `scene.js` moves each track and checks when its head reaches a tile plane.
+5. `scene.js` plays the saved trajectory using physical flight time, slowed
+   to 2 ns of flight per second of animation.
 6. A tile hit starts a tile flash and the corresponding readout indicator.
    In the transparent view, green bands also follow the fibre to the SiPM.
 7. Old track geometry is removed when the particle has left the scene.
@@ -24,9 +26,14 @@ by the browser must never increment a number labelled as a measurement.
 - Tile heights: `TILE_HEIGHTS` in `detector-geometry.js`, shared by the scene,
   acceptance overlay, mechanical placement, and simulation. Keep the tile and
   holder recessed within the beams. Width and separation are in `GEOMETRY`.
-- Synthetic count rate: `target` in the `Simulation` constructor.
-- Room area: `ROOM.width` in `simulation.mjs`. The proposal rate already
-  includes the area ratio, so do not add another rate multiplier.
+- Muon source: `SOURCE` and `differentialFlux()` in `muon-source.js`. There is
+  no target coincidence rate. Changing the absolute flux changes the model.
+- Room volume: `ROOM` in `muon-source.js`. All incoming faces have projected
+  area weighting; changing this boundary must not set the detector rate.
+- Tile shape and material: `tileIntersection()` and the PDG data in
+  `muon-transport.js`. The cut corner comes from the supplied STL.
+- Drawing speed: `DISPLAY_NS_PER_SECOND` in `muon-transport.js`. This is
+  playback only; it must never rescale the simulated arrival process.
 - Acrylic orientation: `ACRYLIC_ANGLE` in `detector-geometry.js`. This turns the
   sheets and lettering together without turning the scintillator or fibre.
 - Socket-head screws and T-nuts: `fasteners.js`; mounting positions are in

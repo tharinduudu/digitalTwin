@@ -1,77 +1,70 @@
 # Tracks and acceptance
 
-The numbers and the picture do different jobs. In detector mode, a number is
-a measured total for one minute. A moving line is a possible straight particle
-path, drawn to explain how the three tiles work.
+Scene distances are centimetres and height is `y`. The three tile centres are
+at 12.05, -0.95 and -13.95 cm, giving 13 cm adjacent spacing. Each tile has a
+20 x 20 cm bounding square and a 1 cm thickness.
 
-## A track crossing a tile
+## The actual tile outline
 
-Scene distances are in centimetres. Height is `y`. Tile centres are at
-12.05, -0.95, and -13.95, matching the horizontal beams. Their separations
-remain 13 cm. A track has a middle-plane position `(xm, zm)` and slopes
-`(dx, dz)`. With middle-plane height `ym = -0.95`, at height `y`:
+The supplied STL has a 38.042 mm cut at one corner. The physics volume uses
+its convex outline, rather than treating the missing corner as scintillator:
 
 ```text
-x(y) = xm - (y - ym) dx
-z(y) = zm - (y - ym) dz
+-10 <= x <= 10
+-10 <= z <= 10
+-x + z <= 16.1958
+height - 0.5 <= y <= height + 0.5
 ```
 
-It hits a tile when both coordinates are between -10 and +10 cm. One hit cannot
-make a pair coincidence. A straight line passing through aligned top and
-bottom squares also passes through the middle square. This is a geometric
-property of this model, not a statement that a real middle channel is perfectly
-efficient.
+Ray clipping against these seven half-spaces gives entry, exit and path length.
+It includes entry through the side of a tile. Fine fibre-groove voids are not
+removed from this bulk material volume.
 
-## Angular sampling
+## Where muons enter
 
-We assume an intensity per area perpendicular to the track proportional to
-`cos²(theta)`. Sampling crossings of a horizontal plane adds its projected
-area factor `cos(theta)`. The solid-angle element adds `sin(theta)`. Thus:
+The generation boundary is a 120 x 120 x 62 cm box enclosing the detector.
+Muons enter through its top or an upstream side face. For an incident unit
+direction `u`, each face is weighted by `area * max(0, -normal dot u)`.
+This matters for near-horizontal tracks: restricting generation to a finite
+horizontal plane would lose tracks that should enter from the sides.
+
+Changing the box dimensions changes how many unrelated muons are generated,
+not the detector's expected coincidence rate. A statistical test compares
+40 cm and 120 cm wide generation boxes with decay and scattering disabled,
+isolating the source-normalization and geometry check.
+
+The energy and direction distributions come from the published sea-level
+source described in [PHYSICS.md](PHYSICS.md). The earlier cos-squared model
+and its acceptance normalization to 230/min are no longer used.
+
+## The acceptance overlay
+
+The overlay starts at the centre of the lower selected tile and ends at the
+upper tile's convex outline. It is a cut-corner pyramid, not a circular cone.
+For separation `L`, its straight centre-to-centre-plane limits include:
 
 ```text
-p(theta) = 4 cos³(theta) sin(theta),  0 <= theta <= pi/2
-cos(theta) = U^(1/4),                U uniform on [0, 1]
-phi = 2 pi V,                       V uniform on [0, 1]
+|L dx| <= 10
+|L dz| <= 10
+-L dx + L dz <= 16.1958
 ```
 
-This is a convenient exhibition model, not a measured angular spectrum for
-the room. Other conventions call the horizontal-plane distribution itself
-`cos²(theta)`; that convention needs different sampling. The convention above
-is the one used in this code.
+For top-bottom spacing of 26 cm, the middle of an uncut edge is about
+`atan(10/26) = 21 degrees` from vertical. The uncut diagonal corners extend
+farther, while the cut corner has a smaller limit.
 
-The simulation rate is normalized by a separate 40,000-track acceptance
-calculation. Increasing the sampled area from 20 x 20 cm to 120 x 120 cm
-increases the proposal rate by the area ratio. It does not increase the expected
-adjacent-pair count rate. In measured mode, the normalization affects only the
-illustration; it does not rescale the detector's recorded counts.
+The label says **straight-line acceptance** because this overlay does not
+include multiple scattering or average over every possible starting point.
+The counters, unlike the overlay, use the finite tile volumes and transported
+paths. An unscattered muon crossing both outside convex tiles also crosses
+the middle volume; scattering and detector inefficiency need separate treatment.
 
-## Why the overlay is not a circular cone
+## What a displayed track means
 
-For a track starting at the centre of the lower selected tile, let `L` be the
-separation from the upper tile. Acceptance requires:
+A trajectory stores its positions, physical times and energy deposits. The
+same trajectory is used for counting and drawing. It is played at 2 ns per
+second so it can be seen. Room misses are thinned for drawing only. Fibre
+light and LED flashes remain illustrative, not optical or firmware predictions.
 
-```text
-|L dx| <= 10 cm
-|L dz| <= 10 cm
-```
-
-The four boundaries make a square pyramid. For the 26 cm top-bottom spacing,
-the limit toward the middle of an edge is `atan(10/26)`, about 21 degrees.
-Toward a corner it is `atan(sqrt(2)*10/26)`, about 29 degrees. There is no single
-azimuth-independent cone angle.
-
-Moving the starting point away from the centre shifts these limits. The
-overlay is labelled with its centre reference. It does not show acceptance
-integrated over every possible hit position.
-
-## Limits
-
-The model uses centre planes, straight paths, and ideal tile detection. It
-does not simulate interactions in the frame, secondary particles, multiple
-scattering, energy loss, optical transport, thresholds, or accidental
-coincidences. Missed tracks are drawn faintly and thinned for performance.
-Raw single-channel counts are not used as a room-muon rate because they also
-contain dark and electronic pulses.
-
-The fibre path follows the groove. The moving green bands are still
-illustrative; they are not a ray-traced calculation of light transport.
+In live-detector mode, measured minute totals remain separate. The drawn
+trajectories are not reconstructed tracks from those totals.
