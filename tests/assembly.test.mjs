@@ -4,8 +4,8 @@ import { readFile } from 'node:fs/promises';
 import { ASSEMBLY_STEPS, smoothAssembly, visibleAtStep } from '../public/assembly-steps.js';
 import { railPose, railProgress, nutLoadingProgress, bracketInsertionProgress, orderRailNuts, sideInsertionPose,
   fasteningProgress, screwPose, assemblyTime, assemblyPosition, ASSEMBLY_FINISH, ASSEMBLY_SPEED, hingedCoverAngle,
-  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage } from '../public/assembly-motion.js';
-import { LINER_SIZE, TILE_OUTLINE } from '../public/detector-geometry.js';
+  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage, frameBuildPose } from '../public/assembly-motion.js';
+import { LINER_SIZE, TILE_OUTLINE, FLOOR_Y } from '../public/detector-geometry.js';
 import * as THREE from '../public/vendor/three.module.js';
 import { addCornerBrackets } from '../public/corner-brackets.js';
 import { createNutGeometry, NUT_ROLES } from '../public/tslot-nut-geometry.js';
@@ -128,18 +128,18 @@ test('nut map separates joint, sheet and box fixings with text as well as colour
 });
 
 test('the faster sequence retains four nominal seconds per rail or stacked layer', () => {
-  for (const [id, parts] of [['bottom-prefit', 4], ['upper-prefit', 8], ['bottom-rails', 4],
+  for (const [id, parts] of [['top-prefit', 4], ['upper-prefit', 8], ['top-rails', 4],
     ['upper-rails', 8], ['lower-acrylic', 3], ['lower-liner', 3], ['tiles', 3],
     ['upper-liner', 3], ['upper-acrylic', 3]]) {
     assert.equal(ASSEMBLY_STEPS.find(step => step.id === id).duration / parts, 4);
   }
   assert.equal(ASSEMBLY_SPEED, 1);
-  assert.ok(assemblyTime(ASSEMBLY_STEPS, 18, 1) / ASSEMBLY_SPEED < 240);
+  assert.ok(assemblyTime(ASSEMBLY_STEPS, ASSEMBLY_STEPS.length - 1, 1) / ASSEMBLY_SPEED < 260);
 });
 
 test('the default camera holds an overview across related steps instead of chasing parts', () => {
   assert.equal(ASSEMBLY_FOLLOW_DEFAULT, false);
-  for (const detail of ['frame', 'joint', 'stack', 'sensor']) {
+  for (const detail of ['frame', 'joint', 'joining', 'stack', 'sensor']) {
     assert.equal(assemblyCameraStage(detail), 'frame');
   }
   assert.equal(assemblyCameraStage('readout'), 'readout');
@@ -153,7 +153,7 @@ test('timeline seeking round-trips across steps and clamps at both ends', () => 
     assert.ok(Math.abs(position.progress - progress) < 1e-12);
   }
   assert.deepEqual(assemblyPosition(ASSEMBLY_STEPS, -10), { index: 0, progress: 0 });
-  assert.deepEqual(assemblyPosition(ASSEMBLY_STEPS, 9999), { index: 18, progress: 1 });
+  assert.deepEqual(assemblyPosition(ASSEMBLY_STEPS, 9999), { index: ASSEMBLY_STEPS.length - 1, progress: 1 });
 });
 
 test('fasteners are inserted after part seating and spin towards a fixed captive nut', () => {
@@ -182,7 +182,7 @@ test('the screw view frames a complete layer rather than each fastener', () => {
 });
 
 test('end-load warnings appear before closing access, not during later tile installation', () => {
-  const bottom = { prefit: 'bottom-prefit', join: 'bottom-rails' };
+  const bottom = { prefit: 'top-prefit', join: 'top-rails' };
   const upper = { prefit: 'upper-prefit', join: 'upper-rails' };
   assert.equal(nutNeedsReminder('post-nuts', bottom, true), true);
   assert.equal(nutNeedsReminder('post-nuts', upper, true), false);
@@ -264,12 +264,12 @@ test('the seek bar, rewind and playback speed are accessible on the assembly pag
   assert.doesNotMatch(viewport, /id="nut-map-controls"|class="separation-control"|class="view-presets"/);
 });
 
-test('assembly follows the frame, two-sided tile sandwich, then readout order', () => {
-  assert.equal(ASSEMBLY_STEPS.length, 19);
-  assert.equal(new Set(ASSEMBLY_STEPS.map(step => step.id)).size, 19);
+test('assembly starts inverted, turns onto its side, then stands upright after the lower sheets', () => {
+  assert.equal(ASSEMBLY_STEPS.length, 22);
+  assert.equal(new Set(ASSEMBLY_STEPS.map(step => step.id)).size, 22);
   const ids = ASSEMBLY_STEPS.map(step => step.id);
-  const ordered = ['posts', 'post-nuts', 'bottom-prefit', 'bottom-rails', 'upper-prefit',
-    'upper-rails', 'brackets', 'lower-acrylic', 'lower-liner', 'tiles', 'upper-liner', 'upper-acrylic', 'case',
+  const ordered = ['posts', 'post-nuts', 'top-prefit', 'top-rails', 'turn-side', 'upper-prefit',
+    'upper-rails', 'feet', 'brackets', 'lower-acrylic', 'turn-upright', 'lower-liner', 'tiles', 'upper-liner', 'upper-acrylic', 'case',
     'pi', 'readout', 'coax', 'lid', 'connections', 'complete'];
   assert.deepEqual(ids, ordered);
   for (const step of ASSEMBLY_STEPS) {
@@ -278,10 +278,50 @@ test('assembly follows the frame, two-sided tile sandwich, then readout order', 
     assert.equal(step.offset.length, 3);
     assert.ok(step.offset.every(Number.isFinite));
   }
+  const index = id => ASSEMBLY_STEPS.findIndex(step => step.id === id);
+  assert.equal(frameBuildPose(ASSEMBLY_STEPS, index('top-rails')).angle, Math.PI);
+  for (const id of ['upper-prefit', 'upper-rails', 'feet', 'brackets', 'lower-acrylic']) {
+    assert.equal(frameBuildPose(ASSEMBLY_STEPS, index(id)).angle, Math.PI / 2);
+  }
+  assert.equal(frameBuildPose(ASSEMBLY_STEPS, index('tiles')).angle, 0);
+  assert.match(ASSEMBLY_STEPS[index('posts')].actions.join(' '), /Leave the feet off/);
+  assert.match(ASSEMBLY_STEPS[index('lower-acrylic')].actions.join(' '), /all three lower sheets/);
+});
+
+test('quarter turns stay continuous, reversible by seeking, and clear of the bench', () => {
+  for (let step = 0; step < ASSEMBLY_STEPS.length; step++) {
+    if (step > 0) {
+      const before = frameBuildPose(ASSEMBLY_STEPS, step - 1, 1);
+      const after = frameBuildPose(ASSEMBLY_STEPS, step, 0);
+      assert.ok(Math.abs(before.angle - after.angle) < 1e-12);
+      assert.ok(Math.abs(before.lift - after.lift) < 1e-12);
+    }
+    for (let tick = 0; tick <= 100; tick++) {
+      const pose = frameBuildPose(ASSEMBLY_STEPS, step, tick / 100);
+      for (const x of [-12.36, 12.36]) for (const y of [FLOOR_Y, 13.05]) {
+        assert.ok(x * Math.sin(pose.angle) + y * Math.cos(pose.angle) + pose.lift >= FLOOR_Y - 1e-10);
+      }
+      assert.equal(frameBuildPose(ASSEMBLY_STEPS, step, tick / 100, true).angle, 0);
+    }
+  }
+});
+
+test('top-first rails enter through the foot ends and slide only along the post axis', () => {
+  for (const y of [12.05, -.95, -13.95]) {
+    const unit = { rest: [11.16, y, 0], bench: [0, -15, 28], benchAngle: 0, entryY: -24 };
+    assert.equal(railPose(unit, .55).position[1], -24);
+    for (const t of [.55, .6, .7, .8]) {
+      const pose = railPose(unit, t);
+      assert.equal(pose.position[0], 11.16);
+      assert.equal(pose.position[2], 0);
+      assert.ok(pose.position[1] <= y);
+    }
+    assert.deepEqual(railPose(unit, 1).position, unit.rest);
+  }
 });
 
 test('a step cannot display future parts unless complete-view is selected', () => {
-  for (let step = 0; step < 19; step++) for (let part = 0; part < 18; part++) {
+  for (let step = 0; step < ASSEMBLY_STEPS.length; step++) for (let part = 0; part < ASSEMBLY_STEPS.length; part++) {
     assert.equal(visibleAtStep(part, step), part <= step);
     assert.equal(visibleAtStep(part, step, true), true);
   }
@@ -378,7 +418,7 @@ test('flat-nut order is farthest-first, complete before the corner pieces slide 
   }
   const instructions = ASSEMBLY_STEPS.filter(step => step.phase === 'Frame')
     .flatMap(step => [...step.actions, step.check]).join(' ');
-  assert.match(instructions, /cannot be dropped in/);
+  assert.match(instructions, /Do not drop nuts into a groove from the side/);
   assert.match(instructions, /disassembly/);
   assert.match(instructions, /acrylic-sheet and readout-box mounting nuts/);
 });

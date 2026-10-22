@@ -3,7 +3,7 @@ import { TelescopeScene } from './scene.js';
 import { ASSEMBLY_STEPS, visibleAtStep, smoothAssembly } from './assembly-steps.js';
 import { railPose, railProgress, nutLoadingProgress, bracketInsertionProgress, orderRailNuts, sideInsertionPose,
   fasteningProgress, screwPose, assemblyTime, assemblyPosition, ASSEMBLY_FINISH, ASSEMBLY_SPEED, hingedCoverAngle,
-  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage } from './assembly-motion.js';
+  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage, frameBuildPose } from './assembly-motion.js';
 import { TILE_HEIGHTS, FLOOR_Y } from './detector-geometry.js';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { createNutGeometry, NUT_ROLES } from './tslot-nut-geometry.js';
@@ -57,9 +57,10 @@ class AssemblyScene extends TelescopeScene {
     for (const nut of [...this.postNuts, ...this.railUnits.flatMap(unit => unit.railNuts)]) {
       nut.object.geometry = nutGeometry;
     }
-    register([...p.uprights, ...p.feet], 'posts');
+    register(p.uprights, 'posts');
+    register(p.feet, 'feet');
     for (const nut of this.postNuts) register([nut.object],
-      nut.unit.prefit === 'bottom-prefit' ? 'post-nuts' : nut.unit.join);
+      nut.unit.prefit === 'top-prefit' ? 'post-nuts' : nut.unit.join);
     for (const unit of this.railUnits) {
       register([unit.group], unit.prefit);
       register(unit.postScrews.map(item => item.object), unit.join);
@@ -147,7 +148,8 @@ class AssemblyScene extends TelescopeScene {
       object.updateWorldMatrix(true, false);
       const tool = object.userData.drive === 'phillips' ? this.phillipsDriver : this.allenKey;
       tool.position.copy(this.model.worldToLocal(object.getWorldPosition(new THREE.Vector3())));
-      tool.quaternion.copy(object.getWorldQuaternion(new THREE.Quaternion()));
+      tool.quaternion.copy(this.model.getWorldQuaternion(new THREE.Quaternion()).invert())
+        .multiply(object.getWorldQuaternion(new THREE.Quaternion()));
       tool.scale.copy(object.getWorldScale(new THREE.Vector3()));
       tool.visible = true;
       this.container.dataset.activeScrew = object.name || 'Frame mounting screw';
@@ -158,7 +160,7 @@ class AssemblyScene extends TelescopeScene {
     this.railUnits = [];
     this.postNuts = [];
     this.model.updateMatrixWorld(true);
-    const levels = [2, 1, 0];
+    const levels = [0, 1, 2];
     for (const level of levels) for (const [index, rail] of parts.rails[level].entries()) {
       const group = new THREE.Group();
       group.position.copy(rail.position);
@@ -170,9 +172,10 @@ class AssemblyScene extends TelescopeScene {
           : joint.sx === Math.sign(group.position.x)));
       const unit = { group, alongX, rest: group.position.toArray(), benchAngle: alongX ? 0 : -Math.PI / 2,
         name: `${['Top', 'Middle', 'Bottom'][level]} - ${alongX ? group.position.z > 0 ? 'front' : 'rear' : group.position.x < 0 ? 'left' : 'right'} rail`,
-        bench: [level === 2 ? 0 : level === 1 ? -14 : 14, FLOOR_Y + 3.3, 28 + index * 3.5],
-        prefit: level === 2 ? 'bottom-prefit' : 'upper-prefit',
-        join: level === 2 ? 'bottom-rails' : 'upper-rails', brackets: [], railNuts: [], postScrews: [] };
+        bench: [level === 0 ? 0 : level === 1 ? -14 : 14, FLOOR_Y + 3.3, 28 + index * 3.5],
+        entryY: -24,
+        prefit: level === 0 ? 'top-prefit' : 'upper-prefit',
+        join: level === 0 ? 'top-rails' : 'upper-rails', brackets: [], railNuts: [], postScrews: [] };
       for (const joint of joints) {
         const postNut = joint.intoPost.children.at(-1);
         const railNut = joint.underRail.children.at(-1);
@@ -448,12 +451,10 @@ class AssemblyScene extends TelescopeScene {
 
   setCamera(preset) {
     const detail = assemblyCameraStage(ASSEMBLY_STEPS[this.stepIndex].camera);
-    const target = new THREE.Vector3(0, -2, 0);
-    const position = new THREE.Vector3(39, 27, 49);
+    const target = new THREE.Vector3(0, -3, 8);
+    const position = new THREE.Vector3(52, 37, 76);
     if (detail === 'bench' && !this.previewComplete) {
       target.set(0, -14, 32); position.set(31, 16, 63);
-    } else if (detail === 'joining' && !this.previewComplete) {
-      target.set(0, 2, 14); position.set(61, 48, 91);
     } else if (detail === 'readout' && !this.previewComplete) {
       target.set(0, -5, 13); position.set(-23, 14, 50);
     } else if (detail === 'cables' && !this.previewComplete) {
@@ -483,6 +484,12 @@ class AssemblyScene extends TelescopeScene {
       }
     }
     this.progress = 1 - fraction;
+    const build = frameBuildPose(ASSEMBLY_STEPS, this.stepIndex, this.progress, this.previewComplete);
+    this.model.rotation.z = build.angle;
+    this.model.position.y = build.lift;
+    this.model.updateMatrixWorld(true);
+    this.container.dataset.frameOrientation = build.orientation;
+    this.container.dataset.frameAngle = build.angle.toFixed(5);
     this.allenKey.visible = false;
     this.phillipsDriver.visible = false;
     delete this.container.dataset.activeScrew;
@@ -578,7 +585,7 @@ class AssemblyScene extends TelescopeScene {
     if (current === 'post-nuts') {
       target = this.postNuts[0].object.getWorldPosition(new THREE.Vector3());
       offset.set(-9, 7, 16);
-      $('focus-label').textContent = 'Bottom joint: nut enters at the open post end';
+      $('focus-label').textContent = 'Top joint: nut enters at the open foot end';
     }
     const rails = this.railUnits.filter(unit => unit.prefit === current || unit.join === current);
     if (rails.length) {
@@ -586,7 +593,7 @@ class AssemblyScene extends TelescopeScene {
       const unit = rails[index];
       target = unit.group.getWorldPosition(new THREE.Vector3());
       if (unit.join === current) offset.set(24, 22, 34);
-      $('focus-label').textContent = `${unit.name}: ${unit.prefit === current ? 'end-load nuts, then slide brackets' : 'slide down the post grooves'}`;
+      $('focus-label').textContent = `${unit.name}: ${unit.prefit === current ? 'end-load nuts, then slide brackets' : 'slide in from the open foot ends'}`;
     }
     const insertion = this.insertionSets.find(set => set.id === current);
     const sheets = this.sheetSets.find(set => set.id === current);
@@ -601,7 +608,7 @@ class AssemblyScene extends TelescopeScene {
         offset.set(-29 + closing * 6, 20 - closing * 3, 37 - closing * 6);
       } else if (sheets) {
         const view = layerFasteningView(part.rest.y);
-        target.set(...view.target);
+        target.copy(this.model.localToWorld(new THREE.Vector3(...view.target)));
         offset.set(...view.offset);
       } else offset.set(27 - closing * 8, 19 - closing * 4, 35 - closing * 8);
       $('focus-label').textContent = `${['Bottom', 'Middle', 'Top'][index]} level: ${ASSEMBLY_STEPS[this.stepIndex].focus.toLowerCase()}`;
@@ -644,14 +651,14 @@ class AssemblyScene extends TelescopeScene {
     for (const nut of this.postNuts) {
       nut.object.position.copy(nut.rest);
       if (current === 'post-nuts' && !this.previewComplete) {
-        if (nut.unit.prefit === 'bottom-prefit') {
-          nut.object.position.y += (15 - nut.rest.y) * (1 - smoothAssembly(progress));
+        if (nut.unit.prefit === 'top-prefit') {
+          nut.object.position.y += (-23 - nut.rest.y) * (1 - smoothAssembly(progress));
           nut.object.visible = progress > 0;
         }
       } else if (current === nut.unit.join && nut.unit.prefit === 'upper-prefit' && !this.previewComplete) {
         const sequence = this.railUnits.filter(item => item.join === nut.unit.join);
         const p = railProgress(progress, sequence.indexOf(nut.unit), sequence.length);
-        nut.object.position.y += (15 - nut.rest.y) * (1 - smoothAssembly(p / 0.18));
+        nut.object.position.y += (-23 - nut.rest.y) * (1 - smoothAssembly(p / 0.18));
         nut.object.visible = p > 0;
       }
     }
@@ -661,9 +668,13 @@ class AssemblyScene extends TelescopeScene {
       const index = joining.indexOf(unit);
       const seated = this.previewComplete || this.stepIndex > joinIndex ? 1
         : this.stepIndex < joinIndex ? 0 : railProgress(progress, index, joining.length);
-      const pose = railPose(unit, seated);
+      // Loose rails stay on the bench while the installed frame turns as a unit.
+      const bench = this.model.worldToLocal(new THREE.Vector3(...unit.bench)).toArray();
+      const pose = railPose({ ...unit, bench }, seated);
       unit.group.position.set(...pose.position);
-      unit.group.rotation.y = pose.angle;
+      const benchRotation = this.model.quaternion.clone().invert().multiply(
+        new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), unit.benchAngle));
+      unit.group.quaternion.copy(benchRotation).slerp(new THREE.Quaternion(), smoothAssembly((seated - .38) / .17));
       const prefitting = this.railUnits.filter(item => item.prefit === unit.prefit);
       const inspecting = this.nutMap && this.nutScope === unit && current === unit.prefit && !this.previewComplete;
       const prefitProgress = inspecting ? this.nutReplayProgress
@@ -857,7 +868,7 @@ function goToStep(index, { auto = false } = {}) {
   stepIndex = Math.max(0, Math.min(ASSEMBLY_STEPS.length - 1, index));
   viewer?.setStep(stepIndex);
   updateNotes();
-  updateNutControls(!playing && ['post-nuts', 'bottom-prefit', 'upper-prefit'].includes(ASSEMBLY_STEPS[stepIndex].id));
+  updateNutControls(!playing && ['post-nuts', 'top-prefit', 'upper-prefit'].includes(ASSEMBLY_STEPS[stepIndex].id));
   history.replaceState(null, '', `#${ASSEMBLY_STEPS[stepIndex].id}`);
   if (auto && stepIndex === ASSEMBLY_STEPS.length - 1) setPlaying(false);
 }

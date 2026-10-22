@@ -1,14 +1,16 @@
 import { smoothAssembly } from './assembly-steps.js';
+import { FLOOR_Y } from './detector-geometry.js';
 
 const clamp = value => Math.max(0, Math.min(1, value));
 const mix = (a, b, t) => a.map((value, index) => value + (b[index] - value) * t);
 
-// Lift clear of the posts, turn, align with their open ends, then slide down the grooves.
+// Approach the open post ends, then slide along the grooves without crossing a joint.
 // The last part of the interval is reserved for starting the post screws.
 export function railPose(unit, progress) {
   const t = clamp(progress);
-  const points = [unit.bench, [unit.bench[0], 25, unit.bench[2]],
-    [0, 25, 0], [unit.rest[0], 25, unit.rest[2]], unit.rest, unit.rest, unit.rest];
+  const entry = unit.entryY ?? 25;
+  const points = [unit.bench, [unit.bench[0], entry, unit.bench[2]],
+    [0, entry, 0], [unit.rest[0], entry, unit.rest[2]], unit.rest, unit.rest, unit.rest];
   const times = [0, 0.18, 0.38, 0.55, 0.82, 0.94, 1];
   let segment = 0;
   while (segment < times.length - 2 && t > times[segment + 1]) segment++;
@@ -90,8 +92,24 @@ export const ASSEMBLY_FINISH = { acrylic: 0.84, liner: 1, scintillator: 1 };
 export const ASSEMBLY_SPEED = 1;
 export const ASSEMBLY_FOLLOW_DEFAULT = false;
 
+// Rotate the build, not the camera. Keep every frame corner clear of the bench.
+export function frameBuildPose(steps, index, progress = 1, complete = false) {
+  const side = steps.findIndex(step => step.id === 'turn-side');
+  const upright = steps.findIndex(step => step.id === 'turn-upright');
+  const turning = !complete && (index === side || index === upright);
+  const t = smoothAssembly(progress);
+  const angle = complete || index > upright ? 0 : index === upright ? Math.PI / 2 * (1 - t)
+    : index > side ? Math.PI / 2 : index === side ? Math.PI * (1 - t / 2) : Math.PI;
+  const c = Math.cos(angle), s = Math.sin(angle);
+  const bounds = { left: -12.36, right: 12.36, bottom: FLOOR_Y, top: 13.05 };
+  const lowest = Math.min(...[bounds.left, bounds.right].flatMap(x =>
+    [bounds.bottom, bounds.top].map(y => x * s + y * c)));
+  return { angle, lift: FLOOR_Y - lowest + (turning ? 2 * Math.sin(Math.PI * clamp(progress)) : 0),
+    orientation: angle > Math.PI * .75 ? 'upside-down' : angle > Math.PI * .25 ? 'on-side' : 'upright' };
+}
+
 export function assemblyCameraStage(detail) {
-  return ['joint', 'stack', 'sensor'].includes(detail) ? 'frame' : detail;
+  return ['joint', 'joining', 'stack', 'sensor'].includes(detail) ? 'frame' : detail;
 }
 
 export function hingedCoverAngle(progress) {
@@ -104,7 +122,7 @@ export function layerFasteningView(height) {
 
 // These are the last steps with access to the open ends of the grooves.
 export function nutNeedsReminder(step, unit, isPost = false) {
-  if (isPost) return step === 'post-nuts' && unit.prefit === 'bottom-prefit' || step === unit.join;
+  if (isPost) return step === 'post-nuts' && unit.prefit === 'top-prefit' || step === unit.join;
   return step === unit.prefit || step === unit.join;
 }
 

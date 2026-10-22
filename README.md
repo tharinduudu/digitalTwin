@@ -62,13 +62,20 @@ storage, traffic and build limits.
 ### Detector assembly guide
 
 Open **http://127.0.0.1:8791/assembly.html** for the separate 3D assembly guide.
-It uses the same CAD as the detector display. The 19 steps cover the three-level
+It uses the same CAD as the detector display. The 22 steps cover the three-level
 frame, acrylic and liner sandwiches, fibres and SiPM holders, and the Pi 5 and
 readout enclosure. Each step has the parts needed and a check before moving on.
 Flat T-nuts are fed through open groove ends, farthest position first. Acrylic
 and enclosure mounting nuts are included before the rail ends close. Corner
-pieces slide along the rail grooves on the bench, then the rail assemblies are
-aligned above the open post ends and slid down their grooves one at a time.
+pieces slide along the rail grooves on the bench. Start with the frame upside
+down and fit the top-layer short beams first, sliding their brackets in from the
+open foot ends of the uprights. Turn the frame 90 degrees onto its side, then
+fit the middle rails followed by the bottom rails through those same open ends.
+Leave the feet off until these sliding operations are complete. Secure and square
+the frame, then fit all three lower acrylic sheets while their undersides are
+accessible from the side. Turn the frame another 90 degrees onto its feet before
+adding the liners and preassembled scintillator units. The complete frame and
+fitted sheets turn together; loose rail subassemblies stay on the bench.
 They are not dropped into a closed slot. A missed flat nut means disassembling
 the joint to regain access to the open beam end. The part-separation slider
 can replay the fitting route.
@@ -131,8 +138,8 @@ This is a mechanical guide, not a power-up script. It does not connect to a
 detector, change bias, or start acquisition. Keep power and HV off while working
 on the wiring. The actual drawings and hardware still decide fastener lengths,
 clearances, optical coupling and the electrical checks before commissioning.
-Partly transparent acrylic reveals the stack. The displayed route leaves room above the
-posts before sliding a rail down the post grooves, but hand and tool clearances
+Partly transparent acrylic reveals the stack. The displayed route leaves room beyond the
+open foot ends before sliding a rail along the post grooves, but hand and tool clearances
 still need checking on the bench. The guide is not a released manufacturing process.
 
 The guide is included in the normal static Pages build as `assembly.html`.
