@@ -52,9 +52,9 @@ export const ASSEMBLY_STEPS = [
     id: 'upper-rails', phase: 'Frame', title: 'Fit the remaining rails with the frame on its side',
     parts: '8 preassembled rail-and-bracket units', camera: 'joining', duration: 32,
     actions: ['Keep the frame on its side. Load the middle-joint nuts from the open foot ends, then slide each middle rail assembly along the upright grooves. Repeat for the bottom layer only after the middle layer is in place.',
-      'Start the post screws and repeat for the next rail. Use 13 cm between tile centres at both sides of the frame.'],
-    check: 'There are three tile levels. Do not add the fourth empty level from the original frame STL.',
-    focus: 'Middle first, then bottom: slide in from the foot ends', offset: [0, 0, 0],
+      'Set 13 cm centre to centre from top to middle and from middle to bottom. Measure between the matching centre lines of the horizontal rails, not the clear gap between their edges. Check both sides before tightening.'],
+    check: 'Keep 13 cm centre to centre at BOTH gaps. There are three tile levels; do not add the fourth empty level from the original frame STL.',
+    focus: 'Middle, then bottom - 13 cm centre to centre', offset: [0, 0, 0],
   },
   {
     id: 'feet', phase: 'Frame', title: 'Fit the rubber feet',
@@ -69,7 +69,7 @@ export const ASSEMBLY_STEPS = [
     parts: '24 corner brackets / 48 bracket screws and T-nuts', camera: 'frame',
     actions: ['All brackets and their screws are now in place. Compare the diagonals of each rail square and check the level heights.',
       'Tighten the socket-head screws gradually while keeping the uprights square. Do not pull a misaligned frame square using one screw.'],
-    check: 'Square all three levels, then tighten gradually. No torque value is specified by this model.',
+    check: 'Recheck both 13 cm centre-to-centre spacings and all three squares before tightening gradually. No torque value is specified by this model.',
     focus: 'Check and tighten the assembled joints', offset: [0, 0, 0],
   },
   {

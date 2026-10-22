@@ -10,6 +10,7 @@ import { createNutGeometry, NUT_ROLES } from './tslot-nut-geometry.js';
 import { tapeSiPMHolder } from './assembly-tape.js';
 import { createCarriedCoax } from './assembly-cables.js';
 import { createPiFixings, createAllenKey, createPhillipsDriver, cablePassage, createCutCornerGuide } from './assembly-hardware.js';
+import { createFrameGuides, frameGuideState, FRAME_LEVELS } from './assembly-guides.js';
 
 const $ = id => document.getElementById(id);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -123,6 +124,8 @@ class AssemblyScene extends TelescopeScene {
     }
     for (const light of this.fibreLights) light.core.material.emissiveIntensity = 0.22;
     this.prepareNutMap(p);
+    this.frameGuides = createFrameGuides();
+    this.model.add(this.frameGuides.group);
     this.prepared = true;
     this.container.dataset.ready = 'true';
     this.container.dataset.partCount = String(this.parts.length);
@@ -490,6 +493,11 @@ class AssemblyScene extends TelescopeScene {
     this.model.updateMatrixWorld(true);
     this.container.dataset.frameOrientation = build.orientation;
     this.container.dataset.frameAngle = build.angle.toFixed(5);
+    const guides = frameGuideState(ASSEMBLY_STEPS, this.stepIndex, this.progress, this.previewComplete);
+    this.frameGuides.update(guides, this.camera, this.container.clientHeight);
+    this.frameGuides.group.visible = !(this.nutMap && this.nutScope);
+    this.container.dataset.frameLabels = FRAME_LEVELS.filter((_, index) => guides.levels[index]).join(',');
+    this.container.dataset.layerSpacing = guides.spacing.some(Boolean) ? '13 cm centre to centre' : '';
     this.allenKey.visible = false;
     this.phillipsDriver.visible = false;
     delete this.container.dataset.activeScrew;

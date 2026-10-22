@@ -14,6 +14,61 @@ import { SENSOR_BOARD } from '../public/sipm-mount.js';
 import { createCarriedCoax } from '../public/assembly-cables.js';
 import { createPiFixings, cablePassage, createCutCornerGuide } from '../public/assembly-hardware.js';
 import { caseMounts, cableGuide } from '../public/readout-placement.js';
+import { frameGuideState, createFrameGuides } from '../public/assembly-guides.js';
+
+test('empty-frame names follow completed levels and stay deterministic when seeking backwards', () => {
+  const index = id => ASSEMBLY_STEPS.findIndex(step => step.id === id);
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('posts')).levels, [true, false, false]);
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('upper-rails'), .49).levels, [true, false, false]);
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('upper-rails'), .5).levels, [true, true, false]);
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('upper-rails'), 1).levels, [true, true, true]);
+  for (const id of ['feet', 'lower-acrylic', 'turn-upright', 'lower-liner']) {
+    assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index(id)).levels, [true, true, true]);
+    assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index(id)).spacing, [true, true]);
+  }
+  for (const id of ['tiles', 'pi', 'complete']) {
+    assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index(id)).levels, [false, false, false]);
+  }
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('posts'), 1, true).levels, [false, false, false]);
+  assert.deepEqual(frameGuideState(ASSEMBLY_STEPS, index('upper-rails'), .1).spacing, [true, false]);
+});
+
+test('frame labels and both 13 cm dimensions share the frame transform', () => {
+  const guides = createFrameGuides(text => {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial());
+    sprite.name = text;
+    return sprite;
+  });
+  const frame = new THREE.Group();
+  frame.add(guides.group);
+  assert.deepEqual(guides.levels.map(label => label.name), ['TOP', 'MIDDLE', 'BOTTOM']);
+  assert.deepEqual(guides.levels.map(label => label.position.y), [12.05, -.95, -13.95]);
+  assert.ok(guides.dimensions.every(dimension => dimension.children[1].name === '13 cm'));
+  frame.rotation.z = Math.PI / 2;
+  assert.ok(guides.levels[0].getWorldPosition(new THREE.Vector3()).distanceTo(new THREE.Vector3(-12.05, 0, 0)) < 1e-10);
+  guides.update({ levels: [true, true, false], spacing: [true, false] });
+  assert.deepEqual(guides.levels.map(label => label.visible), [true, true, false]);
+  assert.deepEqual(guides.dimensions.map(dimension => dimension.visible), [true, false]);
+  const instructions = ASSEMBLY_STEPS.find(step => step.id === 'upper-rails');
+  assert.match(instructions.actions.join(' '), /not the clear gap/);
+});
+
+test('frame annotations retain a readable screen size on desktop and mobile', () => {
+  const guides = createFrameGuides(() => {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ sizeAttenuation: false }));
+    sprite.userData.labelAspect = 2.5;
+    return sprite;
+  });
+  for (const [fov, viewportHeight] of [[40, 729], [52, 506]]) {
+    const camera = new THREE.PerspectiveCamera(fov);
+    guides.update({ levels: [true, true, true], spacing: [true, true] }, camera, viewportHeight);
+    for (const label of [...guides.levels, ...guides.dimensions.map(dimension => dimension.children[1])]) {
+      const pixels = label.scale.y / Math.tan(THREE.MathUtils.degToRad(fov / 2)) * viewportHeight / 2;
+      assert.ok(Math.abs(pixels - 22) < 1e-10);
+      assert.equal(label.scale.x / label.scale.y, 2.5);
+    }
+  }
+});
 
 test('numbered nuts follow an insertable order, including a sheet nut between two joint nuts', () => {
   const nut = (id, x, y, role) => ({ id, rest: { x, y, z: 0 }, role, location: y > 0 ? 'Upper groove' : 'Lower groove' });

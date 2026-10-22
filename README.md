@@ -76,6 +76,11 @@ the frame, then fit all three lower acrylic sheets while their undersides are
 accessible from the side. Turn the frame another 90 degrees onto its feet before
 adding the liners and preassembled scintillator units. The complete frame and
 fitted sheets turn together; loose rail subassemblies stay on the bench.
+The empty frame is labelled TOP from the start. MIDDLE appears after its four
+rails are seated, then BOTTOM after the final four. These names stay with the
+physical levels during both turns. Dimension arrows mark 13 cm from top to
+middle and from middle to bottom, measured centre to centre, not as a clear
+gap between beam edges. The guides disappear when tile installation starts.
 They are not dropped into a closed slot. A missed flat nut means disassembling
 the joint to regain access to the open beam end. The part-separation slider
 can replay the fitting route.
