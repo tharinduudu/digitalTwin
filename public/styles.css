@@ -17,4 +17,9 @@
 .brand-sub:hover{color:var(--mint);text-decoration:underline}
 .brand-sub:focus-visible{outline:2px solid var(--mint);outline-offset:4px}
 dialog a{color:var(--mint);text-underline-offset:3px}
+.assembly-link{display:inline-flex;align-items:center;gap:7px;color:var(--ink);text-decoration:none;font-size:12px;white-space:nowrap}
+.assembly-link svg{width:17px;height:17px}
+.assembly-link:hover{color:var(--mint)}
+.assembly-link:focus-visible{outline:2px solid var(--mint);outline-offset:4px}
+@media(max-width:700px){.assembly-link span{display:none}.assembly-link{justify-content:center;width:34px;height:38px}.header-right{gap:5px}.assembly-link::after{content:none}}
 @media(max-width:700px){:root .brand{column-gap:9px}:root .brand-sub{font-size:10px}.header-right{flex-shrink:0}.physics-strip div{min-width:0}.physics-strip p{overflow-wrap:break-word}}

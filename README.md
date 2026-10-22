@@ -59,6 +59,88 @@ storage, traffic and build limits.
 
 ## What can be opened or changed?
 
+### Detector assembly guide
+
+Open **http://127.0.0.1:8791/assembly.html** for the separate 3D assembly guide.
+It uses the same CAD as the detector display. The 19 steps cover the three-level
+frame, acrylic and liner sandwiches, fibres and SiPM holders, and the Pi 5 and
+readout enclosure. Each step has the parts needed and a check before moving on.
+Flat T-nuts are fed through open groove ends, farthest position first. Acrylic
+and enclosure mounting nuts are included before the rail ends close. Corner
+pieces slide along the rail grooves on the bench, then the rail assemblies are
+aligned above the open post ends and slid down their grooves one at a time.
+They are not dropped into a closed slot. A missed flat nut means disassembling
+the joint to regain access to the open beam end. The part-separation slider
+can replay the fitting route.
+The nut button opens a beam-by-beam loading check. Numbered locations distinguish
+frame-joint nuts (amber), acrylic-sheet nuts (blue) and readout-box nuts (pink).
+The rails become see-through for this inspection; the colours are only highlights.
+The numbers are the actual insertion sequence from the arrow-marked open end.
+In each groove the far nut goes first, then the middle nut, then the near nut.
+Both end brackets stay off until every nut is loaded. The inspection starts with
+brackets hidden; its replay shows the nuts entering before the brackets slide in.
+The fitted-brackets checkbox shows the completed arrangement, not an earlier step.
+The nut mesh comes from
+the supplied 5537T161 STEP: its separate screw solid is excluded, and the nut is
+kept at its original 15 x 8 x 3 mm dimensions. `cad/prepare_tslot_nut.py` records
+the source checksum and selects the nut before the KiCad GLB export.
+The liners cover the full 20 x 20 cm tile area. Each tile arrives as a unit with
+its fibre already glued in, SiPM and cable fitted, and adapter covered in black
+light-blocking tape. Those optical parts are not installed separately in the frame.
+The full coax lead and its free SMA plug also belong to that tile unit. They move
+with it through the side opening, with the free cable carried loose outside the
+frame. The routing step then guides those same cables into the upright corner and
+connects their free ends, one at a time. It does not add a new cable at that stage.
+The loose and seated cable paths have matching lengths; the transition is an
+assembly illustration, not a flexible-cable or hand-clearance simulation.
+The tape uses the holder's actual surface, with a thin patch over the rear board
+recess; it does not replace the holder outline with a triangular block.
+Camera views, the cover control and the
+complete-detector view let you inspect the build from different sides.
+Liners and scintillators are opaque in this guide, while acrylic is only slightly
+transparent. Rail operations take four nominal seconds per rail, and three-layer
+placement steps take 12 seconds. Playback starts at 1.5x; slower and faster settings
+are available. The focus button follows each rail or tile level
+during playback. Dragging the view gives you camera control; the focus button or
+replay returns to the guided view. Autoplay leaves a short pause after each operation
+before moving to the next step.
+
+The timeline can be dragged in either direction, including back across a step
+boundary. The rewind button moves back five seconds. Camera, separation and
+view controls sit below the 3D view so they do not cover the parts. Instructions
+and nut inspection sit in a separate right-hand panel on desktop; the panel button
+can hide them to widen the view. On phones, they follow the playback controls,
+leaving a taller detector view above. The simulation header links to this guide.
+The camera stays on the whole layer while its screws are tightened, or on the
+enclosure while fixing the Pi. It does not chase each screw. Slow amber pulses
+mark the nuts that must be end-loaded before the joint closes, including the
+later acrylic and box mountings. A missed nut would mean reopening that joint.
+Reduced-motion mode keeps these warning rings steady.
+Screws advance along their
+axes and turn into the nuts after the supported part has seated; an Allen key
+marks the active frame fastener. The Pi has four separate Phillips-head screws
+into the enclosure supports, without frame T-nuts; a Phillips screwdriver is
+shown for these screws. The enclosure and open lid are mounted together;
+the lid remains on its hinge while the Pi and readout are fitted, then swings
+closed. An outline marks the actual cut corner at the SiPM end of each tile.
+This gap leaves room to guide the attached lead from the holder groove along the
+inside face of the horizontal beam, then down the inside corner of the upright.
+
+This is a mechanical guide, not a power-up script. It does not connect to a
+detector, change bias, or start acquisition. Keep power and HV off while working
+on the wiring. The actual drawings and hardware still decide fastener lengths,
+clearances, optical coupling and the electrical checks before commissioning.
+Partly transparent acrylic reveals the stack. The displayed route leaves room above the
+posts before sliding a rail down the post grooves, but hand and tool clearances
+still need checking on the bench. The guide is not a released manufacturing process.
+
+The guide is included in the normal static Pages build as `assembly.html`.
+Its step text is in `public/assembly-steps.js`; the viewer and interface are in
+`public/assembly.js`. Component lists in `mechanics.js` and board references in
+`hardware.js` keep the guide aligned with later model corrections.
+
+### Exhibition controls
+
 - The layers button switches between wrapped and transparent tiles.
 - The pyramid button shows the geometric acceptance for the selected pair.
 - The box button opens the readout cover and moves the camera closer.

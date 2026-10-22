@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5f4">
+  <title>gLOWCOST | Detector Assembly</title>
+  <link rel="stylesheet" href="./assembly.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script defer src="./vendor/lucide.min.js"></script>
+  <script type="module" src="./assembly.js"></script>
+</head>
+<body>
+  <header class="assembly-header">
+    <a class="brand" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">gLOWCOST</a>
+    <span class="header-divider"></span><h1>Detector assembly</h1>
+    <a class="simulation-link" href="./index.html"><i data-lucide="activity"></i><span>Detector simulation</span></a>
+  </header>
+  <main class="assembly-layout">
+    <aside class="assembly-sidebar" aria-label="Assembly stages">
+      <div class="sidebar-heading"><span>BUILD SEQUENCE</span><strong id="step-count">01 / 19</strong></div>
+      <div class="mobile-step"><label for="step-select">Assembly step</label><select id="step-select" aria-label="Assembly step"></select><button class="tool" id="mobile-parts-button" aria-label="Parts and tools" title="Parts and tools"><i data-lucide="package-open"></i></button></div>
+      <nav id="steps" aria-label="Assembly steps"></nav>
+      <div class="sidebar-bottom">
+        <button id="parts-button"><i data-lucide="package-open"></i>Parts and tools</button>
+        <button id="photo-button"><i data-lucide="camera"></i>Reference detector</button>
+        <span class="power-note"><i data-lucide="plug-zap"></i>Assemble with power and HV off</span>
+      </div>
+    </aside>
+    <section class="workspace" aria-label="Interactive detector assembly">
+      <div class="scene-toolbar">
+        <div><span id="phase">Frame</span><h2 id="step-title">Fit the feet to the uprights</h2></div>
+        <div class="toolbar-buttons">
+          <button class="tool" id="notes-toggle" aria-label="Hide assembly instructions" aria-controls="step-notes" aria-expanded="true" title="Hide instructions"><i data-lucide="panel-right-close"></i></button>
+          <button class="tool" id="follow-part" aria-label="Follow the part being installed" aria-pressed="true" title="Follow the part being installed"><i data-lucide="focus"></i></button>
+          <button class="tool" id="nut-map-toggle" aria-label="Show T-slot nut locations" aria-pressed="false" title="Show T-slot nut locations"><i data-lucide="nut"></i></button>
+          <button class="tool" id="complete-view" aria-label="Show complete detector" aria-pressed="false" title="Show complete detector"><i data-lucide="boxes"></i></button>
+          <button class="tool" id="open-lid" aria-label="Open readout cover" aria-pressed="false" title="Open readout cover" disabled><i data-lucide="box"></i></button>
+          <button class="tool" id="home-view" aria-label="Reset view" title="Reset view"><i data-lucide="scan"></i></button>
+          <button class="tool" id="full-screen" aria-label="Full screen" title="Full screen"><i data-lucide="maximize"></i></button>
+        </div>
+      </div>
+      <div class="viewport">
+        <div id="scene" role="img" aria-label="3D assembly of the three-level gLOWCOST detector" data-ready="false"></div>
+        <div id="loading" role="status"><span class="loading-mark"></span>Loading detector parts</div>
+      </div>
+      <div class="view-controls" aria-label="Assembly view controls">
+        <div class="view-control-row">
+          <div class="part-caption"><span class="part-dot"></span><span id="focus-label">Uprights and feet</span></div>
+        <div class="view-presets" role="group" aria-label="Camera views">
+          <button data-view="perspective" aria-pressed="true" title="Perspective view"><i data-lucide="cuboid"></i><span>3D</span></button>
+          <button data-view="front" aria-pressed="false" title="Front view"><i data-lucide="panel-top"></i><span>Front</span></button>
+          <button data-view="side" aria-pressed="false" title="Side view"><i data-lucide="panel-left"></i><span>Side</span></button>
+          <button data-view="top" aria-pressed="false" title="Top view"><i data-lucide="square"></i><span>Top</span></button>
+        </div>
+        </div>
+        <p id="preload-warning" hidden><i data-lucide="triangle-alert"></i><span>Load the highlighted T-nuts before closing the groove ends. A missed nut means taking the joint apart.</span></p>
+        <div class="separation-control"><i data-lucide="move-vertical"></i><label for="separation">Part separation</label><input type="range" id="separation" min="0" max="100" value="0"><output id="separation-value" for="separation">0%</output><button class="tool" id="replay" aria-label="Replay this assembly step" title="Replay this step"><i data-lucide="rotate-ccw"></i></button></div>
+      </div>
+      <section class="step-notes" id="step-notes" aria-label="Current step instructions" aria-live="polite">
+        <h3 class="notes-heading">Instructions</h3>
+        <div id="nut-map-controls" hidden>
+          <label for="nut-rail">Check nuts in</label><select id="nut-rail" aria-label="Rail to inspect"></select><button class="tool" id="replay-nuts" aria-label="Replay nut loading" title="Replay nut loading"><i data-lucide="rotate-ccw"></i></button>
+          <div class="nut-legend"><span class="joint">Frame joint</span><span class="acrylic">Acrylic sheet</span><span class="case">Readout box</span></div>
+          <label class="fitted-brackets"><input type="checkbox" id="fitted-brackets">Show fitted brackets (after all nuts)</label>
+        </div>
+        <div class="instruction-copy"><span id="part-list" class="part-list">4 uprights / 4 rubber feet</span><ol id="actions"></ol></div>
+        <div class="check-copy"><h3><i data-lucide="clipboard-check"></i>Before moving on</h3><p id="check-text"></p><div id="nut-inventory" hidden></div></div>
+      </section>
+      <div class="step-navigation">
+        <button id="previous"><i data-lucide="arrow-left"></i><span>Previous</span></button>
+        <div class="playback">
+          <button class="tool" id="seek-back" aria-label="Seek back five seconds" title="Back five seconds"><i data-lucide="rewind"></i></button>
+          <button class="tool" id="autoplay" aria-label="Play assembly sequence" aria-pressed="false" title="Play assembly sequence"><i data-lucide="play"></i></button>
+          <input type="range" id="assembly-progress" min="0" max="240" step="0.05" value="0" aria-label="Assembly timeline">
+          <span id="progress-text">1 of 19</span>
+          <select id="playback-speed" aria-label="Playback speed" title="Playback speed"><option value="0.5">0.5x</option><option value="1">1x</option><option value="1.5" selected>1.5x</option><option value="2">2x</option><option value="3">3x</option></select>
+        </div>
+        <button id="next" class="primary"><span>Next step</span><i data-lucide="arrow-right"></i></button>
+      </div>
+    </section>
+  </main>
+  <dialog id="parts-dialog">
+    <div class="dialog-heading"><h2>Parts and tools</h2><button class="tool close-dialog" aria-label="Close parts list"><i data-lucide="x"></i></button></div>
+    <table><thead><tr><th>Part</th><th>Quantity</th></tr></thead><tbody>
+      <tr><td>Aluminium uprights</td><td>4</td></tr><tr><td>Horizontal rails</td><td>12</td></tr>
+      <tr><td>Rubber feet</td><td>4</td></tr><tr><td>Corner brackets</td><td>24</td></tr>
+      <tr><td>Bracket socket-head screws and T-nuts</td><td>48 pairs</td></tr>
+      <tr><td>Acrylic sheets</td><td>6</td></tr><tr><td>Acrylic mounting screws and T-nuts</td><td>24 pairs</td></tr>
+      <tr><td>Full 20 x 20 cm cushion liners</td><td>6</td></tr><tr><td>Preassembled 20 x 20 x 1 cm tile units</td><td>3</td></tr>
+      <tr><td>Glued fibres, taped SiPM adapters and attached leads</td><td>Included in tile units</td></tr>
+      <tr><td>Enclosure with attached hinged lid</td><td>1</td></tr><tr><td>Raspberry Pi 5 and readout PCB</td><td>1 each</td></tr>
+      <tr><td>Phillips-head Pi-to-enclosure mounting screws</td><td>4</td></tr>
+      <tr><td>Ethernet cable and suitable USB-C supply</td><td>1 each</td></tr>
+    </tbody></table>
+    <p>Use the matching Allen key for the frame fasteners, a Phillips screwdriver for the Pi screws, and a ruler or square. Check screw lengths, electrical clearances and fastener quantities against the actual hardware.</p>
+    <p>The CAD is a visual reference, not a released fabrication drawing. Liners and optical layers are separated for clarity; the real detector must remain light-tight.</p>
+  </dialog>
+  <dialog id="photo-dialog"><div class="dialog-heading"><h2>Reference detector</h2><button class="tool close-dialog" aria-label="Close reference photo"><i data-lucide="x"></i></button></div><img src="./assets/detector.jpg" alt="Actual three-level gLOWCOST detector with acrylic sheets and an outside-mounted readout enclosure."></dialog>
+</body>
+</html>

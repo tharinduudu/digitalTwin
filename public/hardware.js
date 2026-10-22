@@ -97,11 +97,13 @@ export class ReadoutHardware extends THREE.Group {
       readout.ports.forEach(port => port?.add(readoutShift));
       this.headerErrorMm = pi.header.distanceTo(readout.header.clone().add(readoutShift)) * 10;
       this.add(pi.body);
+      this.piBody = pi.body;
       this.state.pi = true;
       const { body, indicators, ports } = readout;
       this.state.u5GapMm = readout.converter.housingGapMm;
       this.state.u5OffsetMm = readout.converter.offsetMm;
       this.add(body);
+      this.readoutBody = body;
       indicators.forEach(point => {
         const material = new THREE.MeshStandardMaterial({ color: '#531919', emissive: '#ff2820', emissiveIntensity: 0.02 });
         const led = new THREE.Mesh(new THREE.SphereGeometry(0.0008, 8, 6), material);

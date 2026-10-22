@@ -47,8 +47,9 @@ function surfaceTexture(kind) {
 }
 
 export class TelescopeScene {
-  constructor(container) {
+  constructor(container, { assembly = false } = {}) {
     this.container = container;
+    this.assemblyMode = assembly;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#111514');
     this.camera = new THREE.PerspectiveCamera(40, 1, 0.1, 250);
@@ -100,7 +101,10 @@ export class TelescopeScene {
     this.buildRoomField();
     this.buildAcceptance();
     this.model.add(createRulers());
-    installMechanicalParts(this).catch(error => console.error('Mechanical CAD', error))
+    this.ready = installMechanicalParts(this).catch(error => {
+      this.loadError = error;
+      console.error('Mechanical CAD', error);
+    })
       .then(() => this.hardware.load());
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#080a09', roughness: 1 }));
     ground.rotation.x = -Math.PI / 2;
@@ -276,6 +280,7 @@ export class TelescopeScene {
   }
 
   buildPiCables() {
+    this.piCables = [];
     const { usbC, ethernet } = piCableAnchors();
     const blue = new THREE.MeshStandardMaterial({ color: '#327cb1', roughness: 0.65 });
     const clearPlug = new THREE.MeshPhysicalMaterial({ color: '#c7d9d5',
@@ -284,6 +289,7 @@ export class TelescopeScene {
       const object = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
       object.position.copy(point);
       this.readout.add(object);
+      this.piCables.push(object);
     };
     // Pi CAD is vertical here: USB-C faces left and Ethernet faces downwards.
     plug([0.45, 0.82, 0.32], usbC.clone().add(new THREE.Vector3(-0.15, 0, 0)), this.silver);
@@ -297,6 +303,7 @@ export class TelescopeScene {
       [ethernet.x, -16, ethernet.z + 0.2], [ethernet.x + 1, FLOOR_Y + 0.26, 16],
       [8, FLOOR_Y + 0.26, 18], [15, FLOOR_Y + 0.26, 16]], blue, 0.24);
     this.readout.add(power, network);
+    this.piCables.push(power, network);
   }
 
   buildRoomField() {
@@ -525,6 +532,7 @@ export class TelescopeScene {
     this.alignReadoutPorts();
     if (!this.paused) this.hardware.update(dt);
     this.updateLabels();
+    this.beforeRender?.(dt);
     this.renderer.render(this.scene, this.camera);
   }
 }

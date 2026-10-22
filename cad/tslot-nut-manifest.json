@@ -1,0 +1,9 @@
+{
+  "source": "5537T161_T-Slotted_Framing.step",
+  "sha256": "f7f81d2771ce9a3ed389370d40edb938d427cdb99c9e650b8d564cd3c3ab72de",
+  "selected_solid": "#434",
+  "solid_name": "Cut-Extrude4",
+  "excluded_solid": "Boss-Extrude3 (screw)",
+  "source_units": "mm",
+  "note": "Only the representation's solid references change. Nut geometry is not rescaled."
+}

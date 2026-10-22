@@ -25,10 +25,11 @@ function bracketParts() {
   return { horizontal, vertical, gusset };
 }
 
-export function addCornerBrackets(model, material, heights) {
+export function addCornerBrackets(model, material, heights, { individual = false } = {}) {
   const parts = bracketParts();
   const batches = new Map();
   let bracketCount = 0;
+  const joints = [];
   for (const height of heights) for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     // Each post-to-rail junction has one bracket for each horizontal rail.
     for (const alongX of [true, false]) {
@@ -56,7 +57,10 @@ export function addCornerBrackets(model, material, heights) {
       bracket.position.set(sx * (alongX ? 10.16 : 11.16), height + side,
         sz * (alongX ? 11.16 : 10.16));
       bracket.updateMatrixWorld(true);
-      bracket.traverse(part => {
+      if (individual) {
+        model.add(bracket);
+        joints.push({ bracket, underRail, intoPost, height, sx, sz, alongX, side });
+      } else bracket.traverse(part => {
         if (!part.isMesh) return;
         const key = `${part.geometry.uuid}:${part.material.uuid}`;
         if (!batches.has(key)) batches.set(key, { geometry: part.geometry, material: part.material, matrices: [] });
@@ -74,5 +78,5 @@ export function addCornerBrackets(model, material, heights) {
     instances.receiveShadow = true;
     model.add(instances);
   }
-  return { brackets: bracketCount, screws: bracketCount * 2, batches: batches.size };
+  return { brackets: bracketCount, screws: bracketCount * 2, batches: batches.size, joints };
 }
