@@ -87,7 +87,12 @@ export function assemblyPosition(steps, seconds) {
 }
 
 export const ASSEMBLY_FINISH = { acrylic: 0.84, liner: 1, scintillator: 1 };
-export const ASSEMBLY_SPEED = 1.5;
+export const ASSEMBLY_SPEED = 1;
+export const ASSEMBLY_FOLLOW_DEFAULT = false;
+
+export function assemblyCameraStage(detail) {
+  return ['joint', 'stack', 'sensor'].includes(detail) ? 'frame' : detail;
+}
 
 export function hingedCoverAngle(progress) {
   return 1.9 * (1 - smoothAssembly(progress));

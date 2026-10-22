@@ -3,7 +3,7 @@ import { TelescopeScene } from './scene.js';
 import { ASSEMBLY_STEPS, visibleAtStep, smoothAssembly } from './assembly-steps.js';
 import { railPose, railProgress, nutLoadingProgress, bracketInsertionProgress, orderRailNuts, sideInsertionPose,
   fasteningProgress, screwPose, assemblyTime, assemblyPosition, ASSEMBLY_FINISH, ASSEMBLY_SPEED, hingedCoverAngle,
-  layerFasteningView, nutNeedsReminder, nutReminderPulse } from './assembly-motion.js';
+  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage } from './assembly-motion.js';
 import { TILE_HEIGHTS, FLOOR_Y } from './detector-geometry.js';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { createNutGeometry, NUT_ROLES } from './tslot-nut-geometry.js';
@@ -23,7 +23,7 @@ class AssemblyScene extends TelescopeScene {
     this.controls.minDistance = 6;
     this.controls.maxDistance = 130;
     this.controls.enablePan = true;
-    this.followPart = true;
+    this.followPart = ASSEMBLY_FOLLOW_DEFAULT;
     this.focusRequested = false;
     this.controls.addEventListener('start', () => {
       this.cameraMotion = null; this.followPart = false;
@@ -282,6 +282,7 @@ class AssemblyScene extends TelescopeScene {
   }
 
   setNutMap(enabled, unit = null) {
+    const wasEnabled = this.nutMap;
     this.nutMap = enabled;
     this.nutScope = unit;
     const loading = enabled && unit && ASSEMBLY_STEPS[this.stepIndex].id === unit.prefit;
@@ -309,7 +310,7 @@ class AssemblyScene extends TelescopeScene {
       target.y += 0.7;
       this.cameraMotion = { from: this.camera.position.clone(), to: target.clone().add(new THREE.Vector3(2, 15, 21)),
         targetFrom: this.controls.target.clone(), targetTo: target, elapsed: reducedMotion ? 1 : 0 };
-    } else this.setCamera('perspective');
+    } else if (wasEnabled) this.setCamera('perspective');
   }
 
   updateNutMarkers() {
@@ -412,16 +413,18 @@ class AssemblyScene extends TelescopeScene {
   }
 
   setStep(index, animate = true) {
+    const previousStage = assemblyCameraStage(ASSEMBLY_STEPS[this.stepIndex].camera);
     this.stepIndex = index;
     this.previewComplete = false;
     this.separation = 0;
     this.replayTime = animate && !reducedMotion ? 0 : null;
     this.boxOpen = index >= stepNumber('case') && index < stepNumber('lid');
-    this.followPart = true;
-    $('follow-part').setAttribute('aria-pressed', 'true');
+    $('follow-part').setAttribute('aria-pressed', String(this.followPart));
     this.lidAngle = this.boxOpen ? 1.9 : 0;
     this.updateVisibility();
-    this.setCamera('perspective');
+    const stage = assemblyCameraStage(ASSEMBLY_STEPS[index].camera);
+    if (!this.hasCameraStage || stage !== previousStage) this.setCamera('perspective');
+    this.hasCameraStage = true;
   }
 
   updateVisibility() {
@@ -444,28 +447,25 @@ class AssemblyScene extends TelescopeScene {
   }
 
   setCamera(preset) {
-    const detail = ASSEMBLY_STEPS[this.stepIndex].camera;
+    const detail = assemblyCameraStage(ASSEMBLY_STEPS[this.stepIndex].camera);
     const target = new THREE.Vector3(0, -2, 0);
     const position = new THREE.Vector3(39, 27, 49);
     if (detail === 'bench' && !this.previewComplete) {
       target.set(0, -14, 32); position.set(31, 16, 63);
     } else if (detail === 'joining' && !this.previewComplete) {
       target.set(0, 2, 14); position.set(61, 48, 91);
-    } else if (detail === 'joint' && !this.previewComplete) {
-      target.set(-10, 4, 10); position.set(-29, 22, 33);
-    } else if (detail === 'stack' && !this.previewComplete) {
-      target.set(0, 1, 10); position.set(45, 32, 68);
     } else if (detail === 'readout' && !this.previewComplete) {
-      target.set(-0.7, -5.6, 13); position.set(-13, 0, 31);
+      target.set(0, -5, 13); position.set(-23, 14, 50);
     } else if (detail === 'cables' && !this.previewComplete) {
       target.set(-4, -2, 7); position.set(-37, 15, 42);
-    } else if (detail === 'sensor' && !this.previewComplete) {
-      target.set(-4, 7.5, 5); position.set(-29, 32, 36);
     }
     const distance = position.distanceTo(target);
     if (preset === 'front') position.copy(target).add(new THREE.Vector3(0, 0.03, distance));
     if (preset === 'side') position.copy(target).add(new THREE.Vector3(-distance, 0.03, 0));
     if (preset === 'top') position.copy(target).add(new THREE.Vector3(0, distance, 0.03));
+    this.container.dataset.cameraTarget = JSON.stringify(target.toArray());
+    this.container.dataset.cameraOffset = JSON.stringify(position.clone().sub(target).toArray());
+    this.container.dataset.cameraTransitions = String(Number(this.container.dataset.cameraTransitions || 0) + 1);
     this.cameraMotion = { from: this.camera.position.clone(), to: position,
       targetFrom: this.controls.target.clone(), targetTo: target, elapsed: reducedMotion ? 1 : 0 };
   }
@@ -881,8 +881,8 @@ function setPlaying(value) {
     if (viewer) {
       const progress = viewer.progress >= 1 ? 0 : viewer.progress;
       viewer.replayTime = progress * (ASSEMBLY_STEPS[stepIndex].duration || 4);
-      viewer.separation = 1 - progress; viewer.followPart = true;
-      $('follow-part').setAttribute('aria-pressed', 'true');
+      viewer.separation = 1 - progress;
+      $('follow-part').setAttribute('aria-pressed', String(viewer.followPart));
     }
     const schedule = () => {
       const stepDuration = ASSEMBLY_STEPS[stepIndex].duration || 4;
@@ -915,8 +915,7 @@ $('replay').addEventListener('click', () => {
   viewer.previewComplete = false;
   viewer.updateVisibility(); updateNotes(); updateNutControls(false);
   viewer.replayTime = 0; viewer.separation = 0;
-  viewer.followPart = true;
-  $('follow-part').setAttribute('aria-pressed', 'true');
+  $('follow-part').setAttribute('aria-pressed', String(viewer.followPart));
 });
 $('separation').addEventListener('input', event => {
   if (!viewer?.prepared) return;

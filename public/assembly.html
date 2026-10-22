@@ -32,7 +32,7 @@
         <div><span id="phase">Frame</span><h2 id="step-title">Fit the feet to the uprights</h2></div>
         <div class="toolbar-buttons">
           <button class="tool" id="notes-toggle" aria-label="Hide assembly instructions" aria-controls="step-notes" aria-expanded="true" title="Hide instructions"><i data-lucide="panel-right-close"></i></button>
-          <button class="tool" id="follow-part" aria-label="Follow the part being installed" aria-pressed="true" title="Follow the part being installed"><i data-lucide="focus"></i></button>
+          <button class="tool" id="follow-part" aria-label="Follow the part being installed" aria-pressed="false" title="Follow the part being installed"><i data-lucide="focus"></i></button>
           <button class="tool" id="nut-map-toggle" aria-label="Show T-slot nut locations" aria-pressed="false" title="Show T-slot nut locations"><i data-lucide="nut"></i></button>
           <button class="tool" id="complete-view" aria-label="Show complete detector" aria-pressed="false" title="Show complete detector"><i data-lucide="boxes"></i></button>
           <button class="tool" id="open-lid" aria-label="Open readout cover" aria-pressed="false" title="Open readout cover" disabled><i data-lucide="box"></i></button>
@@ -74,7 +74,7 @@
           <button class="tool" id="autoplay" aria-label="Play assembly sequence" aria-pressed="false" title="Play assembly sequence"><i data-lucide="play"></i></button>
           <input type="range" id="assembly-progress" min="0" max="240" step="0.05" value="0" aria-label="Assembly timeline">
           <span id="progress-text">1 of 19</span>
-          <select id="playback-speed" aria-label="Playback speed" title="Playback speed"><option value="0.5">0.5x</option><option value="1">1x</option><option value="1.5" selected>1.5x</option><option value="2">2x</option><option value="3">3x</option></select>
+          <select id="playback-speed" aria-label="Playback speed" title="Playback speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option><option value="3">3x</option></select>
         </div>
         <button id="next" class="primary"><span>Next step</span><i data-lucide="arrow-right"></i></button>
       </div>

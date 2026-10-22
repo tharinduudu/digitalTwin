@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { ASSEMBLY_STEPS, smoothAssembly, visibleAtStep } from '../public/assembly-steps.js';
 import { railPose, railProgress, nutLoadingProgress, bracketInsertionProgress, orderRailNuts, sideInsertionPose,
   fasteningProgress, screwPose, assemblyTime, assemblyPosition, ASSEMBLY_FINISH, ASSEMBLY_SPEED, hingedCoverAngle,
-  layerFasteningView, nutNeedsReminder, nutReminderPulse } from '../public/assembly-motion.js';
+  layerFasteningView, nutNeedsReminder, nutReminderPulse, ASSEMBLY_FOLLOW_DEFAULT, assemblyCameraStage } from '../public/assembly-motion.js';
 import { LINER_SIZE, TILE_OUTLINE } from '../public/detector-geometry.js';
 import * as THREE from '../public/vendor/three.module.js';
 import { addCornerBrackets } from '../public/corner-brackets.js';
@@ -133,8 +133,17 @@ test('the faster sequence retains four nominal seconds per rail or stacked layer
     ['upper-liner', 3], ['upper-acrylic', 3]]) {
     assert.equal(ASSEMBLY_STEPS.find(step => step.id === id).duration / parts, 4);
   }
-  assert.equal(ASSEMBLY_SPEED, 1.5);
-  assert.ok(assemblyTime(ASSEMBLY_STEPS, 18, 1) / ASSEMBLY_SPEED < 180);
+  assert.equal(ASSEMBLY_SPEED, 1);
+  assert.ok(assemblyTime(ASSEMBLY_STEPS, 18, 1) / ASSEMBLY_SPEED < 240);
+});
+
+test('the default camera holds an overview across related steps instead of chasing parts', () => {
+  assert.equal(ASSEMBLY_FOLLOW_DEFAULT, false);
+  for (const detail of ['frame', 'joint', 'stack', 'sensor']) {
+    assert.equal(assemblyCameraStage(detail), 'frame');
+  }
+  assert.equal(assemblyCameraStage('readout'), 'readout');
+  assert.equal(assemblyCameraStage('bench'), 'bench');
 });
 
 test('timeline seeking round-trips across steps and clamps at both ends', () => {
@@ -248,6 +257,8 @@ test('the seek bar, rewind and playback speed are accessible on the assembly pag
   assert.match(html, /type="range" id="assembly-progress"/);
   assert.match(html, /id="seek-back" aria-label="Seek back five seconds"/);
   assert.match(html, /id="playback-speed" aria-label="Playback speed"/);
+  assert.match(html, /<option value="1" selected>1x<\/option>/);
+  assert.match(html, /id="follow-part"[^>]*aria-pressed="false"/);
   assert.match(html, /id="notes-toggle"[^>]*aria-controls="step-notes"[^>]*aria-expanded="true"/);
   const viewport = html.slice(html.indexOf('<div class="viewport">'), html.indexOf('<div class="view-controls"'));
   assert.doesNotMatch(viewport, /id="nut-map-controls"|class="separation-control"|class="view-presets"/);

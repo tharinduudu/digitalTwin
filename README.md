@@ -99,10 +99,11 @@ Camera views, the cover control and the
 complete-detector view let you inspect the build from different sides.
 Liners and scintillators are opaque in this guide, while acrylic is only slightly
 transparent. Rail operations take four nominal seconds per rail, and three-layer
-placement steps take 12 seconds. Playback starts at 1.5x; slower and faster settings
-are available. The focus button follows each rail or tile level
-during playback. Dragging the view gives you camera control; the focus button or
-replay returns to the guided view. Autoplay leaves a short pause after each operation
+placement steps take 12 seconds. Playback starts at 1x; slower and faster settings
+are available. The camera holds a wider view by default, with the same view kept
+between related steps. The focus button enables following a rail or tile level
+when a closer look is needed. Dragging the view stops following; replay and
+autoplay keep that choice. Autoplay leaves a short pause after each operation
 before moving to the next step.
 
 The timeline can be dragged in either direction, including back across a step
