@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { loadBoard } from './hardware.js';
 import { identifyNet } from './probe-signals.js';
+import { layoutProbeLabels } from './probe-labels.js';
 
 const COLOURS = ['#f0bd43', '#64cff0'];
 
@@ -75,18 +76,6 @@ export class ProbeBoard {
     this.padMesh.renderOrder = 20;
     this.padMesh.frustumCulled = false;
     this.scene.add(this.padMesh);
-    this.probeMeshes = COLOURS.map(colour => {
-      const probe = new THREE.Group();
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3, 12), new THREE.MeshStandardMaterial({ color: '#dedfdb', metalness: 0.8, roughness: 0.25 }));
-      tip.position.y = 1.5;
-      tip.rotation.z = Math.PI;
-      const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.9, 9, 12), new THREE.MeshStandardMaterial({ color: colour, roughness: 0.55 }));
-      handle.position.y = 7.4;
-      probe.add(tip, handle);
-      probe.visible = false;
-      this.scene.add(probe);
-      return probe;
-    });
     this.updatePads();
     this.render();
   }
@@ -116,12 +105,6 @@ export class ProbeBoard {
     this.padMesh.instanceMatrix.needsUpdate = true;
     if (this.padMesh.instanceColor) this.padMesh.instanceColor.needsUpdate = true;
     this.updateNetTracks();
-    this.probeMeshes?.forEach((mesh, index) => {
-      const pad = this.probes[index];
-      mesh.visible = Boolean(pad) && (this.side === 'back' ? pad.back : pad.front);
-      if (pad) mesh.position.copy(this.padPosition(pad));
-      mesh.rotation.z = this.side === 'back' ? Math.PI : 0;
-    });
     this.render();
   }
 
@@ -200,16 +183,34 @@ export class ProbeBoard {
   render() {
     this.renderer.render(this.scene, this.camera);
     this.host.dataset.ready = String(Boolean(this.body));
+    if (!this.centre) return;
+    const width = this.host.clientWidth, height = this.host.clientHeight;
+    const points = this.probes.map(pad => {
+      if (!pad) return null;
+      const point = this.padPosition(pad).project(this.camera);
+      return { x: (point.x + 1) * width / 2, y: (1 - point.y) * height / 2,
+        visible: (this.side === 'back' ? pad.back : pad.front) && point.z > -1 && point.z < 1 };
+    });
+    const layout = layoutProbeLabels(points, width, height);
+    const overlay = document.getElementById('probe-leaders');
+    overlay?.setAttribute('viewBox', `0 0 ${width} ${height}`);
     this.probes.forEach((pad, index) => {
       const label = document.getElementById(`board-probe-${index}`);
-      if (!label || !this.centre) return;
-      const visible = pad && (this.side === 'back' ? pad.back : pad.front);
-      label.hidden = !visible;
-      if (!visible) return;
-      const point = this.padPosition(pad).add(new THREE.Vector3(0, this.side === 'back' ? -12 : 12, 0)).project(this.camera);
-      label.style.left = `${(point.x + 1) * this.host.clientWidth / 2}px`;
-      label.style.top = `${(1 - point.y) * this.host.clientHeight / 2}px`;
+      const arrow = document.getElementById(`probe-arrow-${index}`);
+      const ring = document.getElementById(`probe-target-${index}`);
+      const item = layout[index];
+      if (!label) return;
+      label.hidden = !item;
+      if (arrow) arrow.style.display = item ? '' : 'none';
+      if (ring) ring.style.display = item ? '' : 'none';
+      if (!item) return;
+      label.style.left = `${item.box.x}px`;
+      label.style.top = `${item.box.y}px`;
+      label.style.width = `${item.box.width}px`;
       label.textContent = `${index === 0 ? 'A' : 'B'}  ${pad.id}`;
+      arrow?.setAttribute('d', item.path);
+      ring?.setAttribute('cx', item.target.x);
+      ring?.setAttribute('cy', item.target.y);
     });
   }
 }

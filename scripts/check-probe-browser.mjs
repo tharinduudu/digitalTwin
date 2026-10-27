@@ -38,11 +38,32 @@ try {
   });
   assert.ok(pixels.board > 10000, JSON.stringify(pixels));
   assert.ok(pixels.yellow > 100 && pixels.cyan > 100, JSON.stringify(pixels));
+  async function checkProbeArrows() {
+    const result = await page.evaluate(() => {
+      const bounds = document.querySelector('.board-stage').getBoundingClientRect();
+      const labels = [0, 1].map(index => document.getElementById(`board-probe-${index}`));
+      const targets = [0, 1].map(index => {
+        const ring = document.getElementById(`probe-target-${index}`);
+        return { x: bounds.left + Number(ring.getAttribute('cx')), y: bounds.top + Number(ring.getAttribute('cy')) };
+      });
+      const visible = labels.filter(label => !label.hidden && getComputedStyle(label).display !== 'none');
+      return visible.map(label => {
+        const box = label.getBoundingClientRect();
+        return { contained: box.left >= bounds.left && box.right <= bounds.right && box.top >= bounds.top && box.bottom <= bounds.bottom,
+          clear: targets.every(target => target.x < box.left - 12 || target.x > box.right + 12 || target.y < box.top - 12 || target.y > box.bottom + 12) };
+      });
+    });
+    assert.ok(result.length > 0);
+    assert.ok(result.every(item => item.contained && item.clear), JSON.stringify(result));
+    for (const index of [0, 1]) assert.match(await page.locator(`#probe-arrow-${index}`).getAttribute('d'), /^M .* L /);
+  }
+  await checkProbeArrows();
   await page.screenshot({ path: 'screenshots/probe-desktop.png', fullPage: true });
   const originalBoard = await page.locator('#probe-board canvas').evaluate(canvas => canvas.toDataURL());
   await page.getByRole('button', { name: '3D', exact: true }).click();
   const turnedBoard = await page.locator('#probe-board canvas').evaluate(canvas => canvas.toDataURL());
   assert.notEqual(originalBoard, turnedBoard);
+  await checkProbeArrows();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Front', exact: true }).click();
 
@@ -103,6 +124,7 @@ try {
     await page.waitForTimeout(300);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
     assert.equal(overflow, false, `horizontal overflow at ${width}px`);
+    await checkProbeArrows();
     await page.screenshot({ path: `screenshots/probe-mobile-${width}.png`, fullPage: true });
   }
   assert.deepEqual(errors, []);

@@ -25,7 +25,23 @@
     <div class="instruments">
       <section class="board-panel" aria-label="Readout PCB probe locations">
         <div class="panel-toolbar"><h2>gLOWCOST 2v2</h2><div class="segmented" role="group" aria-label="PCB view"><button data-view="front" aria-pressed="true">Front</button><button data-view="back" aria-pressed="false">Back</button><button data-view="3d" aria-pressed="false">3D</button><button data-view="schematic" aria-pressed="false">Schematic</button></div><button class="icon-button" id="board-reset" title="Reset view" aria-label="Reset view"><i data-lucide="scan"></i></button></div>
-        <div class="board-stage"><div id="probe-board" data-ready="false" aria-label="Actual PCB CAD with electrical pad locations"></div><div id="schematic-view" hidden aria-label="Actual KiCad schematic"></div><div class="schematic-tools" id="schematic-tools" hidden><button class="icon-button" id="schematic-in" title="Zoom schematic in" aria-label="Zoom schematic in"><i data-lucide="zoom-in"></i></button><button class="icon-button" id="schematic-out" title="Zoom schematic out" aria-label="Zoom schematic out"><i data-lucide="zoom-out"></i></button><button class="icon-button" id="schematic-sheet" title="Whole schematic sheet" aria-label="Whole schematic sheet"><i data-lucide="scan"></i></button></div><div id="board-loading" role="status">Loading PCB CAD</div><span class="probe-label a" id="board-probe-0" hidden></span><span class="probe-label b" id="board-probe-1" hidden></span></div>
+        <div class="board-stage">
+          <div id="probe-board" data-ready="false" aria-label="Actual PCB CAD with electrical pad locations"></div>
+          <div id="schematic-view" hidden aria-label="Actual KiCad schematic"></div>
+          <div class="schematic-tools" id="schematic-tools" hidden><button class="icon-button" id="schematic-in" title="Zoom schematic in" aria-label="Zoom schematic in"><i data-lucide="zoom-in"></i></button><button class="icon-button" id="schematic-out" title="Zoom schematic out" aria-label="Zoom schematic out"><i data-lucide="zoom-out"></i></button><button class="icon-button" id="schematic-sheet" title="Whole schematic sheet" aria-label="Whole schematic sheet"><i data-lucide="scan"></i></button></div>
+          <div id="board-loading" role="status">Loading PCB CAD</div>
+          <svg id="probe-leaders" aria-hidden="true" preserveAspectRatio="none">
+            <defs>
+              <marker id="arrow-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#f0bd43"/></marker>
+              <marker id="arrow-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#64cff0"/></marker>
+            </defs>
+            <path id="probe-arrow-0" fill="none" stroke="#f0bd43" stroke-width="1.5" marker-end="url(#arrow-a)"/>
+            <path id="probe-arrow-1" fill="none" stroke="#64cff0" stroke-width="1.5" marker-end="url(#arrow-b)"/>
+            <circle id="probe-target-0" r="4" fill="none" stroke="#f0bd43" stroke-width="1.5"/>
+            <circle id="probe-target-1" r="5.5" fill="none" stroke="#64cff0" stroke-width="1.5"/>
+          </svg>
+          <span class="probe-label a" id="board-probe-0" hidden></span><span class="probe-label b" id="board-probe-1" hidden></span>
+        </div>
         <div class="probe-picker"><span>Probe tip</span><div class="segmented"><button id="place-a" class="a" aria-pressed="true">A</button><button id="place-b" class="b" aria-pressed="false">B</button></div><label>PCB channel<select id="pcb-channel"><option value="0">CH0</option><option value="1">CH1</option><option value="2">CH2</option><option value="3">CH3</option></select></label><label class="check"><input type="checkbox" id="all-pads">All nets</label></div>
         <div class="hover-readout" id="hover-readout">PCB pad and net</div>
         <div class="quick-points" id="quick-points" aria-label="Signal-chain probe points"></div>

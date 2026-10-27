@@ -19,6 +19,11 @@ two sources. There are nine label aliases in this revision, affecting 28
 pads. For example, schematic `Ch0_HV0` is PCB `Ch0_DAC0`, and schematic
 `Ch7_COMP3` is PCB `Ch6_COMP3`. These are name differences, not invented wires.
 
+Probe letters sit away from the selected pads, with thin arrows and hollow
+target rings. The arrowheads stop 7 pixels before the pad centre so they do
+not cover the point being inspected. Labels move with the view and avoid
+both targets and one another. Solid probe bodies are not drawn over the pads.
+
 Select the probe letter before clicking a pad. Green markers belong to the
 selected channel. All nets also shows other connected pads, including grey
 points without a waveform model. Selecting a surface track resolves its net
