@@ -1,4 +1,4 @@
-export const CHANNEL_COLOURS = ['#f0bd43', '#64cff0'];
+export const CHANNEL_COLOURS = ['#ffffff', '#ff63df'];
 
 export function voltageLabel(value) {
   if (Math.abs(value) < 1e-8) return '0 V';

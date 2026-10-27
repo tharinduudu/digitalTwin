@@ -29,15 +29,30 @@ try {
     for (let i = 0; i < data.length; i += 4) if (data[i] > 65 && data[i + 1] > 70 && data[i + 2] > 60) board++;
     const scope = document.querySelector('#scope-screen');
     const waveform = scope.getContext('2d').getImageData(0, 0, scope.width, scope.height).data;
-    let yellow = 0, cyan = 0;
+    let white = 0, magenta = 0;
     for (let i = 0; i < waveform.length; i += 4) {
-      if (waveform[i] > 180 && waveform[i + 1] > 140 && waveform[i + 2] < 110) yellow++;
-      if (waveform[i] < 150 && waveform[i + 1] > 150 && waveform[i + 2] > 150) cyan++;
+      if (waveform[i] > 230 && waveform[i + 1] > 230 && waveform[i + 2] > 230) white++;
+      if (waveform[i] > 220 && waveform[i + 1] < 130 && waveform[i + 2] > 190) magenta++;
     }
-    return { board, yellow, cyan };
+    return { board, white, magenta };
   });
   assert.ok(pixels.board > 10000, JSON.stringify(pixels));
-  assert.ok(pixels.yellow > 100 && pixels.cyan > 100, JSON.stringify(pixels));
+  assert.ok(pixels.white > 100 && pixels.magenta > 100, JSON.stringify(pixels));
+  const markers = await page.evaluate(async () => {
+    const { CHANNEL_COLOURS } = await import('./probe-scope.js');
+    return CHANNEL_COLOURS.map((colour, index) => {
+      const arrow = document.getElementById(`probe-arrow-${index}`);
+      const ring = document.getElementById(`probe-target-${index}`);
+      const expected = colour.match(/[a-f0-9]{2}/gi).map(hex => parseInt(hex, 16));
+      return {
+        matched: getComputedStyle(arrow).color === `rgb(${expected.join(', ')})`,
+        outlined: getComputedStyle(arrow).filter.includes('drop-shadow')
+          && getComputedStyle(ring).filter.includes('drop-shadow'),
+        width: Number(arrow.getAttribute('stroke-width'))
+      };
+    });
+  });
+  assert.ok(markers.every(marker => marker.matched && marker.outlined && marker.width >= 2), JSON.stringify(markers));
   async function checkProbeArrows() {
     const result = await page.evaluate(() => {
       const bounds = document.querySelector('.board-stage').getBoundingClientRect();

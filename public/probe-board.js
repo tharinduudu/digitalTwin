@@ -3,8 +3,7 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 import { loadBoard } from './hardware.js';
 import { identifyNet } from './probe-signals.js';
 import { layoutProbeLabels } from './probe-labels.js';
-
-const COLOURS = ['#f0bd43', '#64cff0'];
+import { CHANNEL_COLOURS } from './probe-scope.js';
 
 export class ProbeBoard {
   constructor(host, data, onPick, onHover) {
@@ -121,7 +120,7 @@ export class ProbeBoard {
       }
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-      const line = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: COLOURS[index], depthTest: false, transparent: true, opacity: 0.65 }));
+      const line = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: CHANNEL_COLOURS[index], depthTest: false }));
       line.renderOrder = 19;
       this.scene.add(line);
       return line;

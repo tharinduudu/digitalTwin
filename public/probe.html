@@ -32,13 +32,13 @@
           <div id="board-loading" role="status">Loading PCB CAD</div>
           <svg id="probe-leaders" aria-hidden="true" preserveAspectRatio="none">
             <defs>
-              <marker id="arrow-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#f0bd43"/></marker>
-              <marker id="arrow-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="#64cff0"/></marker>
+              <marker id="arrow-a" class="a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="currentColor"/></marker>
+              <marker id="arrow-b" class="b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 7 3.5 L 0 7 Z" fill="currentColor"/></marker>
             </defs>
-            <path id="probe-arrow-0" fill="none" stroke="#f0bd43" stroke-width="1.5" marker-end="url(#arrow-a)"/>
-            <path id="probe-arrow-1" fill="none" stroke="#64cff0" stroke-width="1.5" marker-end="url(#arrow-b)"/>
-            <circle id="probe-target-0" r="4" fill="none" stroke="#f0bd43" stroke-width="1.5"/>
-            <circle id="probe-target-1" r="5.5" fill="none" stroke="#64cff0" stroke-width="1.5"/>
+            <path id="probe-arrow-0" class="a" fill="none" stroke="currentColor" stroke-width="2.5" marker-end="url(#arrow-a)"/>
+            <path id="probe-arrow-1" class="b" fill="none" stroke="currentColor" stroke-width="2.5" marker-end="url(#arrow-b)"/>
+            <circle id="probe-target-0" class="a" r="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <circle id="probe-target-1" class="b" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
           </svg>
           <span class="probe-label a" id="board-probe-0" hidden></span><span class="probe-label b" id="board-probe-1" hidden></span>
         </div>
