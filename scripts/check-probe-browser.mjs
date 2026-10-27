@@ -77,11 +77,53 @@ try {
     }
   }
   await checkProbeArrows();
+  // Net-name selection colours every connected pad and trace on the visible face.
+  await page.getByRole('button', { name: 'Select net CH1', exact: true }).click();
+  assert.match(await page.locator('#node-net-0').textContent(), /CH1/);
+  const selectedNet = await page.evaluate(async () => {
+    const data = await (await fetch('./assets/probe-board.json')).json();
+    const path = document.getElementById('probe-net-0');
+    const back = document.querySelector('[data-view="back"]').getAttribute('aria-pressed') === 'true';
+    return {
+      net: path.dataset.net,
+      pads: Number(path.dataset.pads),
+      tracks: Number(path.dataset.tracks),
+      expectedPads: data.pads.filter(pad => pad.net === 'CH1' && (back ? pad.back : pad.front)).length,
+      expectedTracks: data.tracks.filter(track => track.net === 'CH1' && track.front === !back).length,
+      visible: path.getAttribute('d').length > 0
+    };
+  });
+  assert.equal(selectedNet.net, 'CH1');
+  assert.equal(selectedNet.pads, selectedNet.expectedPads);
+  assert.equal(selectedNet.tracks, selectedNet.expectedTracks);
+  assert.ok(selectedNet.visible && selectedNet.pads > 1 && selectedNet.tracks > 0);
+  await page.getByRole('button', { name: 'Amp output', exact: true }).click();
+  async function checkPan() {
+    const targets = () => page.evaluate(() => [0, 1].map(index => {
+      const ring = document.getElementById(`probe-target-${index}`);
+      return [Number(ring.getAttribute('cx')), Number(ring.getAttribute('cy'))];
+    }));
+    const before = await targets();
+    const box = await page.locator('#probe-board canvas').boundingBox();
+    await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.4);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.65 + 25, box.y + box.height * 0.4 + 15, { steps: 8 });
+    await page.mouse.up();
+    const after = await targets();
+    const shifts = after.map((point, index) => point.map((value, axis) => value - before[index][axis]));
+    assert.ok(Math.hypot(...shifts[0]) > 15, JSON.stringify(shifts));
+    // Perspective gives different-depth points slightly different travel, but no rotation.
+    assert.ok(Math.abs(shifts[0][0] * shifts[1][1] - shifts[0][1] * shifts[1][0]) < 0.1, JSON.stringify(shifts));
+    assert.ok(Math.hypot(shifts[0][0] - shifts[1][0], shifts[0][1] - shifts[1][1]) < 1.5, JSON.stringify(shifts));
+  }
+  await checkPan();
+  await page.locator('#board-reset').click();
   await page.screenshot({ path: 'screenshots/probe-desktop.png', fullPage: true });
   const originalBoard = await page.locator('#probe-board canvas').evaluate(canvas => canvas.toDataURL());
   await page.getByRole('button', { name: '3D', exact: true }).click();
   const turnedBoard = await page.locator('#probe-board canvas').evaluate(canvas => canvas.toDataURL());
   assert.notEqual(originalBoard, turnedBoard);
+  await checkPan();
   await checkProbeArrows();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Front', exact: true }).click();

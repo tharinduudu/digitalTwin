@@ -137,8 +137,14 @@ function renderNets() {
   $('net-list').replaceChildren(...rows.map(([net, pads]) => {
     const descriptor = identifyNet(net);
     const row = document.createElement('div'); row.className = 'net-row';
+    row.dataset.net = net;
     if (state.probes.some(pad => pad?.net === net)) row.classList.add('active');
-    const copy = document.createElement('div'); copy.className = 'net-copy';
+    const matchingPad = () => pads.find(pad => pad.id.toLowerCase().includes(search))
+      || pads.find(pad => board?.side === 'back' ? pad.back : pad.front) || pads[0];
+    const copy = document.createElement('button'); copy.className = 'net-copy';
+    copy.type = 'button';
+    copy.setAttribute('aria-label', `Select net ${net}`);
+    copy.addEventListener('click', () => setProbe(state.active, matchingPad()));
     const title = document.createElement('strong'); title.textContent = net;
     const pins = document.createElement('span'); pins.textContent = pads.slice(0, 5).map(pad => pad.id).join('  ') + (pads.length > 5 ? `  +${pads.length - 5}` : '');
     copy.append(title, pins);
@@ -150,8 +156,7 @@ function renderNets() {
       button.title = `Probe ${index ? 'B' : 'A'} at ${net}`;
       button.setAttribute('aria-label', button.title);
       button.addEventListener('click', () => {
-        const matching = pads.find(pad => pad.id.toLowerCase().includes(search)) || pads.find(pad => board?.side === 'back' ? pad.back : pad.front) || pads[0];
-        setProbe(index, matching);
+        setProbe(index, matchingPad());
       }); row.append(button);
     });
     return row;

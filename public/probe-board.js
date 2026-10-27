@@ -4,6 +4,7 @@ import { loadBoard } from './hardware.js';
 import { identifyNet } from './probe-signals.js';
 import { layoutProbeLabels } from './probe-labels.js';
 import { CHANNEL_COLOURS } from './probe-scope.js';
+import { netOnFace } from './probe-nets.js';
 
 export class ProbeBoard {
   constructor(host, data, onPick, onHover) {
@@ -26,6 +27,9 @@ export class ProbeBoard {
     host.append(this.renderer.domElement);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = false;
+    this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+    this.controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+    this.controls.screenSpacePanning = true;
     this.controls.minDistance = 28;
     this.controls.maxDistance = 250;
     this.controls.addEventListener('change', () => this.render());
@@ -93,13 +97,14 @@ export class ProbeBoard {
     this.data.pads.forEach((pad, index) => {
       const descriptor = identifyNet(pad.net);
       const active = descriptor.channel === this.channel;
+      const selected = this.probes.findIndex(probe => probe?.net === pad.net);
       const visible = (this.side === 'back' ? pad.back : pad.front)
         && (this.showAll || active || this.probes.some(probe => probe?.net === pad.net));
-      const size = visible ? active ? 0.75 : 0.55 : 0;
+      const size = visible ? selected >= 0 ? 1.2 : active ? 0.75 : 0.55 : 0;
       const position = this.padPosition(pad);
       matrix.compose(position, new THREE.Quaternion(), new THREE.Vector3(size, size, size));
       this.padMesh.setMatrixAt(index, matrix);
-      this.padMesh.setColorAt(index, new THREE.Color(descriptor.type === 'unknown' ? '#7d8984'
+      this.padMesh.setColorAt(index, new THREE.Color(selected >= 0 ? CHANNEL_COLOURS[selected] : descriptor.type === 'unknown' ? '#7d8984'
         : descriptor.type === 'hv' ? '#ed8c7b' : active ? '#9eedd0' : '#b2bbc0'));
       if (visible) this.pickPads.push(pad);
     });
@@ -110,21 +115,7 @@ export class ProbeBoard {
   }
 
   updateNetTracks() {
-    this.netLines?.forEach(line => { this.scene.remove(line); line.geometry.dispose(); line.material.dispose(); });
-    this.netLines = this.probes.map((pad, index) => {
-      const points = [];
-      for (const track of this.data.tracks) {
-        if (track.net !== pad?.net || track.front !== (this.side !== 'back')) continue;
-        for (const [x, z] of [track.a, track.b]) points.push(x - this.centre.x,
-          this.side === 'back' ? -0.25 : this.data.thickness + 0.15, z - this.centre.z);
-      }
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-      const line = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: CHANNEL_COLOURS[index], depthTest: false }));
-      line.renderOrder = 19;
-      this.scene.add(line);
-      return line;
-    });
+    this.netHighlights = this.probes.map(pad => netOnFace(this.data, pad?.net, this.side));
   }
 
   setProbes(probes) { this.probes = probes; this.updatePads(); }
@@ -132,6 +123,7 @@ export class ProbeBoard {
 
   setView(view) {
     this.side = view === 'back' ? 'back' : 'front';
+    this.controls.enableRotate = view === '3d';
     this.camera.up.set(0, 0, -1);
     this.camera.position.set(...(view === '3d' ? [60, 95, 60] : view === 'back' ? [0, -125, 0] : [0, 125, 0]));
     this.controls.target.set(0, 0, 0);
@@ -195,6 +187,24 @@ export class ProbeBoard {
     const layout = layoutProbeLabels(points, width, height);
     const overlay = document.getElementById('probe-leaders');
     overlay?.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    // Screen-space strokes stay readable when zooming; coordinates still come from KiCad.
+    const project = (x, z) => {
+      const point = this.padPosition({ x, z }).project(this.camera);
+      return [(point.x + 1) * width / 2, (1 - point.y) * height / 2];
+    };
+    this.netHighlights?.forEach((net, index) => {
+      const highlight = document.getElementById(`probe-net-${index}`);
+      if (!highlight) return;
+      const paths = net.tracks.map(track => `M ${project(...track.a).join(' ')} L ${project(...track.b).join(' ')}`);
+      net.pads.forEach(pad => {
+        const [x, y] = project(pad.x, pad.z);
+        paths.push(`M ${x - 3} ${y} a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0`);
+      });
+      highlight.setAttribute('d', paths.join(' '));
+      highlight.dataset.net = this.probes[index]?.net || '';
+      highlight.dataset.pads = String(net.pads.length);
+      highlight.dataset.tracks = String(net.tracks.length);
+    });
     this.probes.forEach((pad, index) => {
       const label = document.getElementById(`board-probe-${index}`);
       const arrow = document.getElementById(`probe-arrow-${index}`);
