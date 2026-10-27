@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { DAC, DEFAULT_BENCH, dacVoltage, identifyNet, createEvent, sampleSignal,
   measurements, triggerCrossing, traceCsv } from '../public/probe-signals.js';
+import { axisVoltageLabel } from '../public/probe-scope.js';
 
 const data = JSON.parse(await readFile(new URL('../public/assets/probe-board.json', import.meta.url), 'utf8'));
 const response = data.response;
@@ -48,6 +49,11 @@ test('DAC hexadecimal values correspond to the stored 10-bit calibration, not ac
   assert.ok(Math.abs(dacVoltage(129) - dacVoltage(128) - 2.9968 / 1023) < 1e-12);
   const e = event({ biasCode: 445 });
   assert.ok(Math.abs(e.overvoltage - (DEFAULT_BENCH.highSide - e.low - DEFAULT_BENCH.vbr)) < 1e-12);
+});
+
+test('millivolt divisions remain readable on a large DC pedestal', () => {
+  assert.notEqual(axisVoltageLabel(55.134, 0.001), axisVoltageLabel(55.136, 0.001));
+  assert.equal(axisVoltageLabel(1.65, 1), '1.65');
 });
 
 test('SPICE impulse has the resistor-defined gain, a positive pulse and a recovered baseline', () => {

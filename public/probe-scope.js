@@ -6,6 +6,11 @@ export function voltageLabel(value) {
   return `${Number(value.toPrecision(4))} V`;
 }
 
+export function axisVoltageLabel(value, scale) {
+  const places = Math.max(2, Math.min(6, Math.ceil(-Math.log10(scale)) + 1));
+  return Number(value.toFixed(places)).toString();
+}
+
 function timeLabel(value) { return Math.abs(value) >= 1000 ? `${Number((value / 1000).toFixed(2))} us` : `${Number(value.toFixed(1))} ns`; }
 
 export class ScopeDisplay {
@@ -71,7 +76,7 @@ export class ScopeDisplay {
       ctx.textAlign = index ? 'left' : 'right';
       for (let i = 0; i <= 8; i += 2) {
         const value = channel.offset + (4 - i) * channel.scale;
-        ctx.fillText(Number(value.toPrecision(3)).toString(), index ? p.right + 7 : p.left - 7, p.top + i * h / 8 + 3);
+        ctx.fillText(axisVoltageLabel(value, channel.scale), index ? p.right + 7 : p.left - 7, p.top + i * h / 8 + 3);
       }
       const zero = yAt(0, index);
       if (zero >= p.top && zero <= p.bottom) { ctx.beginPath(); ctx.arc(index ? p.right : p.left, zero, 3, 0, Math.PI * 2); ctx.fill(); }
