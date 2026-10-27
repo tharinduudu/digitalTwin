@@ -1,5 +1,32 @@
 import * as THREE from './vendor/three.module.js';
 
+export function boardSurfaceRole(meshName = '') {
+  if (meshName.endsWith('_PCB')) return 'substrate';
+  if (meshName.endsWith('_silkscreen')) return 'silkscreen';
+  if (meshName.endsWith('_soldermask')) return 'soldermask';
+  return 'component';
+}
+
+export function boardSurfaceMaterial(source, role) {
+  const material = source.clone();
+  material.userData.boardSurface = role;
+  if (role === 'substrate' || role === 'silkscreen') {
+    material.opacity = 1;
+    material.transparent = false;
+    material.depthTest = true;
+    material.depthWrite = true;
+  }
+  // KiCad supplies outward-facing normals for the top and bottom lettering.
+  if (role === 'silkscreen') material.side = THREE.FrontSide;
+  return material;
+}
+
+export function boardMaterialKey(material) {
+  return JSON.stringify([material.userData.boardSurface, material.color?.getHex(),
+    material.emissive?.getHex(), material.metalness, material.roughness, material.opacity,
+    material.transparent, material.side, material.depthTest, material.depthWrite, material.alphaTest]);
+}
+
 export function seatConverter(scene) {
   const component = scene.getObjectByName('U5');
   if (!component) throw new Error('CAD converter U5 missing');

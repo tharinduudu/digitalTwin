@@ -168,6 +168,12 @@ Bodies with matching materials are merged for drawing. Component sizes are
 not stretched to force them to fit. This alignment does not replace a complete
 enclosure clearance or manufacturing check.
 
+The exported FR-4 substrate is rendered opaque. Top and bottom silkscreen use
+their outward-facing CAD normals, so back lettering is not visible through the
+front of the board. Soldermask and component transparency are otherwise kept.
+This shared loader is used by the detector, assembly guide and readout bench;
+the original GLB and KiCad project are unchanged.
+
 The exported U5 converter housing had a 4.1 mm gap above its footprint plane.
 `hardware-adjustments.js` lowers the complete component by that amount before
 merging the meshes. The housing is flush, its dimensions are unchanged, and

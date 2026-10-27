@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { mergeGeometries } from './vendor/utils/BufferGeometryUtils.js';
 import { headerShift, PI_HOLES, caseMounts, mountingShift } from './readout-placement.js';
-import { seatConverter } from './hardware-adjustments.js';
+import { seatConverter, boardSurfaceRole, boardSurfaceMaterial, boardMaterialKey } from './hardware-adjustments.js';
 
 // CAD is in metres. The exhibition scene uses centimetres.
 const boardAxes = new THREE.Matrix4().makeBasis(
   new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1), new THREE.Vector3(-1, 0, 0));
 
 export async function loadBoard(url, position, indicatorNames = [], headerName) {
-  const { scene } = await new GLTFLoader().loadAsync(url);
+  const { scene, parser } = await new GLTFLoader().loadAsync(url);
   scene.updateMatrixWorld(true);
   const converter = headerName === 'J2' ? seatConverter(scene) : null;
   const indicators = indicatorNames.map(name => {
@@ -25,16 +25,22 @@ export async function loadBoard(url, position, indicatorNames = [], headerName) 
   header.y = headerName === 'J2' ? headerBounds.min.y : headerBounds.max.y;
   // Merge by appearance: thousands of small CAD bodies need only a few draw calls.
   const batches = new Map();
+  const surfaceMaterials = new Map();
   scene.traverse(node => {
     if (!node.isMesh) return;
+    const meshIndex = parser.associations.get(node)?.meshes;
+    const role = boardSurfaceRole(parser.json.meshes[meshIndex]?.name);
     const materials = Array.isArray(node.material) ? node.material : [node.material];
     const source = node.geometry.index ? node.geometry.toNonIndexed() : node.geometry.clone();
     source.applyMatrix4(node.matrixWorld);
     const groups = source.groups.length ? source.groups : [{ start: 0, count: source.attributes.position.count, materialIndex: 0 }];
     for (const group of groups) {
-      const material = materials[group.materialIndex || 0];
-      const key = [material.color?.getHex(), material.metalness, material.roughness, material.opacity].join(':');
-      if (!batches.has(key)) batches.set(key, { material: material.clone(), geometries: [] });
+      const original = materials[group.materialIndex || 0];
+      const cacheKey = `${original.uuid}:${role}`;
+      if (!surfaceMaterials.has(cacheKey)) surfaceMaterials.set(cacheKey, boardSurfaceMaterial(original, role));
+      const material = surfaceMaterials.get(cacheKey);
+      const key = boardMaterialKey(material);
+      if (!batches.has(key)) batches.set(key, { material, geometries: [] });
       const geometry = new THREE.BufferGeometry();
       for (const name of ['position', 'normal']) {
         const attribute = source.attributes[name];
