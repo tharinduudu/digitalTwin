@@ -8,7 +8,7 @@ await mkdir(output, { recursive: true });
 const revision = (process.env.GITHUB_SHA || 'preview').slice(0, 12);
 // Publish only browser assets. SSH code and local configuration stay out.
 await cp(resolve(root, 'public'), resolve(output, revision), { recursive: true });
-for (const entry of ['index.html', 'assembly.html']) {
+for (const entry of ['index.html', 'assembly.html', 'probe.html']) {
   const source = await readFile(resolve(root, 'public', entry), 'utf8');
   await writeFile(resolve(output, entry),
     source.replace('<html lang="en">', '<html lang="en" data-feed="simulation">')

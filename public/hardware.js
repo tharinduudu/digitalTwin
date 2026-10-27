@@ -8,7 +8,7 @@ import { seatConverter } from './hardware-adjustments.js';
 const boardAxes = new THREE.Matrix4().makeBasis(
   new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1), new THREE.Vector3(-1, 0, 0));
 
-async function loadBoard(url, position, indicatorNames = [], headerName) {
+export async function loadBoard(url, position, indicatorNames = [], headerName) {
   const { scene } = await new GLTFLoader().loadAsync(url);
   scene.updateMatrixWorld(true);
   const converter = headerName === 'J2' ? seatConverter(scene) : null;

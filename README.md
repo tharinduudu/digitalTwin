@@ -59,6 +59,40 @@ storage, traffic and build limits.
 
 ## What can be opened or changed?
 
+### Readout oscilloscope bench
+
+Open **http://127.0.0.1:8791/probe.html**, or choose **Oscilloscope** in the
+detector display. This is a separate bench, with two virtual probes on the
+actual readout PCB. Select A or B, then a pad, a surface track, or a signal-chain
+point. The node list also searches by reference, pin or net name.
+
+The schematic button opens an export of the actual KiCad schematic. Its net
+labels select probe points; component references bring up their connected nets.
+Use the channel selector to inspect another front-end. The PCB and schematic
+use a few different net labels, so the export checks connectivity pin by pin
+and records those aliases rather than guessing from the names.
+
+The scope has separate vertical scales and offsets, DC/AC/GND coupling,
+compensated 1x/10x probe settings, a 20 MHz bandwidth limit, edge triggering,
+run/stop, single acquisition, two time cursors, and CSV/PNG downloads. Threshold
+and bias fields change the simulation only. They never write to a detector.
+The input can be a fixed light pulse, one dark avalanche in the selected
+channel, or no pulse. The fixed light pulse is injected into all four nominal
+circuits; it is not a simulated cosmic event or a light-collection calculation.
+
+These are **expected model signals, not measured waveforms**. The analog shape
+comes from a small-signal ngspice calculation using the readout's component
+values. The op amp and comparator are reduced-order models, and the SiPM pulse
+parameters still need experimental validation. DC rails have no simulated
+switching ripple. Nets without a model show no trace. In particular, this is
+not yet a simulation of the MAX1932 switching circuit or the loaded FPGA code.
+The information button gives the assumptions and the ground warning.
+
+Everything runs locally in the browser, using libraries and data included in
+the site. It needs no account, paid API, subscription, remote simulator or
+extra hosting. The existing public GitHub Pages deployment is sufficient.
+See [Readout bench](docs/READOUT-BENCH.md) for the model, source checks and tests.
+
 ### Detector assembly guide
 
 Open **http://127.0.0.1:8791/assembly.html** for the separate 3D assembly guide.
