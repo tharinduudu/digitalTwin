@@ -16,6 +16,8 @@ export class ProbeBoard {
     this.channel = 0;
     this.showAll = false;
     this.probes = [];
+    // Pages uses a <base> for versioned assets; marker IDs belong to this document.
+    this.markerUrls = ['a', 'b'].map(letter => new URL(`#arrow-${letter}`, window.location.href).href);
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#18211e');
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1500);
@@ -209,6 +211,7 @@ export class ProbeBoard {
       label.style.width = `${item.box.width}px`;
       label.textContent = `${index === 0 ? 'A' : 'B'}  ${pad.id}`;
       arrow?.setAttribute('d', item.path);
+      arrow?.setAttribute('marker-end', `url("${this.markerUrls[index]}")`);
       ring?.setAttribute('cx', item.target.x);
       ring?.setAttribute('cy', item.target.y);
     });

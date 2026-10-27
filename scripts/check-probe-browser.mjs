@@ -55,7 +55,11 @@ try {
     });
     assert.ok(result.length > 0);
     assert.ok(result.every(item => item.contained && item.clear), JSON.stringify(result));
-    for (const index of [0, 1]) assert.match(await page.locator(`#probe-arrow-${index}`).getAttribute('d'), /^M .* L /);
+    for (const index of [0, 1]) {
+      const arrow = page.locator(`#probe-arrow-${index}`);
+      assert.match(await arrow.getAttribute('d'), /^M .* L /);
+      assert.ok((await arrow.getAttribute('marker-end')).includes(page.url().split('#')[0] + '#arrow-'));
+    }
   }
   await checkProbeArrows();
   await page.screenshot({ path: 'screenshots/probe-desktop.png', fullPage: true });
