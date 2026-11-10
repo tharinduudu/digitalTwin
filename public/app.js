@@ -1,4 +1,5 @@
 import { TelescopeScene } from './scene.js';
+import { applyStudioAppearance } from './studio-appearance.js';
 import { historyChart, sparkline } from './charts.js';
 import { acceptanceProfile } from './acceptance.js';
 
@@ -14,14 +15,14 @@ let presentation = false;
 const formatTime = ms => new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 const icons = () => window.lucide?.createIcons();
 
-try { scene = new TelescopeScene($('scene')); }
+try { scene = new TelescopeScene($('scene')); applyStudioAppearance(scene); }
 catch (error) { $('render-error').hidden = false; console.error(error); }
 icons();
 
 function drawCharts() {
   if (!latest?.history?.length) return;
-  sparkline($('spark-c01'), latest.history.map(d => d.c01), '#80ecc0');
-  sparkline($('spark-c12'), latest.history.map(d => d.c12), '#f5a394');
+  sparkline($('spark-c01'), latest.history.map(d => d.c01), '#347356');
+  sparkline($('spark-c12'), latest.history.map(d => d.c12), '#a4654d');
   historyChart($('history'), latest.history);
 }
 

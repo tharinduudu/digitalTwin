@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TelescopeScene } from './scene.js';
+import { applyStudioAppearance } from './studio-appearance.js';
 import { ASSEMBLY_STEPS, visibleAtStep, smoothAssembly } from './assembly-steps.js';
 import { railPose, railProgress, nutLoadingProgress, bracketInsertionProgress, orderRailNuts, sideInsertionPose,
   fasteningProgress, screwPose, assemblyTime, assemblyPosition, ASSEMBLY_FINISH, ASSEMBLY_SPEED, hingedCoverAngle,
@@ -20,6 +21,7 @@ const stepNumber = id => ASSEMBLY_STEPS.findIndex(step => step.id === id);
 class AssemblyScene extends TelescopeScene {
   constructor(container) {
     super(container, { assembly: true });
+    applyStudioAppearance(this);
     this.paused = true;
     this.controls.minDistance = 6;
     this.controls.maxDistance = 130;

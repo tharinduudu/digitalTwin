@@ -42,7 +42,7 @@ not adjusted to the earlier 230/min demonstration value. Individual minutes
 fluctuate because arrivals are sampled as a Poisson process.
 
 To preview simulated data while a local detector feed is configured, open
-**http://127.0.0.1:8791/?source=simulation**. This does not change the detector.
+**http://127.0.0.1:8791/detector.html?source=simulation**. This does not change the detector.
 
 ### Publish an update
 
@@ -57,7 +57,38 @@ GitHub Pages is enabled with **GitHub Actions** as the build source. There are
 no paid services in this setup. The free service still has GitHub's normal
 storage, traffic and build limits.
 
+## Discover and explore
+
+The home page now introduces the detector CAD with a six-step guided muon
+journey. It reuses the detector CAD and existing transport code. The guided
+track is a deliberate 4 GeV central example with scattering and decay disabled,
+not a measured event or a sky sample. Optical light and indicator flashes are
+illustrative. The original full display is at `/detector.html`; add
+`?source=simulation` to use it without the optional local measured feed.
+The assembly, network and electronics views remain separate deeper layers.
+The student workspace at `/investigate.html` rotates the actual tile geometry
+against a fixed sea-level sky, estimates rates in a browser worker, and samples
+7/30/90/180-day Poisson observations. Saved comparisons include numerical and
+counting uncertainties; CSV exports preserve settings and seeds. The model
+retains ideal detection and has no geographic east–west or weather response.
+`/scintillation.html` adds a separate molecular-process explorer, source-groove
+fibre illustration, timeline controls and a shared-transport path/energy exercise.
+Its optical packets, state diagrams and pulse are conceptual, not a calibrated
+optical model.
+
 ## What can be opened or changed?
+
+### Global network
+
+Open **http://127.0.0.1:8791/network.html**, or choose **Network** from the
+detector display. The globe shows the public portal's station records with
+search, country and data-status filters. A station panel gives the recorded
+dates and a link to its measured data. This is a dated portal snapshot, not
+live telemetry. The existing detector remains a reference model rather than
+a claim that every site has identical hardware.
+
+See [the network guide](docs/network-view.md) for sources, metadata issues and
+how to update the snapshot. This page also works on free static hosting.
 
 ### Readout oscilloscope bench
 

@@ -1,3 +1,4 @@
+import { applyStudioAppearance } from './studio-appearance.js';
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { loadBoard } from './hardware.js';
@@ -40,6 +41,7 @@ export class ProbeBoard {
     const backLight = new THREE.DirectionalLight('#e4f2ff', 2);
     backLight.position.set(30, -70, -40);
     this.scene.add(backLight);
+    applyStudioAppearance(this);
     this.group = new THREE.Group();
     this.scene.add(this.group);
     this.raycaster = new THREE.Raycaster();

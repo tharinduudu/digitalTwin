@@ -23,8 +23,8 @@ test('browser entry points work beneath a GitHub project path', async () => {
 });
 
 test('the simulation and assembly guide link to one another', async () => {
-  const simulation = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const simulation = await readFile(new URL('../public/detector.html', import.meta.url), 'utf8');
   const assembly = await readFile(new URL('../public/assembly.html', import.meta.url), 'utf8');
   assert.match(simulation, /class="assembly-link" href="\.\/assembly\.html"/);
-  assert.match(assembly, /class="simulation-link" href="\.\/index\.html"/);
+  assert.match(assembly, /class="simulation-link" href="\.\/detector\.html"/);
 });

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a1a">
+  <title>gLOWCOST | Global Detector Network</title>
+  <link rel="stylesheet" href="./network.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script defer src="./vendor/lucide.min.js"></script>
+  <script type="module" src="./network.js"></script>
+<link rel="stylesheet" href="./site-theme.css">
+</head>
+<body data-page="network">
+  <header class="site-header"><div class="site-identity"><a class="site-brand" href="./index.html" aria-label="gLOWCOST home"><img src="./assets/glowcost-logo-transparent.png" alt="gLOWCOST" width="160" height="107"></a><a class="site-origin" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">cosmic.gsu.edu ↗</a></div><nav class="site-navigation" aria-label="Digital twin pages"><a class="site-link" href="./index.html">Discover</a><a class="simulation-link" href="./detector.html">Detector</a><a class="site-link" href="./scintillation.html">Inside a tile</a><a class="site-link" href="./investigate.html">Experiment</a><a class="site-link" href="./probe.html">Electronics</a><a class="assembly-link" href="./assembly.html">Assembly</a><a class="site-link" href="./network.html" aria-current="page">Network</a></nav><button class="icon-button" id="about" title="Data sources and limits" aria-label="Data sources and limits"><i data-lucide="info"></i></button></header>
+  <section class="network-summary" aria-label="Network summary">
+    <div class="network-title"><span class="eyebrow">Global cosmic-ray monitoring</span><h1>Global detector network</h1></div>
+    <div class="metric"><strong id="total-records">--</strong><span>station records</span></div>
+    <div class="metric"><strong id="total-countries">--</strong><span>countries</span></div>
+    <div class="metric"><strong id="total-recent">--</strong><span>with recent data</span></div>
+    <div class="metric"><strong id="total-available">--</strong><span>with data available</span></div>
+  </section>
+  <main class="network-workspace">
+    <aside class="station-browser" aria-label="Stations">
+      <div class="browser-heading"><h2>Stations</h2><span id="result-count" aria-live="polite"></span></div>
+      <label class="search"><i data-lucide="search"></i><input id="station-search" type="search" placeholder="Search stations or cities" aria-label="Search stations"></label>
+      <div class="filters"><select id="country-filter" aria-label="Filter by country"><option value="">All countries</option></select><select id="status-filter" aria-label="Filter by data status"><option value="">All statuses</option><option value="recent">Recent data</option><option value="review">Check stability</option><option value="older">Older data</option><option value="missing">No ingested data</option></select></div>
+      <div id="station-list" class="station-list" aria-label="Station records"></div>
+      <div class="empty" id="no-results" hidden>No matching stations.<button id="clear-filters">Clear filters</button></div>
+    </aside>
+    <section class="world-view" aria-label="Network globe">
+      <div id="network-globe" role="img" aria-label="Interactive Earth showing the public gLOWCOST station locations"></div>
+      <div id="location-labels"></div>
+      <div class="world-heading"><span class="eyebrow">gLOWCOST worldwide</span><h2>Cosmic Muon Detector Network</h2><span id="selected-location">Public station locations</span></div>
+      <div class="globe-tools" aria-label="Globe controls">
+        <button class="icon-button" id="home-globe" title="Whole network" aria-label="Reset globe view"><i data-lucide="scan"></i></button>
+        <button class="icon-button" id="rotate-globe" title="Rotate Earth" aria-label="Automatic globe rotation" aria-pressed="false"><i data-lucide="rotate-3d"></i></button>
+        <button class="icon-button" id="zoom-in" title="Zoom in" aria-label="Zoom in"><i data-lucide="plus"></i></button>
+        <button class="icon-button" id="zoom-out" title="Zoom out" aria-label="Zoom out"><i data-lucide="minus"></i></button>
+        <button class="icon-button" id="full-screen" title="Full screen" aria-label="Full screen"><i data-lucide="maximize"></i></button>
+      </div>
+      <div class="globe-fallback" id="globe-error" hidden>3D is unavailable. The complete station list and records remain available.</div>
+      <div class="map-legend"><span><b class="dot recent"></b>Recent data</span><span><b class="dot review"></b>Check stability</span><span><b class="dot older"></b>Older data</span><span><b class="dot missing"></b>No ingested data</span></div>
+      <div class="snapshot-tag"><i data-lucide="database"></i><span id="snapshot-label">Loading portal snapshot</span></div>
+    </section>
+    <aside class="station-detail" aria-label="Selected station" aria-live="polite">
+      <span class="eyebrow">Station record</span><h2 id="station-name">Loading stations</h2><p class="station-place" id="station-place"></p>
+      <span class="status-badge" id="station-status"></span>
+      <div class="detail-section"><h3>Latest recorded observation</h3><time id="station-latest">--</time><p class="muted">Station time as shown by the portal</p></div>
+      <dl id="station-facts"></dl>
+      <div id="nearby-records" class="nearby-records" hidden><h3>Records at this location</h3><div id="nearby-list"></div></div>
+      <p class="metadata-note" id="metadata-note" hidden></p>
+      <a class="primary-link" id="station-portal" href="https://cosmic.gsu.edu/~cosmic/dataportal/" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Measured data in portal</a>
+      <a class="secondary-link" href="./index.html?source=simulation"><i data-lucide="box"></i>Explore the reference detector</a>
+      <p class="reference-note">The 3D detector is a reference design, not a verified model of this station.</p>
+    </aside>
+  </main><section class="layer-next" aria-label="Continue exploring"><div><span class="eyebrow">RETURN / YOUR OWN INVESTIGATION</span><h2>Bring the question back to your detector.</h2><p>Try a new orientation and compare it with your earlier simulated observations.</p></div><a href="./investigate.html">Return to the experiment →</a></section>
+  <footer><span id="feed-note">Saved public portal data, not live telemetry</span><a href="./assets/network-snapshot.json" download="glowcost-network-snapshot.json">Snapshot JSON <i data-lucide="download"></i></a><a href="https://cosmic.gsu.edu/~cosmic/dataportal/" target="_blank" rel="noopener">Open current portal <i data-lucide="arrow-up-right"></i></a></footer>
+  <dialog id="source-dialog"><button class="icon-button close-dialog" aria-label="Close data details"><i data-lucide="x"></i></button><span class="eyebrow">Data and interpretation</span><h2>A map of the network, not a live event display</h2><p id="source-description"></p><h3>What does recent mean?</h3><p id="running-definition"></p><p id="timestamp-note"></p><h3>Station records and locations</h3><p>The Network summary contains separate detector IDs, including similarly named and possibly duplicate records. None have been merged. USA and United States count as one country here. Nearby records share a map pin; selecting it lists them individually. Locations come from the portal map and are not surveyed coordinates.</p><h3>What is not measured here</h3><p>This snapshot contains no individual particle times or current count rates. There are no invented station pulses, intercontinental particle tracks or simulated replacements for missing data. Use the portal for the latest measurements. Data status and stability are the portal's reported assessments at capture time, not new diagnoses.</p><h3>Map source</h3><p>Land outlines: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener">Natural Earth, public domain</a>, 1:110m land. The entire view runs in your browser without a paid map service.</p></dialog>
+</body>
+</html>

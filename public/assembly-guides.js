@@ -22,7 +22,7 @@ function textLabel(text, color) {
   const context = canvas.getContext('2d');
   context.font = '600 80px Arial';
   canvas.width = Math.ceil(context.measureText(text).width) + 48;
-  context.fillStyle = 'rgba(16, 24, 21, 0.88)';
+  context.fillStyle = 'rgba(248, 251, 244, 0.96)';
   context.fillRect(0, 4, canvas.width, 120);
   context.fillStyle = color;
   context.font = '600 80px Arial';
@@ -43,7 +43,7 @@ export function createFrameGuides(makeLabel = textLabel) {
   const group = new THREE.Group();
   group.name = 'Frame level names and centre-to-centre spacing';
   const levels = FRAME_LEVELS.map((name, index) => {
-    const label = makeLabel(name.toUpperCase(), '#f1f5f2');
+    const label = makeLabel(name.toUpperCase(), '#344e3f');
     label.position.set(0, TILE_HEIGHTS[index], 0);
     group.add(label);
     return label;
@@ -61,9 +61,9 @@ export function createFrameGuides(makeLabel = textLabel) {
       segment([14.3, y, 0], [14.65, y + direction * .8, 0]);
     }
     const line = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(vertices),
-      new THREE.LineBasicMaterial({ color: '#f3c765', depthTest: false, depthWrite: false }));
+      new THREE.LineBasicMaterial({ color: '#966117', depthTest: false, depthWrite: false }));
     line.renderOrder = 55;
-    const label = makeLabel(`${upper - lower} cm`, '#f3c765');
+    const label = makeLabel(`${upper - lower} cm`, '#966117');
     label.position.set(17.8, (upper + lower) / 2, 0);
     dimension.add(line, label);
     group.add(dimension);

@@ -1,5 +1,79 @@
 # Exhibition display checks
 
+## Integrated UI and learning-flow review — 10 November 2026
+
+All 117 tests pass. Static build passes. Shared light studio lighting now
+covers introduction, guided model, student bench and the separate tile view;
+no geometry or rate-model changes were made in this UI pass. Key specified
+body/secondary/action text colour pairs exceed 4.9:1; slider track against
+white is 3.33:1. These are palette checks, not a full WCAG conformance audit.
+
+Browser checks confirmed named stage controls, the guided tour's onward tile
+link, loading states, a 60° prediction giving 2.000 cm and 4.812 MeV in the
+shared mean-deposit model, and a suggested upright comparison preserving the
+previous 7-day exposure and compass bearing. Collection completed and added
+a row without relabelling earlier runs. Phone document width equals the
+390 px viewport. The experiment and scintillation scenes were captured on
+desktop and phone. The prior PMREM sigma warning was fixed by removing the
+unnecessary initial blur; historical console entries can remain in the tab.
+
+`docs/UI-DESIGN-REVIEW.md` records research, design decisions, contrast values,
+section-level attention hypotheses and a user-study plan. There has been no
+student attention/retention study or analytics deployment. No hardware was
+operated and nothing was published.
+
+## Realistic teaching scenes — 10 November 2026
+
+All 117 tests pass, including the added compass-bearing invariance check for
+the azimuthally symmetric sky. Detector, fixture and transport now use the same
+tilt-then-yaw transform; old stored rows retain an earlier-convention label.
+The static build passes. Browser checks covered the bench at 30° with its
+compass and graduated scale, compass changes, a completed 7-day observation,
+and the source tile's perspective/top/edge controls and optical playback.
+Source tile/holder/sensor assets report ready. Desktop and 390 x 844 phone
+screenshots show both scenes; no page overflow or browser warnings/errors were
+observed. Added fixture and bench geometry are explicitly illustrative.
+No hardware operation or publication occurred.
+
+## Playable investigations and scintillation — 10 November 2026
+
+All 116 Node tests pass, including the new rotation, baseline-rate, boundary
+invariance, exposure-accounting and aggregate-Poisson tests. Static build passes
+with `investigate.html` and `scintillation.html` included. Existing tests remain.
+
+Browser checks at 1440 px desktop and 390 x 844 phone confirmed loaded CAD,
+actual detector tilt while sky arrows stay vertical, a completed 30-day vertical
+run and 7-day 60° east run, preserved comparison rows, a rate graph and CSV
+export. A subsequent observation survived reload via sessionStorage. The phone
+workspace and updated home page have no horizontal document overflow.
+Checked CAD screenshot crops have RGB standard deviations above 33 (phone)
+and 36 (desktop). No browser warnings or errors were logged on either new page.
+
+The scintillation controls switch molecular, groove and microcell diagrams;
+play advances to the final stage and stops; restart returns to deposition.
+The single-tile control changes path from 1.000 cm at 0° to 2.924 cm at 70°,
+and mean CSDA deposition from 2.406 to 7.035 MeV for the chosen 4 GeV example.
+These are software-model results, not measured optical yields or pulse heights.
+No detector feed requests, hardware control or publication were performed.
+See `docs/INVESTIGATIONS.md` for method and limitations.
+
+## Discovery page — 10 November 2026
+
+All 111 Node tests pass. The static Pages build completes with both the new
+`index.html` introduction and the preserved full display at `detector.html`.
+The guided example uses the shared transport model; its three tile crossings,
+pair accounting and approximately 0.87 ns outer-plane flight interval are tested.
+
+Local browser checks covered a 1440 x 1000 desktop and a 390 x 844 phone.
+Source CAD reports ready, the six-step controls change the explanation,
+the electronics step opens the readout cover, and replay/reset are operable.
+The phone document width equals its 390 px viewport. Browser logs showed no
+warnings or errors. Screenshots show nonblank CAD; RGB standard deviations
+in the checked scene crops exceed 36 on phone and 79 on desktop. This is a
+rendering check, not validation of optical yield or detector efficiency.
+The new introduction makes no detector feed request. No hardware was operated
+and no publication was performed. The following older checks remain historical.
+
 Checked locally on 20 October 2026.
 
 ## Automated tests
@@ -89,3 +163,20 @@ The server listens on localhost, port 8791. Rendering is capped near 30 frames/s
 and static CAD bodies are merged by appearance. Sustained performance on the
 exhibition Pi has not been measured. Runtime assets are local, but full
 airplane-mode operation has not been separately tested.
+
+### Shared interface preview (10 November 2026)
+
+All seven pages share `site-theme.css` and a consistent navigation header.
+Browser layout checks passed at 320, 390, 768 and 1440 px widths without
+document horizontal overflow. Reviewed desktop/phone screenshots and exercised
+assembly complete-view and PCB back/3D controls. Source CAD dimensions and
+transport calculations were not changed by this visual pass. Local only.
+
+### First-view size, identity and learning path
+
+Homepage second WebGL scene replaced with tightly framed source-CAD portrait;
+interactive guide retained. Official cosmic.gsu.edu logo on all seven pages.
+Recommended continuation follows detector → scintillation → experiment →
+electronics, with assembly and network as optional branches. Saturated particle
+colours, higher trail opacity and larger illustrative heads improve visibility
+on the pale studio background; physics calculations are unchanged.

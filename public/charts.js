@@ -34,18 +34,18 @@ export function historyChart(canvas, history) {
   ctx.font = '10px Arial';
   for (const value of [low, (low + high) / 2, high]) {
     const yy = y(value);
-    ctx.strokeStyle = '#354139'; ctx.lineWidth = 0.7;
+    ctx.strokeStyle = '#d6ddd2'; ctx.lineWidth = 0.7;
     ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w - pad.r, yy); ctx.stroke();
-    ctx.fillStyle = '#9faea3'; ctx.textAlign = 'left'; ctx.fillText(Math.round(value), 0, yy + 3);
+    ctx.fillStyle = '#596b5e'; ctx.textAlign = 'left'; ctx.fillText(Math.round(value), 0, yy + 3);
   }
-  for (const [key, color] of [['c01', '#80ecc0'], ['c12', '#f5a394']]) {
+  for (const [key, color] of [['c01', '#347356'], ['c12', '#a4654d']]) {
     ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.beginPath();
     history.forEach((row, index) => index ? ctx.lineTo(x(index), y(row[key])) : ctx.moveTo(x(index), y(row[key])));
     ctx.stroke();
     ctx.fillStyle = color;
     for (const index of [0, history.length - 1]) { ctx.beginPath(); ctx.arc(x(index), y(history[index][key]), 2, 0, Math.PI * 2); ctx.fill(); }
   }
-  ctx.fillStyle = '#9faea3';
+  ctx.fillStyle = '#596b5e';
   for (const index of [0, history.length - 1]) {
     ctx.textAlign = index ? 'right' : 'left';
     ctx.fillText(new Date(history[index].start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), x(index), h - 5);

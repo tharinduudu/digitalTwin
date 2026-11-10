@@ -1,68 +1,28 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111514">
-  <title>gLOWCOST | Cosmic Muon Detector</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-  <script defer src="./vendor/lucide.min.js"></script>
-  <script type="module" src="./app.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f5f2"><meta name="description" content="Meet the gLOWCOST cosmic muon detector. Follow a particle from a flash of light to an electronic count, then explore the real instrument.">
+<title>gLOWCOST | A window into the invisible</title>
+<link rel="stylesheet" href="./discover.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module" src="./discover.js"></script>
+<link rel="stylesheet" href="./site-theme.css">
 </head>
-<body>
-  <header class="masthead">
-    <div class="brand"><h1>g<span>LOW</span>COST</h1><a class="brand-sub" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener noreferrer">cosmic.gsu.edu</a></div>
-    <div class="header-right"><a class="assembly-link" href="./probe.html" aria-label="Readout oscilloscope bench" title="Readout oscilloscope bench"><i data-lucide="scan-line"></i><span>Oscilloscope</span></a><a class="assembly-link" href="./assembly.html" aria-label="Detector assembly guide" title="Detector assembly guide"><i data-lucide="wrench"></i><span>Assembly guide</span></a><span class="feed-status" id="feed-status"><b></b>Simulation</span><time id="clock"></time><button class="icon-button" id="fullscreen" aria-label="Enter full screen" title="Full screen"><i data-lucide="maximize"></i></button></div>
-  </header>
-  <main>
-    <section class="detector-space" aria-label="Animated three-plate cosmic muon detector">
-      <div id="scene" role="img" aria-label="Three scintillator tiles in an aluminium frame. Simulated particle tracks make the tiles flash."></div>
-      <div class="scene-heading"><span class="eyebrow" id="scene-source">Particles from the sky</span><h2>Cosmic Muon Detector</h2><span class="geometry">3 scintillator tiles <span> / </span> 20 × 20 cm</span></div>
-      <div class="view-tools" aria-label="Detector view controls">
-        <button class="icon-button" id="cutaway" aria-label="Show wrapped tiles" aria-pressed="true" title="Transparent / wrapped tiles"><i data-lucide="layers-2"></i></button>
-        <button class="icon-button" id="acceptance" aria-label="Show geometric acceptance" aria-pressed="false" title="Geometric acceptance"><i data-lucide="pyramid"></i></button>
-        <button class="icon-button" id="open-box" aria-label="Open readout box" aria-pressed="false" title="Open / close readout box"><i data-lucide="box"></i></button>
-        <button class="icon-button" id="rotate" aria-label="Start automatic rotation" aria-pressed="false" title="Automatic rotation"><i data-lucide="rotate-3d"></i></button>
-        <button class="icon-button" id="pause" aria-label="Pause particle animation" aria-pressed="false" title="Pause animation"><i data-lucide="pause"></i></button>
-        <button class="icon-button" id="reset-camera" aria-label="Reset camera" title="Reset camera"><i data-lucide="scan"></i></button>
-        <button class="icon-button" id="photo" aria-label="View the real detector" title="The real detector"><i data-lucide="camera"></i></button>
-      </div>
-      <div class="geometry-caption" id="acceptance-caption" hidden></div>
-      <div class="hardware-caption" id="hardware-caption" hidden>Loading readout PCB + Raspberry Pi 5 CAD</div>
-      <div id="tile-labels" aria-hidden="true"><span data-tile="0"><b>0</b>Top tile</span><span data-tile="1"><b>1</b>Middle tile</span><span data-tile="2"><b>2</b>Bottom tile</span></div>
-      <div class="track-key"><span class="track-swatch"></span><span id="track-label">Coincidences + room particle field</span><span class="subtle">Motion slowed</span></div>
-      <div class="physics-strip"><div><span>01</span><p>Particle crosses a plastic scintillator</p></div><i data-lucide="chevron-right"></i><div><span>02</span><p>A tiny flash of light</p></div><i data-lucide="chevron-right"></i><div><span>03</span><p>Silicon photomultiplier makes an electrical pulse</p></div></div>
-      <div class="render-error" id="render-error" hidden>3D view unavailable. Please enable hardware acceleration. The counts remain available.</div>
-    </section>
-    <aside class="readout" aria-label="Last minute coincidence counts">
-      <div class="readout-heading"><span class="eyebrow">Last complete minute</span><time id="minute-range">Loading simulated counts</time></div>
-      <div class="pair-picker" role="group" aria-label="Highlighted tile pair"><button data-pair="all" aria-pressed="true">All pairs</button><button data-pair="c01" aria-pressed="false">0–1</button><button data-pair="c12" aria-pressed="false">1–2</button><button data-pair="c02" aria-pressed="false">0–2</button></div>
-      <div class="count-row" data-count="c01"><div class="count-label"><span class="pair-dot mint"></span>Top + middle<span class="channel-code">0–1</span></div><div class="count-value" id="c01">—</div><div class="count-bottom"><span>coincidences / min</span><canvas class="spark" id="spark-c01" aria-label="Recent top and middle counts"></canvas></div></div>
-      <div class="count-row" data-count="c12"><div class="count-label"><span class="pair-dot coral"></span>Middle + bottom<span class="channel-code">1–2</span></div><div class="count-value secondary" id="c12">—</div><div class="count-bottom"><span>coincidences / min</span><canvas class="spark" id="spark-c12" aria-label="Recent middle and bottom counts"></canvas></div></div>
-      <div class="far-row" data-count="c02"><div><span class="pair-dot violet"></span>Top + bottom <span class="channel-code">0–2</span></div><strong id="c02">—</strong><span>coincidences / min</span></div>
-      <section class="history"><div class="section-label"><h3>Recent minutes</h3><span>0–1 <b class="mint-line"></b> 1–2 <b class="coral-line"></b></span></div><canvas id="history" role="img" aria-label="Coincidence counts in each of the last fifteen complete minutes"></canvas></section>
-      <div class="minute-progress"><div><span>This minute</span><span id="minute-elapsed">0 / 60 s</span></div><progress id="minute-progress" value="0" max="60" aria-label="Elapsed part of current minute"></progress></div>
-      <div class="source-note"><i data-lucide="activity"></i><p><span id="source-description">Sea-level muon model</span><span id="source-detail">Open sky · ideal detection · no rate tuning</span></p><button class="icon-button" id="info" aria-label="Display details" title="Display details"><i data-lucide="info"></i></button></div>
-    </aside>
-  </main>
-  <footer><span>A global, low-cost cosmic-ray muon detector network</span><a href="./assembly.html" style="color:inherit">Detector assembly guide</a><span id="connection-note" role="status">Connecting to simulation</span></footer>
-  <dialog id="details">
-    <button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button>
-    <span class="eyebrow">About this display</span><h2>A particle, a flash, a count.</h2>
-    <p>A charged particle crossing a plastic scintillator can produce light. A silicon photomultiplier converts that light into an electrical pulse. Pulses in two tiles form a coincidence.</p>
-    <h3>Muon source and counts</h3>
-    <p>Simulation uses the energy-dependent sea-level muon spectrum of <a href="https://arxiv.org/abs/1509.06176" target="_blank" rel="noopener noreferrer">Guan et al.</a>, with kinetic energies from 0.1 GeV to 10 TeV. Arrival directions, boundary entry positions and Poisson arrival times are sampled from its absolute flux. The rate is not adjusted to 230 counts/min.</p>
-    <p>Muons enter through the top and sides of the surrounding volume. Hits are checked against the full 1 cm tile thickness and the cut corner in the supplied tile model. A coincidence requires the same simulated muon to deposit energy in both tiles. A triple contributes to all three pair counts; adding the pair totals double-counts particles.</p>
-    <h3>Motion and material</h3>
-    <p>Muon speeds follow relativistic kinematics. Mean energy loss and stopping use <a href="https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/polystyrene.html" target="_blank" rel="noopener noreferrer">PDG polystyrene data</a>. Deflections use a Gaussian, thin-slab approximation to multiple scattering, and muons can decay. Playback shows 2 ns of particle flight per second. Light propagation and red LED flashes are slowed illustrations, not an optical or electronics simulation.</p>
-    <h3>What is not known here</h3>
-    <p>This is an open-sky, sea-level model with ideal detection. It does not predict the measured response of this indoor detector: roof shielding, local altitude and weather, passive housing materials, secondary particles, energy-loss fluctuations, SiPM efficiency, thresholds and electronic noise are not included. The Gaussian scattering core does not reproduce rare large-angle tails. It is not a Geant4 transport calculation.</p>
-    <p>Unrelated room tracks are thinned for drawing without changing any count. The yellow overlay is the straight-line acceptance from one lower-tile centre to the upper tile outline, not the acceptance averaged over the whole detector.</p>
-    <h3>Live detector mode</h3>
-    <p>When connected locally, counts come from the detector's completed minute log. Simulated counts never replace missing measurements. Drawn muons and LED timing remain illustrations and are not added to measured totals.</p>
-    <div class="detail-stat"><span>20 × 20 × 1 cm tiles</span><span>13 cm spacing</span><span>60 s count bins</span></div>
-  </dialog>
-  <dialog id="photo-dialog"><button class="icon-button close-dialog" aria-label="Close"><i data-lucide="x"></i></button><img src="./assets/detector.jpg" alt="The actual GSU cosmic muon detector, with three wrapped tiles in an aluminium frame."><p>GSU cosmic muon detector · Exhibition detector</p></dialog>
-</body>
-</html>
+<body data-page="index">
+<header class="site-header"><div class="site-identity"><a class="site-brand" href="./index.html" aria-label="gLOWCOST home"><img src="./assets/glowcost-logo-transparent.png" alt="gLOWCOST" width="160" height="107"></a><a class="site-origin" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">cosmic.gsu.edu ↗</a></div><nav class="site-navigation" aria-label="Digital twin pages"><a class="site-link" href="./index.html" aria-current="page">Discover</a><a class="simulation-link" href="./detector.html">Detector</a><a class="site-link" href="./scintillation.html">Inside a tile</a><a class="site-link" href="./investigate.html">Experiment</a><a class="site-link" href="./probe.html">Electronics</a><a class="assembly-link" href="./assembly.html">Assembly</a><a class="site-link" href="./network.html">Network</a></nav></header>
+<main>
+<section class="hero">
+<div class="hero-copy"><p class="eyebrow">THE gLOWCOST COSMIC MUON DETECTOR</p><h1>A window into<br>the invisible.</h1><p class="intro">High-energy particles from space strike Earth’s atmosphere, creating muons that pass through us. When a muon crosses our detector’s tiles, it can leave tiny flashes of light—signals that help us detect and count these invisible visitors.</p><div class="actions"><a class="button primary" href="#journey">Follow a muon <span>↓</span></a><a class="text-link" href="./detector.html?source=simulation">Explore the 3D detector ↗</a></div><p class="quiet">The actual detector design. A simulated particle journey.</p></div>
+<a class="hero-image" href="./detector.html?source=simulation" aria-label="Explore the three-layer detector in 3D"><img src="./assets/detector-hero.png" width="900" height="980" fetchpriority="high" alt="Rendered source-CAD model of the complete three-layer gLOWCOST detector with its readout enclosure and cables"><span class="image-caption">ACTUAL DETECTOR CAD · EXPLORE IN 3D ↗</span></a>
+</section>
+<section class="facts" aria-label="Reference detector dimensions"><div><strong>3</strong><span>scintillator tiles</span></div><div><strong>20 × 20 cm</strong><span>tile bounding dimensions</span></div><div><strong>1 cm</strong><span>scintillator thickness</span></div><div><strong>13 cm</strong><span>between adjacent tile centres</span></div></section>
+<section class="journey" id="journey" aria-labelledby="journey-title">
+<div class="section-intro"><p class="eyebrow">ONE PARTICLE. A CHAIN OF DISCOVERY.</p><h2 id="journey-title">From a passing muon<br>to a recorded count.</h2><p>Follow six short steps, look inside a tile, then try your own experiment. Your place is kept in this browser tab.</p></div>
+<div class="guide-layout"><div class="model-panel"><span class="model-loading" id="guide-loading" role="status">Loading detector model…</span><div id="guided-scene" role="img" aria-label="Interactive CAD model of the gLOWCOST detector"></div><div id="model-error" hidden>3D is unavailable in this browser. You can still follow every step below or <a href="./assembly.html">open the assembly guide</a>.</div><div class="model-tag">SOURCE CAD + ILLUSTRATIVE LIGHT</div><div class="model-tools"><button id="replay" type="button">Replay muon</button><button id="reset-view" type="button">Reset view</button><span>Drag to look around</span></div></div>
+<div class="guide-copy"><div class="step-progress" role="group" aria-label="Choose explanation step"></div><p class="eyebrow" id="step-number"></p><h3 id="step-title"></h3><p id="step-body"></p><div class="step-fact" id="step-fact"></div><p class="model-note" id="step-note"></p><a class="text-link" id="step-deeper" href="./scintillation.html" hidden>Explore the scintillation process →</a><div class="step-controls"><button id="previous" type="button">← Back</button><button id="next" class="button primary" type="button">Next step →</button></div><p class="quiet" id="step-announcement" role="status" aria-live="polite"></p></div></div>
+<details class="accuracy"><summary>What is real here, and what is illustrated?</summary><p>The frame profiles, tile, holder and enclosure derive from supplied CAD. The readout PCB comes from KiCad; the Raspberry Pi 5 uses manufacturer CAD. Carrier boards, connectors and some fasteners are illustrative. Acrylic and liner thicknesses are assumed.</p><p>This guided track is a selected 4 GeV example through the reference detector, calculated with the existing muon transport model. It is not a measured event or a random sample of the sky. Flight plays at 2 ns per displayed second. Green fibre light and red indicators are teaching animations, not photon transport, measured timing or FPGA logic.</p><p>The full count simulation uses a sea-level source, approximate transport and ideal detection. Indoor shielding, optical efficiency, thresholds and electronic noise are not included in those counts.</p></details>
+</section>
+<section class="deeper" id="deeper"><div class="section-intro"><p class="eyebrow">KEEP EXPLORING</p><h2>Go as deep as your curiosity.</h2><p>Follow the path from a passing particle to a signal you can investigate. Each layer builds on the last. Construction and the network are optional side paths.</p></div><div class="explore-links"><a href="./detector.html?source=simulation"><span>01 / MEET THE INSTRUMENT</span><h3>See what catches a muon <b>↗</b></h3><p>Explore the complete detector, reveal its three tiles and see how one particle can produce several coincidences.</p></a><a href="./scintillation.html"><span>02 / LOOK INSIDE A TILE</span><h3>Discover the tiny flash <b>↗</b></h3><p>Follow energy deposition, molecular excitation, scintillation, fibre collection and the sensor. Test a longer path through the plastic.</p></a><a href="./investigate.html"><span>03 / TRY IT YOURSELF</span><h3>Turn a question into data <b>↗</b></h3><p>Change the tilt and direction. Collect a simulated week or several months, then compare rates across orientations.</p></a><a href="./probe.html"><span>04 / GO DEEPER</span><h3>Trace the electronic signal <b>↗</b></h3><p>Probe the actual PCB and schematic. Compare expected analogue and logic signals in the virtual oscilloscope.</p></a></div><div class="branch-heading"><p class="eyebrow">TAKE A SIDE PATH</p><h3>Build it. Or see the bigger picture.</h3></div><div class="explore-links side-paths"><a class="assembly-link" href="./assembly.html"><span>CONSTRUCTION / OPTIONAL BRANCH</span><h3>Piece by piece <b>↗</b></h3><p>Follow the assembly guide from the open rail ends to a complete instrument.</p></a><a href="./network.html"><span>WORLDWIDE / OPTIONAL BRANCH</span><h3>One detector, a global project <b>↗</b></h3><p>Explore public station records in a dated portal snapshot.</p></a></div></section>
+</main><footer><a class="wordmark" href="https://cosmic.gsu.edu/"><img class="footer-logo" src="./assets/glowcost-logo-transparent.png" alt="gLOWCOST" width="120" height="80"></a><p>A global, low-cost cosmic-ray muon detector network.</p><a href="./detector.html">Open the full detector →</a></footer>
+</body></html>

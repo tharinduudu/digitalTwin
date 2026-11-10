@@ -9,17 +9,10 @@
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
   <script defer src="./vendor/lucide.min.js"></script>
   <script type="module" src="./probe.js"></script>
+<link rel="stylesheet" href="./site-theme.css">
 </head>
-<body>
-  <header class="bench-header">
-    <a class="brand" href="./index.html">gLOWCOST</a>
-    <nav aria-label="Detector views">
-      <a href="./index.html"><i data-lucide="activity"></i><span>Detector</span></a>
-      <a href="./assembly.html"><i data-lucide="wrench"></i><span>Assembly</span></a>
-      <a href="./probe.html" aria-current="page"><i data-lucide="scan-line"></i><span>Oscilloscope</span></a>
-    </nav>
-    <button class="icon-button" id="model-info" title="Signal model and limitations" aria-label="Signal model and limitations"><i data-lucide="info"></i></button>
-  </header>
+<body data-page="probe">
+  <header class="site-header"><div class="site-identity"><a class="site-brand" href="./index.html" aria-label="gLOWCOST home"><img src="./assets/glowcost-logo-transparent.png" alt="gLOWCOST" width="160" height="107"></a><a class="site-origin" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">cosmic.gsu.edu ↗</a></div><nav class="site-navigation" aria-label="Digital twin pages"><a class="site-link" href="./index.html">Discover</a><a class="simulation-link" href="./detector.html">Detector</a><a class="site-link" href="./scintillation.html">Inside a tile</a><a class="site-link" href="./investigate.html">Experiment</a><a class="site-link" href="./probe.html" aria-current="page">Electronics</a><a class="assembly-link" href="./assembly.html">Assembly</a><a class="site-link" href="./network.html">Network</a></nav><button class="icon-button" id="model-info" title="Signal model and limitations" aria-label="Signal model and limitations"><i data-lucide="info"></i></button></header>
   <main>
     <div class="bench-heading"><h1>Readout bench</h1><span class="model-badge">SIMULATED SIGNALS <span> / </span> No hardware connection</span></div>
     <div class="instruments">
@@ -64,7 +57,7 @@
       <section class="node-browser" aria-label="Electrical node browser"><div class="section-heading"><h2>Electrical nodes</h2><label class="search"><i data-lucide="search"></i><input type="search" id="node-search" placeholder="Component, pin or net" aria-label="Search component pin or net"></label></div><div class="net-list" id="net-list"></div></section>
     </div>
     <footer><span id="ground-reference">Reference: PCB signal GND</span><span id="model-status">Schematic-derived model / not a measurement</span><a href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">cosmic.gsu.edu</a></footer>
-  </main>
+  </main><section class="layer-next" aria-label="Continue exploring"><div><span class="eyebrow">OPTIONAL / CONSTRUCTION</span><h2>See how the instrument fits together.</h2><p>Follow the mechanical assembly, one step at a time.</p></div><a href="./assembly.html">Explore assembly →</a></section>
   <dialog id="model-dialog"><div class="dialog-heading"><h2>What these traces mean</h2><button class="icon-button" id="close-model" title="Close" aria-label="Close"><i data-lucide="x"></i></button></div><p>The PCB, pad positions and net names come from the same KiCad board as the detector twin. A point on the same net has the same voltage in this lumped circuit model.</p><h3>Signal chain</h3><p>The analog impulse response is calculated offline with ngspice using the CH0 coupling capacitor, input and feedback resistors, and a reduced-order OPA846 model. The browser scales this response with the number of fired cells and assumed overvoltage. All four channels use the same nominal circuit. These traces do not predict measured channel-to-channel differences.</p><p>The assumed SiPM parameters are 140 pF terminal capacitance, 1.7 million electrons per avalanche at 3 V overvoltage, and a 0.8 ns rise / 30 ns fall current pulse. Pulse shape, optical yield and amplifier bandwidth have not been validated against this assembled detector. Fired cells are not incident photons or measured PDE.</p><h3>Comparator and scope</h3><p>The comparator uses the threshold DAC setting, assumed 8 mV hysteresis, nominal 2.5 ns propagation delay and finite edges. Output saturation is a simple rail clamp, not a model of recovery or slew-rate limits. The 20 MHz scope filter is first order. Probe attenuation is correctly compensated in the voltage display; it does not model input capacitance or cable reflections. AC coupling uses an assumed 10 Hz high-pass.</p><p>DC supplies and DAC outputs are ideal settled levels. There is no prediction of converter switching, supply ripple, DAC update glitches, I2C traffic, loaded FPGA firmware, LED timing, startup or faults. Unsupported nets show no trace. The 50 MHz clock is illustrative.</p><h3>Bias values and ground</h3><p>DAC voltage uses the stored calibration law: 0.0005 + 2.9968 x code / 1023 V. Its absolute accuracy is not established here. Effective SiPM bias = high side - low side. The breakdown voltage is an editable assumption, not a new measurement. Changing these fields never changes real hardware.</p><p class="warning">On this detector the SMA outer shield carries high voltage. It is not signal ground. Virtual probing cannot establish whether a real earth-referenced scope connection is safe. All displayed voltages are relative to PCB signal GND.</p><h3>Sources</h3><ul><li><a href="https://www.ti.com/product/OPA846" target="_blank" rel="noopener">TI OPA846</a></li><li><a href="https://www.ti.com/product/TLV3603" target="_blank" rel="noopener">TI TLV3603</a></li><li><a href="https://www.ti.com/product/DAC6578" target="_blank" rel="noopener">TI DAC6578</a></li></ul><p id="source-hash"></p></dialog>
 </body>
 </html>

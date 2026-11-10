@@ -9,14 +9,10 @@
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
   <script defer src="./vendor/lucide.min.js"></script>
   <script type="module" src="./assembly.js"></script>
+<link rel="stylesheet" href="./site-theme.css">
 </head>
-<body>
-  <header class="assembly-header">
-    <a class="brand" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">gLOWCOST</a>
-    <span class="header-divider"></span><h1>Detector assembly</h1>
-    <a class="simulation-link" href="./probe.html"><i data-lucide="scan-line"></i><span>Oscilloscope</span></a>
-    <a class="simulation-link" href="./index.html"><i data-lucide="activity"></i><span>Detector simulation</span></a>
-  </header>
+<body data-page="assembly">
+  <header class="site-header"><div class="site-identity"><a class="site-brand" href="./index.html" aria-label="gLOWCOST home"><img src="./assets/glowcost-logo-transparent.png" alt="gLOWCOST" width="160" height="107"></a><a class="site-origin" href="https://cosmic.gsu.edu/" target="_blank" rel="noopener">cosmic.gsu.edu ↗</a></div><nav class="site-navigation" aria-label="Digital twin pages"><a class="site-link" href="./index.html">Discover</a><a class="simulation-link" href="./detector.html">Detector</a><a class="site-link" href="./scintillation.html">Inside a tile</a><a class="site-link" href="./investigate.html">Experiment</a><a class="site-link" href="./probe.html">Electronics</a><a class="assembly-link" href="./assembly.html" aria-current="page">Assembly</a><a class="site-link" href="./network.html">Network</a></nav></header><h1 class="sr-only">Detector assembly</h1>
   <main class="assembly-layout">
     <aside class="assembly-sidebar" aria-label="Assembly stages">
       <div class="sidebar-heading"><span>BUILD SEQUENCE</span><strong id="step-count">01 / 19</strong></div>
@@ -80,7 +76,7 @@
         <button id="next" class="primary"><span>Next step</span><i data-lucide="arrow-right"></i></button>
       </div>
     </section>
-  </main>
+  </main><section class="layer-next" aria-label="Continue exploring"><div><span class="eyebrow">OPTIONAL / WORLDWIDE</span><h2>One instrument in a global project.</h2><p>Explore the saved public station records on the globe.</p></div><a href="./network.html">Explore the network →</a></section>
   <dialog id="parts-dialog">
     <div class="dialog-heading"><h2>Parts and tools</h2><button class="tool close-dialog" aria-label="Close parts list"><i data-lucide="x"></i></button></div>
     <table><thead><tr><th>Part</th><th>Quantity</th></tr></thead><tbody>

@@ -222,3 +222,24 @@ mechanical fit. The Hamamatsu sensor itself still uses its component model.
 Three.js, OrbitControls, GLTFLoader, STLLoader, and BufferGeometryUtils are
 version 0.180.0. Lucide is version 0.468.0. Their licences are in `public/vendor`.
 The detector photograph was supplied by the detector's builder.
+
+### Discovery-page photograph
+
+`cosmic-baseline-detector.jpg` is the baseline-detector photograph served at
+https://cosmic.gsu.edu/assets/baseline-detector.jpg, retrieved 10 November 2026
+from the COSMIC homepage. This optional reference asset is retained; the introduction now renders the detector CAD instead of a photograph.
+It is a reference instrument photograph, not evidence that every visible
+hardware revision matches the twin. Original authors’ image rights remain;
+no new image licence is asserted. The earlier builder-supplied `detector.jpg`
+remains available for the existing reference-photo dialogs.
+
+### Official identity and CAD portrait
+
+- `public/assets/glowcost-logo-transparent.png`: original transparent logo served by
+  https://cosmic.gsu.edu/assets/glowcost-logo-transparent.png, retrieved 10 November
+  2026; used with its aspect ratio preserved.
+- `public/assets/detector-hero.png`: screenshot rendered from the existing source
+  CAD through `public/model-render.html`, not an invented detector or photograph.
+  Render viewport 1200 × 1200; screenshot region x=140, y=180, w=900, h=980 removes
+  empty studio margins. No physical geometry was scaled or retouched. The render
+  page waits for CAD loading and removes only the explanatory rulers.

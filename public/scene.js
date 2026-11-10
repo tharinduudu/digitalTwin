@@ -10,7 +10,7 @@ import { DISPLAY_NS_PER_SECOND, pointAtTime } from './muon-transport.js';
 
 const TILE_Y = TILE_HEIGHTS;
 const READOUT_PORT_Y = [-2.5, -4.5, -6.5];
-const PAIR_COLORS = { c01: '#80ecc0', c12: '#f5a394', c02: '#bcb0f6', all: '#80ecc0' };
+const PAIR_COLORS = { c01: '#08794e', c12: '#c04a22', c02: '#6237bf', all: '#08794e' };
 
 function surfaceTexture(kind) {
   const canvas = document.createElement('canvas');
@@ -130,7 +130,7 @@ export class TelescopeScene {
     this.red = new THREE.MeshStandardMaterial({ color: '#df493a', roughness: 0.5 });
     this.gold = new THREE.MeshStandardMaterial({ color: '#b3a764', roughness: 0.28, metalness: 0.8 });
     this.glass = new THREE.MeshPhysicalMaterial({ color: '#d8eee1', transparent: true, opacity: 0.045, roughness: 0.12, metalness: 0, depthWrite: false });
-    this.dotGeometry = new THREE.SphereGeometry(0.12, 8, 6);
+    this.dotGeometry = new THREE.SphereGeometry(0.26, 12, 8);
   }
 
   box(w, h, d, x, y, z, material, parent = this.model) {
@@ -312,7 +312,7 @@ export class TelescopeScene {
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.roomCapacity * 6), 3));
     geometry.setDrawRange(0, 0);
     this.roomLines = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({
-      color: '#a7bcb0', transparent: true, opacity: 0.24, depthWrite: false }));
+      color: '#2264b3', transparent: true, opacity: 0.48, depthWrite: false }));
     this.roomLines.frustumCulled = false;
     this.scene.add(this.roomLines);
   }
@@ -428,13 +428,13 @@ export class TelescopeScene {
     }
     if (this.tracks.length >= 90) return;
     const selected = this.selectedPair === 'all' || event.pairs[this.selectedPair];
-    const color = !selected ? '#83998c' : event.pairs.c02 ? PAIR_COLORS.c02 : event.pairs.c01 ? PAIR_COLORS.c01
-      : event.pairs.c12 ? PAIR_COLORS.c12 : '#b5c8bb';
+    const color = !selected ? '#56718b' : event.pairs.c02 ? PAIR_COLORS.c02 : event.pairs.c01 ? PAIR_COLORS.c01
+      : event.pairs.c12 ? PAIR_COLORS.c12 : '#1764bd';
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array((event.path.length + 2) * 3), 3));
-    const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65, depthTest: true }));
+    const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.95, depthTest: true, toneMapped: false }));
     line.frustumCulled = false;
-    const head = new THREE.Mesh(this.dotGeometry, new THREE.MeshBasicMaterial({ color }));
+    const head = new THREE.Mesh(this.dotGeometry, new THREE.MeshBasicMaterial({ color, toneMapped: false }));
     this.scene.add(line, head);
     this.tracks.push({ line, head, event, age, hit: [false, false, false], color });
   }
@@ -483,7 +483,7 @@ export class TelescopeScene {
         track.hit[crossing.index] = true;
         if (track.event.hits[crossing.index]) this.flash(track, crossing.index);
       }
-      track.line.material.opacity = 0.65;
+      track.line.material.opacity = 0.95;
       if (time > track.event.durationNs) {
         this.scene.remove(track.line, track.head);
         track.line.geometry.dispose(); track.line.material.dispose(); track.head.material.dispose();
