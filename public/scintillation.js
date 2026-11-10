@@ -3,7 +3,7 @@ import { traceMuon } from './muon-transport.js';
 import { TILE_HEIGHTS } from './detector-geometry.js';
 const $=id=>document.getElementById(id);
 const stages=[
- ['Energy deposition','A charged particle transfers energy to electrons in the plastic. Excitation and ionization leave the material with energy to release. Only some of that deposited energy becomes light.','The moving muon is a teaching marker. It is not a photon, and the deposit is not a measured pulse height.'],
+ ['Energy deposition','A charged particle transfers energy to electrons in the plastic. Excitation and ionization leave the material with energy to release. Only some of that deposited energy becomes light.','The moving muon is a teaching marker. Energy transfer explains the physical process; this detector does not measure the muon’s energy or the deposited energy.'],
  ['Molecular excitation','Energy can reach fluorescent molecules in an organic scintillator. They enter excited electronic states, with energy also distributed among molecular vibrations.','These are conceptual molecular energy levels, not circular electron orbits. The supplied tile’s specific fluorescent formulation is not known here.'],
  ['Relaxation and fluorescence','Some energy is lost without light, including through vibrational relaxation. A radiative transition emits a photon as the molecule returns towards a lower electronic state.','The drawing separates non-radiative relaxation from fluorescence. It does not assign an unverified wavelength, lifetime or light yield to this tile.'],
  ['Collection by the WLS fibre','Light spreads through the tile. Some reaches the wavelength-shifting fibre, is absorbed and re-emitted at a longer wavelength. A fraction travels along the fibre towards the sensor.','The fibre path follows the supplied groove section. Travelling dots show the idea; their number, speed and collection efficiency are not a photon-transport calculation.'],
@@ -73,7 +73,7 @@ requestAnimationFrame(frame);setPhase(0);deposit();
 for(const b of document.querySelectorAll('[data-prediction]'))b.onclick=()=>{
  $('crossing-angle').value=60;deposit();
  $('prediction-feedback').hidden=false;
- $('prediction-feedback').textContent=`At 60°, the calculated path is ${$('path-length').textContent}, compared with 1.000 cm upright. The oblique path is longer. Explore the slider and see how the mean energy deposit changes.`;
+ $('prediction-feedback').textContent=`At 60°, the calculated path is ${$('path-length').textContent}, compared with 1.000 cm upright. The oblique path is longer. Explore the slider and compare the calculated path lengths. The detector counts events; it does not measure muon energy.`;
  b.setAttribute('aria-pressed','true');
  document.querySelectorAll('[data-prediction]').forEach(other=>{if(other!==b)other.setAttribute('aria-pressed','false');});
 };
