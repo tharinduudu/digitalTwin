@@ -44,6 +44,14 @@ fluctuate because arrivals are sampled as a Poisson process.
 To preview simulated data while a local detector feed is configured, open
 **http://127.0.0.1:8791/detector.html?source=simulation**. This does not change the detector.
 
+### Install on cosmic.gsu.edu
+
+See [the cosmic.gsu.edu installation guide](docs/INSTALL-COSMIC-GSU.md) for
+building, previewing, uploading, host requirements, validation and rollback.
+The recommended public installation serves the static `dist/` build from a
+dedicated subdirectory. It needs no running Node server or detector credentials.
+Pushing to GitHub updates GitHub Pages; it does not deploy to cosmic.gsu.edu.
+
 ### Publish an update
 
 Push to `main`. The Pages workflow runs the tests, copies `public/` into a
