@@ -48,8 +48,8 @@ export class FibreLight {
   }
 
   update(dt, visible) {
-    // Light propagation is slowed down for the exhibition, not a timing measurement.
-    this.phase += dt / 1.3;
+    // A brief display cue for collection. The fibre transit itself takes nanoseconds.
+    this.phase += dt / 0.24;
     const active = this.phase < Math.max(this.origin, 1 - this.origin);
     this.glow.material.uniforms.heads.value.set(this.origin - this.phase, this.origin + this.phase);
     this.core.material.emissiveIntensity = 0.12 + (active ? 0.7 : 0);

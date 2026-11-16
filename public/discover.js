@@ -12,37 +12,40 @@ const steps = [
 ];
 const $ = id => document.getElementById(id);
 let scene;
+let eventSeed = 1;
 let current = 0;
 try {current=Math.max(0,Math.min(steps.length-1,Math.trunc(Number(sessionStorage.getItem('glowcost-guide-step')))||0));} catch {}
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-try {
-  scene = new TelescopeScene($('guided-scene'));
-  applyStudioAppearance(scene);
-  scene.setCutaway(false);
-  scene.paused = reduced;
-  scene.ready.then(() => {
-    if (scene.loadError || scene.hardware.state.error) throw scene.loadError || new Error(scene.hardware.state.error);
-    $('guided-scene').dataset.ready = 'true';
-    $('guide-loading').hidden=true;
-    show(current);
-  }).catch(error => {
+function loadGuide() {
+  try {
+    scene = new TelescopeScene($('guided-scene'));
+    applyStudioAppearance(scene);
+    scene.setCutaway(false);
+    scene.paused = reduced;
+    scene.ready.then(() => {
+      if (scene.loadError || scene.hardware.state.error) throw scene.loadError || new Error(scene.hardware.state.error);
+      $('guided-scene').dataset.ready = 'true';
+      $('guide-loading').hidden=true;
+      show(current);
+    }).catch(error => {
+      console.error(error);
+      $('model-error').textContent = 'Some source CAD could not load. The visible model may be incomplete; the explanation remains available.';
+      $('model-error').hidden = false;
+      $('guide-loading').hidden=true;
+    });
+  } catch (error) {
     console.error(error);
-    $('model-error').textContent = 'Some source CAD could not load. The visible model may be incomplete; the explanation remains available.';
     $('model-error').hidden = false;
-    $('guide-loading').hidden=true;
-  });
-} catch (error) {
-  console.error(error);
-  $('model-error').hidden = false;
-    $('guide-loading').hidden=true;
-  $('replay').disabled = true;
-  $('reset-view').disabled = true;
+      $('guide-loading').hidden=true;
+    $('replay').disabled = true;
+    $('reset-view').disabled = true;
+  }
 }
 function replay() {
   if (!scene) return;
   scene.paused = false;
   scene.clearTracks();
-  scene.addTrack(guidedMuon());
+  scene.addTrack(guidedMuon(eventSeed));
 }
 const dots = steps.map((step, index) => {
   const button = document.createElement('button');
@@ -59,7 +62,11 @@ function show(index) {
   $('step-number').textContent = `STEP ${index + 1} OF ${steps.length}`;
   $('step-title').textContent = title;
   $('step-body').textContent = body;
-  $('step-fact').textContent = fact;
+  const event = guidedMuon(eventSeed);
+  const flightNs = event.crossings[2].timeNs - event.crossings[0].timeNs;
+  $('step-fact').textContent = index === 0
+    ? `${event.zenithDeg.toFixed(0)}° from vertical · ${flightNs.toFixed(2)} ns from top tile to bottom tile`
+    : fact;
   $('step-note').textContent = note;
   $('step-deeper').hidden = index < 1 || index > 3;
   $('step-announcement').textContent = `Step ${index + 1} of ${steps.length}`;
@@ -76,12 +83,81 @@ function show(index) {
 $('previous').addEventListener('click', () => show(Math.max(0, current - 1)));
 $('next').addEventListener('click', () => {if(current===steps.length-1)location.href='./scintillation.html';else show(current+1);});
 $('replay').addEventListener('click', replay);
+$('another-muon').addEventListener('click', () => {
+  eventSeed += 1;
+  show(current);
+  if (reduced || current >= 4) replay();
+});
 $('reset-view').addEventListener('click', () => scene?.resetCamera());
 show(0);
 
-// Start the example when a visitor reaches the model, rather than spending it
-// while they are reading the introduction above it.
-const visibility = new IntersectionObserver(entries => {
-  if (entries.some(entry => entry.isIntersecting) && !reduced) replay();
-}, { threshold: 0.5 });
-visibility.observe($('guided-scene'));
+const guideVisibility = new IntersectionObserver(([entry]) => {
+  if (entry.isIntersecting && !scene) loadGuide();
+  if (!scene) return;
+  scene.suspendRendering = !entry.isIntersecting;
+  if (entry.isIntersecting && !reduced && $('guided-scene').dataset.ready === 'true') replay();
+});
+guideVisibility.observe($('guided-scene'));
+
+const heroContainer = $('hero-scene');
+const heroStatus = $('hero-status');
+const heroPlayback = $('hero-playback');
+
+async function loadHero() {
+  heroContainer.hidden = false;
+  let hero;
+  try {
+    hero = new TelescopeScene(heroContainer);
+    hero.suspendRendering = true;
+    hero.paused = true;
+    applyStudioAppearance(hero);
+    hero.setCutaway(true);
+    hero.controls.enableZoom = false;
+    hero.renderer.domElement.style.touchAction = 'pan-y';
+    hero.camera.position.set(45, 30, 59);
+    hero.controls.target.set(0, -2, 0);
+    hero.controls.update();
+    const [{ Simulation }] = await Promise.all([import('./simulation.js'), hero.ready]);
+    if (hero.loadError || hero.hardware.state.error) throw new Error('Detector model could not load');
+    hero.setCutaway(true);
+    const simulation = new Simulation();
+    let playing = !reduced;
+    let visible = true;
+    let simulationTime = Date.now();
+
+    function updatePlayback() {
+      hero.paused = !playing || !visible;
+      hero.suspendRendering = !visible;
+      heroPlayback.textContent = playing ? 'Pause simulation' : 'Play simulation';
+      heroStatus.textContent = playing ? 'Simulated muons · slowed motion' : 'Simulation paused';
+    }
+
+    heroPlayback.addEventListener('click', () => {
+      playing = !playing;
+      updatePlayback();
+    });
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      updatePlayback();
+    }).observe(heroContainer);
+    setInterval(() => {
+      if (hero.paused || document.hidden) return;
+      // Resume from the preview clock without simulating time spent offscreen.
+      simulationTime += 150;
+      const now = Date.now();
+      for (const event of simulation.advance(simulationTime)) {
+        hero.addTrack({ ...event, at: now - (simulationTime - event.at) });
+      }
+    }, 150);
+
+    heroPlayback.hidden = false;
+    heroContainer.dataset.ready = 'true';
+    $('hero-poster').hidden = true;
+    updatePlayback();
+  } catch (error) {
+    if (hero) hero.suspendRendering = true;
+    heroContainer.hidden = true;
+    console.error(error);
+  }
+}
+loadHero();

@@ -24,11 +24,11 @@ test('green light moves along the fibre towards both sensor ends and expires', (
   const curve = fibreCurve(data, 0);
   const light = new FibreLight(curve, 0.05);
   light.excite(curve.getPointAt(0.5));
-  light.update(0.13, true);
+  light.update(0.04, true);
   const heads = light.glow.material.uniforms.heads.value;
   assert.ok(heads.x < 0.5 && heads.y > 0.5);
   assert.equal(light.glow.visible, true);
-  light.update(2, true);
+  light.update(0.2, true);
   assert.equal(light.glow.visible, false);
   light.update(0, false);
   assert.equal(light.core.visible, false);

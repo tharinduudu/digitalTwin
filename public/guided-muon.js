@@ -1,10 +1,25 @@
+import { MuonSource } from './muon-source.js';
 import { traceMuon } from './muon-transport.js';
-import { pairsFor } from './simulation.js';
+import { pairsFor, randomGenerator } from './simulation.js';
 
-// A deliberate central example, transported by the same physics as the full twin.
-// Disable stochastic decay/scattering to keep every replay identical and explanatory.
-export function guidedMuon() {
-  const track = traceMuon({ origin: [0, 27, 0], direction: [0, -1, 0], energyGeV: 4 }, () => 0.5,
-    { scatter: false, decay: false });
-  return { ...track, id: 1, at: Date.now(), pairs: pairsFor(track) };
+let source;
+const examples = new Map();
+
+// Select an oblique triple from the same sea-level sky as the detector.
+// Holding the seed lets every step of the lesson follow the same event.
+export function guidedMuon(seed = 1) {
+  if (!examples.has(seed)) {
+    source ??= new MuonSource();
+    const random = randomGenerator(seed);
+    while (true) {
+      const particle = source.sample(random);
+      const zenithDeg = Math.acos(particle.cosine) * 180 / Math.PI;
+      if (zenithDeg < 15 || zenithDeg > 34) continue;
+      const track = traceMuon(particle, random, { room: source.room });
+      if (!track.hits.every(Boolean)) continue;
+      examples.set(seed, { ...track, zenithDeg, pairs: pairsFor(track) });
+      break;
+    }
+  }
+  return { ...examples.get(seed), id: seed, at: Date.now() };
 }

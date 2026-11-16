@@ -25,7 +25,7 @@ function setPhase(value){
  buttons.forEach((b,j)=>{if(j===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
  $('play-process').textContent=playing?'Pause sequence':'Play sequence';$('play-process').setAttribute('aria-pressed',String(playing));
  $('drawing-title').textContent=i<3?'CONCEPTUAL MOLECULAR ENERGY DIAGRAM':i===3?'TILE GROOVE → WAVELENGTH-SHIFTING FIBRE':'PHOTON → MICROCELL → ELECTRICAL PULSE';
- const status=`${title}. Animation is slowed for explanation.`;if($('stage-status').textContent!==status)$('stage-status').textContent=status;draw();
+ const status=`${title}. The stages hold for reading. Light flashes represent nanosecond processes.`;if($('stage-status').textContent!==status)$('stage-status').textContent=status;draw();
 }
 function resize(){const d=Math.min(devicePixelRatio,2);canvas.width=canvas.clientWidth*d;canvas.height=canvas.clientHeight*d;draw();}
 function line(x1,y1,x2,y2,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
@@ -51,13 +51,13 @@ function draw(){
   const points=groove.map(([a,b])=>[x+a/200*size,y+b/200*size]);
   ctx.strokeStyle='#4a7c48';ctx.lineWidth=3;ctx.beginPath();points.forEach(([px,py],i)=>i?ctx.lineTo(px,py):ctx.moveTo(px,py));ctx.stroke();
   for(let i=0;i<6;i++){const a=i*Math.PI/3;wave(x+size/2,y+size/2,x+size/2+Math.cos(a)*size*.25,y+size/2+Math.sin(a)*size*.25,'#3577a7');}
-  if(points.length){const k=Math.floor((1-t)*(points.length-1));dot(...points[k],5,'#44814b');}
+  if(points.length){const k=Math.floor((1-t/.16)*(points.length-1));if(t<.16)dot(...points[k],5,'#44814b');}
   ctx.fillStyle='#805d2c';ctx.fillRect(x+size*.06,y+size*.04,15,15);text('SiPM',x,y+size+24,'#805d2c');text('Source groove · top view',x,h-20,'#637458',11);
  }else{
   const x=w*.25,y=55,size=Math.min(w*.4,h*.4,130);text('Illustrative microcells',x,30,'#556e48',12);
   for(let i=0;i<5;i++)for(let j=0;j<5;j++){ctx.fillStyle=(i===2&&j===2)?'#4d925d':'#bcccb1';ctx.fillRect(x+i*size/5,y+j*size/5,size/5-3,size/5-3);}
   wave(12,y+size*.5,x-5,y+size*.5,'#44814b');text('Photon',12,y+size*.5+30,'#467642',11);
-  const base=h-65;line(x,base,w*.87,base,'#789169');ctx.strokeStyle='#a06a2b';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<150;i++){const q=i/149,v=q>.2?Math.exp(-(q-.2)*8)-Math.exp(-(q-.2)*60):0;const xx=x+q*(w*.6),yy=base-v*70;if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy);}ctx.stroke();text('Conceptual pulse · no voltage/time scale',20,h-22,'#5a6e4f',11);
+  const base=h-65;line(x,base,w*.87,base,'#789169');ctx.strokeStyle='#a06a2b';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<150;i++){const q=i/149,v=q>.2?Math.exp(-(q-.2)*8)-Math.exp(-(q-.2)*60):0;const xx=x+q*(w*.6),yy=base-v*70;if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy);}ctx.stroke();text('SiPM pulse shape · illustrative',20,h-22,'#5a6e4f',11);
  }
 }
 $('process-time').oninput=()=>{playing=false;setPhase(Number($('process-time').value));};
@@ -67,8 +67,8 @@ function deposit(){const angle=Number($('crossing-angle').value),a=angle*Math.PI
 $('crossing-angle').oninput=deposit;
 fetch('./assets/fibre-path.json').then(r=>{if(!r.ok)throw Error('Groove unavailable');return r.json();}).then(data=>{groove=data.points_mm;draw();}).catch(error=>{$('stage-status').textContent=error.message;});
 new ResizeObserver(resize).observe(canvas);
-function frame(now){if(playing){phase+=Math.min((now-last)/1000,.1)/5;if(phase>=4.999){phase=4.999;playing=false;}setPhase(phase);}last=now;requestAnimationFrame(frame);}
-requestAnimationFrame(frame);setPhase(0);deposit();
+function frame(now){if(playing){phase+=Math.min((now-last)/1000,.1)/2;if(phase>=4.999){phase=4.999;playing=false;}setPhase(phase);}last=now;requestAnimationFrame(frame);}
+requestAnimationFrame(frame);setPhase(0);$('crossing-angle').value=25;deposit();
 
 for(const b of document.querySelectorAll('[data-prediction]'))b.onclick=()=>{
  $('crossing-angle').value=60;deposit();

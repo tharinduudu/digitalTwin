@@ -518,7 +518,7 @@ export class TelescopeScene {
 
   animate(now) {
     this.animationId = requestAnimationFrame(this.animate);
-    if (document.hidden || now - this.lastFrame < 1000 / 30) return;
+    if (this.suspendRendering || document.hidden || now - this.lastFrame < 1000 / 30) return;
     const dt = Math.min(0.08, (now - (this.lastFrame || now)) / 1000);
     this.lastFrame = now;
     this.controls.update(dt);

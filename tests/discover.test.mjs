@@ -13,5 +13,7 @@ test('the guided example crosses the actual three tile volumes and counts one tr
     assert.ok(crossing.depositedMeV > 0);
   }
   const elapsed = event.crossings[2].timeNs - event.crossings[0].timeNs;
-  assert.ok(elapsed > 0.86 && elapsed < 0.89);
+  assert.ok(event.zenithDeg >= 15 && event.zenithDeg <= 34);
+  assert.ok(elapsed > 0.89 && elapsed < 1.12);
+  assert.notDeepEqual(guidedMuon(2).direction, event.direction);
 });

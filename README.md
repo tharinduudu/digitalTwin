@@ -69,9 +69,9 @@ storage, traffic and build limits.
 
 The home page now introduces the detector CAD with a six-step guided muon
 journey. It reuses the detector CAD and existing transport code. The guided
-track is a deliberate 4 GeV central example with scattering and decay disabled,
-not a measured event or a sky sample. Optical light and indicator flashes are
-illustrative. The original full display is at `/detector.html`; add
+track is sampled from the sea-level source and selected to cross all three tiles
+at an angle. The guide shows the modeled flight time across the stack. Optical
+and readout flashes are brief visual cues for nanosecond processes. The original full display is at `/detector.html`; add
 `?source=simulation` to use it without the optional local measured feed.
 The assembly, network and electronics views remain separate deeper layers.
 The student workspace at `/investigate.html` rotates the actual tile geometry
