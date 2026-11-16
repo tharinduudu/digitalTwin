@@ -63,22 +63,32 @@ export class ScintillationScene {
   setStage(stage,phase){this.stage=stage;this.phase=phase;}
   frame(now){
     requestAnimationFrame(this.frame);if(document.hidden)return;
-    const t=this.phase;
-    const a=this.angle*Math.PI/180;
-    const y=5.5-Math.min(1,t/.18)*10;this.muon.position.set((.5-y)*Math.tan(a),y,0);
-    this.muon.visible=this.stage===0 && t<.18;this.track.visible=this.stage===0;
-    this.spot.visible=this.stage>0;this.spot.position.set(...(this.stage===4?[-8.098,.35,8.098]:[0,.34,0]));this.spot.material.color.set(this.stage===4?'#ffcc7c':'#c6e9ff');this.spot.scale.setScalar(1+Math.sin(t*Math.PI*2)*.2);
-    for(let i=0;i<this.packets.length;i++){
-      const p=this.packets[i],angle=i*2.39996;
-      p.visible=this.stage===2 && t<.22;
-      const distance=(.4+(i%5)/5)*((t/.22+i/this.packets.length)%1)*8;
-      p.position.set(Math.cos(angle)*distance,.32,Math.sin(angle)*distance);
+    const t = this.phase;
+    const angle = this.angle * Math.PI / 180;
+    const y = 5.5 - t * 10;
+    this.muon.position.set((.5 - y) * Math.tan(angle), y, 0);
+    this.muon.visible = this.stage === 0;
+    this.track.visible = this.stage === 0;
+
+    const sensorFired = this.stage === 4 && t >= .23;
+    this.spot.visible = this.stage === 1 || this.stage === 2 || sensorFired;
+    this.spot.position.set(...(sensorFired ? [-8.098,.35,8.098] : [0,.34,0]));
+    this.spot.material.color.set(sensorFired ? '#ffcc7c' : '#c6e9ff');
+    this.spot.material.opacity = sensorFired ? .25 + .65 * Math.exp(-5 * (t - .23)) : .7;
+    this.spot.scale.setScalar(this.stage === 1 ? .8 + .55 * t : 1);
+
+    for (let i = 0; i < this.packets.length; i++) {
+      const packet = this.packets[i];
+      const direction = i * 2.39996;
+      const distance = (3.5 + (i % 5)) * t;
+      packet.visible = this.stage === 2;
+      packet.position.set(Math.cos(direction) * distance, .32, Math.sin(direction) * distance);
     }
-    if(this.light){
-      const phase=this.stage===3?this.phase/.16:2;
-      this.light.glow.material.uniforms.heads.value.set(.5-phase*.5,.5+phase*.5);
-      this.light.glow.visible=this.stage===3 && phase<1;
-      this.light.core.material.emissiveIntensity=this.light.glow.visible?.3:.04;
+
+    if (this.light) {
+      this.light.glow.material.uniforms.heads.value.set(.5 - t * .5, .5 + t * .5);
+      this.light.glow.visible = this.stage === 3;
+      this.light.core.material.emissiveIntensity = this.stage === 3 ? .3 : .04;
     }
     this.controls.update();this.renderer.render(this.scene,this.camera);
   }

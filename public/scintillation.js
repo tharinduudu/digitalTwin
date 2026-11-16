@@ -9,7 +9,10 @@ const stages=[
  ['Collection by the WLS fibre','Light spreads through the tile. Some reaches the wavelength-shifting fibre, is absorbed and re-emitted at a longer wavelength. A fraction travels along the fibre towards the sensor.','The fibre path follows the supplied groove section. Travelling dots show the idea; their number, speed and collection efficiency are not a photon-transport calculation.'],
  ['A SiPM avalanche','A photon reaching the Hamamatsu S13360-2050VE can trigger an avalanche in a biased microcell. The combined cell signals form an electrical pulse for the readout.','Arrival does not guarantee detection. Photon detection probability, dark noise and microcell response are not calculated in this illustration.'],
 ];
+// Presentation seconds for each stage. The slider uses normalized stage progress.
+const stageSeconds = [0.8, 1, 1.2, 1.1, 1.4];
 let phase=0,playing=false,last=0,groove=[];
+let displayedStage = -1;
 let tileView;
 try {tileView=new ScintillationScene($('tile-scene'));tileView.ready.catch(error=>{console.error(error);$('tile-scene').textContent='Tile CAD unavailable. The process diagrams remain available.';});}
 catch(error){console.error(error);$('tile-scene').textContent='3D unavailable. Explore the diagrams below.';}
@@ -18,14 +21,27 @@ const canvas=$('optical-canvas'),ctx=canvas.getContext('2d');
 const buttons=stages.map((stage,i)=>{const b=document.createElement('button');b.textContent=`${i+1} ${['Energy','Excitation','Light','Fibre','Signal'][i]}`;b.setAttribute('aria-label',`Stage ${i+1}: ${stage[0]}`);b.onclick=()=>{playing=false;setPhase(i);};document.querySelector('.stages').append(b);return b;});
 function setPhase(value){
  phase=Math.min(4.999,Math.max(0,value));const i=Math.floor(phase),[title,body,detail]=stages[i];
- $('stage-label').textContent=`STAGE ${i+1} OF 5`;
- $('continue-lab').hidden=i!==4;$('stage-title').textContent=title;$('stage-body').textContent=body;$('stage-detail').textContent=detail;
+ if (i !== displayedStage) {
+  displayedStage = i;
+  $('stage-label').textContent = `STAGE ${i+1} OF 5`;
+  $('continue-lab').hidden = i !== 4;
+  $('stage-title').textContent = title;
+  $('stage-body').textContent = body;
+  $('stage-detail').textContent = detail;
+  buttons.forEach((button, index) => {
+    if (index === i) button.setAttribute('aria-current', 'step');
+    else button.removeAttribute('aria-current');
+  });
+  $('drawing-title').textContent = i < 3 ? 'CONCEPTUAL MOLECULAR ENERGY DIAGRAM'
+    : i === 3 ? 'TILE GROOVE → WAVELENGTH-SHIFTING FIBRE' : 'PHOTON → MICROCELL → ELECTRICAL PULSE';
+  $('stage-status').textContent = `${title}. Playback uses an illustrative timescale.`;
+ }
  tileView?.setStage(i,phase-i);
- $('process-time').value=phase;$('process-value').textContent=`${i+1} / 5`;
- buttons.forEach((b,j)=>{if(j===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
- $('play-process').textContent=playing?'Pause sequence':'Play sequence';$('play-process').setAttribute('aria-pressed',String(playing));
- $('drawing-title').textContent=i<3?'CONCEPTUAL MOLECULAR ENERGY DIAGRAM':i===3?'TILE GROOVE → WAVELENGTH-SHIFTING FIBRE':'PHOTON → MICROCELL → ELECTRICAL PULSE';
- const status=`${title}. The stages hold for reading. Light flashes represent nanosecond processes.`;if($('stage-status').textContent!==status)$('stage-status').textContent=status;draw();
+ $('process-time').value=phase;
+ $('process-value').textContent=`${i+1} / 5`;
+ $('play-process').textContent=playing?'Pause sequence':'Play sequence';
+ $('play-process').setAttribute('aria-pressed',String(playing));
+ draw();
 }
 function resize(){const d=Math.min(devicePixelRatio,2);canvas.width=canvas.clientWidth*d;canvas.height=canvas.clientHeight*d;draw();}
 function line(x1,y1,x2,y2,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
@@ -51,13 +67,44 @@ function draw(){
   const points=groove.map(([a,b])=>[x+a/200*size,y+b/200*size]);
   ctx.strokeStyle='#4a7c48';ctx.lineWidth=3;ctx.beginPath();points.forEach(([px,py],i)=>i?ctx.lineTo(px,py):ctx.moveTo(px,py));ctx.stroke();
   for(let i=0;i<6;i++){const a=i*Math.PI/3;wave(x+size/2,y+size/2,x+size/2+Math.cos(a)*size*.25,y+size/2+Math.sin(a)*size*.25,'#3577a7');}
-  if(points.length){const k=Math.floor((1-t/.16)*(points.length-1));if(t<.16)dot(...points[k],5,'#44814b');}
+  if (points.length) {
+    const midpoint = (points.length - 1) / 2;
+    dot(...points[Math.round(midpoint * (1 - t))], 5, '#44814b');
+    dot(...points[Math.round(midpoint * (1 + t))], 5, '#44814b');
+  }
   ctx.fillStyle='#805d2c';ctx.fillRect(x+size*.06,y+size*.04,15,15);text('SiPM',x,y+size+24,'#805d2c');text('Source groove · top view',x,h-20,'#637458',11);
  }else{
   const x=w*.25,y=55,size=Math.min(w*.4,h*.4,130);text('Illustrative microcells',x,30,'#556e48',12);
-  for(let i=0;i<5;i++)for(let j=0;j<5;j++){ctx.fillStyle=(i===2&&j===2)?'#4d925d':'#bcccb1';ctx.fillRect(x+i*size/5,y+j*size/5,size/5-3,size/5-3);}
-  wave(12,y+size*.5,x-5,y+size*.5,'#44814b');text('Photon',12,y+size*.5+30,'#467642',11);
-  const base=h-65;line(x,base,w*.87,base,'#789169');ctx.strokeStyle='#a06a2b';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<150;i++){const q=i/149,v=q>.2?Math.exp(-(q-.2)*8)-Math.exp(-(q-.2)*60):0;const xx=x+q*(w*.6),yy=base-v*70;if(i)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy);}ctx.stroke();text('SiPM pulse shape · illustrative',20,h-22,'#5a6e4f',11);
+  const cellY = y + size * .5;
+  const arrival = .23;
+  const photonProgress = Math.min(1, t / arrival);
+  const pulseProgress = Math.max(0, (t - arrival) / (1 - arrival));
+  for (let i = 0; i < 5; i++) {
+   for (let j = 0; j < 5; j++) {
+    ctx.fillStyle = i === 2 && j === 2 && t >= arrival ? '#4d925d' : '#bcccb1';
+    ctx.fillRect(x+i*size/5,y+j*size/5,size/5-3,size/5-3);
+   }
+  }
+  const photonX = 12 + (x + size * .5 - 12) * photonProgress;
+  if (t < arrival) {
+   wave(12,cellY,photonX,cellY,'#44814b');
+   dot(photonX,cellY,4,'#44814b');
+  }
+  text(t < arrival ? 'Photon arriving' : 'Microcell fires',12,cellY+30,'#467642',11);
+  const base = h - 65;
+  line(x,base,w*.87,base,'#789169');
+  ctx.strokeStyle='#a06a2b';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  for (let i = 0; i <= 150; i++) {
+   const q = pulseProgress * i / 150;
+   const voltage = Math.exp(-q * 8) - Math.exp(-q * 60);
+   const xx = x + q * (w * .62), yy = base - voltage * 70;
+   if (i === 0) ctx.moveTo(xx,yy);
+   else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();
+  text('SiPM pulse shape · illustrative',20,h-22,'#5a6e4f',11);
  }
 }
 $('process-time').oninput=()=>{playing=false;setPhase(Number($('process-time').value));};
@@ -67,7 +114,16 @@ function deposit(){const angle=Number($('crossing-angle').value),a=angle*Math.PI
 $('crossing-angle').oninput=deposit;
 fetch('./assets/fibre-path.json').then(r=>{if(!r.ok)throw Error('Groove unavailable');return r.json();}).then(data=>{groove=data.points_mm;draw();}).catch(error=>{$('stage-status').textContent=error.message;});
 new ResizeObserver(resize).observe(canvas);
-function frame(now){if(playing){phase+=Math.min((now-last)/1000,.1)/2;if(phase>=4.999){phase=4.999;playing=false;}setPhase(phase);}last=now;requestAnimationFrame(frame);}
+function frame(now) {
+ if (playing) {
+  const elapsed = Math.min((now - last) / 1000, .1);
+  const nextPhase = phase + elapsed / stageSeconds[Math.floor(phase)];
+  if (nextPhase >= 4.999) playing = false;
+  setPhase(nextPhase);
+ }
+ last = now;
+ requestAnimationFrame(frame);
+}
 requestAnimationFrame(frame);setPhase(0);$('crossing-angle').value=25;deposit();
 
 for(const b of document.querySelectorAll('[data-prediction]'))b.onclick=()=>{
