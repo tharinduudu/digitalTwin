@@ -1,68 +1,85 @@
+import { sampleTilePhotons, OPTICAL_WINDOW_NS } from './tile-photons.js';
+import { pointAtTime } from './muon-transport.js';
+import { randomGenerator } from './simulation.js';
 import * as THREE from 'three';
-import { OrbitControls } from './vendor/OrbitControls.js';
-import { STLLoader } from './vendor/loaders/STLLoader.js';
-import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
-import { fibreCurve, FibreLight } from './fibre.js';
-import { applyStudioAppearance } from './studio-appearance.js';
-import { createSiPMMount } from './sipm-mount.js';
 
-// Actual tile/holder/sensor geometry with deliberately illustrative optical packets.
+// Optical effects share the extracted tile's local coordinates.
 export class ScintillationScene {
-  constructor(container) {
-    this.container=container;this.stage=0;this.phase=0;this.angle=0;
-    this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#222b32');
-    this.camera=new THREE.PerspectiveCamera(40,1,.1,150);this.camera.position.set(20,20,23);
-    this.renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.outputColorSpace=THREE.SRGBColorSpace;
-    this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
-    container.append(this.renderer.domElement);
-    this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.enablePan=false;this.controls.minDistance=10;this.controls.maxDistance=55;
-    this.scene.add(new THREE.HemisphereLight('#ebf4fa','#283b43',2.5));
-    for(const [color,intensity,p]of [['#fff0d8',4,[12,25,10]],['#c4dce9',3,[-15,10,-12]]]){const l=new THREE.DirectionalLight(color,intensity);l.position.set(...p);this.scene.add(l);}
-    const floor=new THREE.Mesh(new THREE.PlaneGeometry(150,150),new THREE.MeshStandardMaterial({color:'#31414a',roughness:.85}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.1;this.scene.add(floor);
-    this.packets=[];
-    const geometry=new THREE.SphereGeometry(.09,10,8);
-    for(let i=0;i<24;i++){const p=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color:'#347cb4'}));this.scene.add(p);this.packets.push(p);}
-    this.muon=new THREE.Mesh(new THREE.SphereGeometry(.25,12,10),new THREE.MeshBasicMaterial({color:'#165ec4',toneMapped:false}));this.scene.add(this.muon);
-    this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#165ec4',transparent:true,opacity:.95,toneMapped:false}));this.scene.add(this.track);
-    this.spot=new THREE.Mesh(new THREE.SphereGeometry(.24,16,12),new THREE.MeshBasicMaterial({color:'#c6e9ff',transparent:true,opacity:.7}));this.scene.add(this.spot);
-    this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(container);
-    applyStudioAppearance(this);
-    this.ready=this.load();
-    this.frame=this.frame.bind(this);requestAnimationFrame(this.frame);this.resize();
+  constructor(group, light, camera, controls, redraw) {
+    this.group = group;
+    this.light = light;
+    this.camera = camera;
+    this.controls = controls;
+    this.redraw = redraw;
+    this.stage = 0;
+    this.phase = 0;
+    this.angle = 0;
+    this.photonPaths = [];
+    this.photonGeometry = new THREE.BufferGeometry();
+    this.photonPositions = new THREE.BufferAttribute(new Float32Array(192 * 3), 3);
+    this.photonGeometry.setAttribute('position', this.photonPositions);
+    this.photonGeometry.setDrawRange(0, 0);
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = 64;
+    const context = sprite.getContext('2d');
+    const glow = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+    glow.addColorStop(0, '#ffffff');
+    glow.addColorStop(.24, '#dcfbff');
+    glow.addColorStop(.43, '#1178ef');
+    glow.addColorStop(.58, '#1246aa');
+    glow.addColorStop(.76, 'rgba(24, 125, 255, .45)');
+    glow.addColorStop(1, 'rgba(24, 125, 255, 0)');
+    context.fillStyle = glow;
+    context.fillRect(0, 0, 64, 64);
+    const photonTexture = new THREE.CanvasTexture(sprite);
+    photonTexture.colorSpace = THREE.SRGBColorSpace;
+    this.photons = new THREE.Points(this.photonGeometry,
+      new THREE.PointsMaterial({
+        map: photonTexture,
+        size: .78,
+        toneMapped: false,
+        transparent: true,
+        depthWrite: false,
+      }));
+    this.photons.renderOrder = 7;
+    this.photons.frustumCulled = false;
+    this.group.add(this.photons);
+    this.muon=new THREE.Mesh(new THREE.SphereGeometry(.25,12,10),new THREE.MeshBasicMaterial({color:'#165ec4',toneMapped:false}));this.group.add(this.muon);
+    this.track=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#165ec4',transparent:true,opacity:.95,toneMapped:false}));this.group.add(this.track);
+    this.spot=new THREE.Mesh(new THREE.SphereGeometry(.24,16,12),new THREE.MeshBasicMaterial({color:'#c6e9ff',transparent:true,opacity:.7}));this.group.add(this.spot);
+    this.updateTrack();
   }
-  async load(){
-    const loader=new STLLoader();
-    const [tile,holder,data,sipm]=await Promise.all([loader.loadAsync('./assets/tile.stl'),loader.loadAsync('./assets/holder.stl'),fetch('./assets/fibre-path.json').then(r=>r.json()),new GLTFLoader().loadAsync('./assets/sipm.glb')]);
-    for(const g of [tile,holder])g.translate(-100,-100,-5).scale(.1,.1,.1).rotateX(-Math.PI/2);
-    this.tile=new THREE.Mesh(tile,new THREE.MeshPhysicalMaterial({color:'#8ba5ac',transparent:true,opacity:.6,metalness:0,roughness:.2,clearcoat:1,depthWrite:false}));this.scene.add(this.tile);
-    this.scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(tile,35),new THREE.LineBasicMaterial({color:'#657f82',transparent:true,opacity:.75})));
-    this.scene.add(new THREE.Mesh(holder,new THREE.MeshStandardMaterial({color:'#252a31',roughness:.5})));
-    const {mount,cableCurve}=createSiPMMount(sipm.scene,0,0);this.scene.add(mount);
-    this.scene.add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve,80,.055,8),new THREE.MeshStandardMaterial({color:'#151919',roughness:.6})));
-    this.light=new FibreLight(fibreCurve(data,0),data.diameter_mm/20);this.scene.add(this.light.core,this.light.glow);
-    this.light.core.material.color.set('#447640');this.light.core.material.emissive.set('#448b3b');this.light.glow.material.blending=THREE.NormalBlending;
-    // Surface-emission schematic glow; no calibrated brightness or optical index.
-    for(const [name,p,width]of [['Scintillator',[8,1.5,-1],8],['WLS fibre',[2,2,-6],6.5],['SiPM',[-9,1.8,8],5]]){
-      const canvas=document.createElement('canvas');canvas.width=384;canvas.height=96;const c=canvas.getContext('2d');
-      c.fillStyle='rgba(255,255,252,.94)';c.fillRect(0,0,384,96);c.fillStyle='#314e44';c.font='550 44px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(name,192,48);
-      const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-      const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false,toneMapped:false}));sprite.renderOrder=20;sprite.scale.set(width,width/4,1);sprite.position.set(...p);this.scene.add(sprite);
-    }
-    this.container.dataset.ready='true';this.updateTrack();
-  }
-  resize(){const {width,height}=this.container.getBoundingClientRect();this.camera.aspect=width/Math.max(1,height);this.camera.updateProjectionMatrix();this.renderer.setSize(width,height,false);}
   updateTrack(){const a=this.angle*Math.PI/180;this.track.geometry.dispose();this.track.geometry=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-Math.tan(a)*5,5.5,0),new THREE.Vector3(Math.tan(a)*5,-4.5,0)]);}
-  setAngle(angle){this.angle=angle;this.updateTrack();}
-  setView(name){
-    if(name==='top')this.camera.position.set(0,34,.01);
-    else if(name==='edge')this.camera.position.set(2,2.7,33);
-    else this.camera.position.set(20,20,23);
-    this.controls.target.set(0,0,0);this.controls.update();
+  setAngle(angle, crossing, tileY) {
+    this.angle = angle;
+    this.updateTrack();
+    if (!crossing) {
+      this.photonPaths = [];
+      return;
+    }
+    const local = ([x, y, z]) => [x, y - tileY, z];
+    this.photonPaths = sampleTilePhotons({
+      entry: local(crossing.entry), exit: local(crossing.exit),
+    }, this.photonPositions.count, randomGenerator(617));
+    this.redraw();
   }
-  setStage(stage,phase){this.stage=stage;this.phase=phase;}
-  frame(now){
-    requestAnimationFrame(this.frame);if(document.hidden)return;
+  setView(name) {
+    if (!this.group.visible) return;
+    const aim = this.group.position;
+    this.controls.target.copy(aim);
+    if (name === 'top') this.camera.position.set(0, 39, .01);
+    else if (name === 'edge') this.camera.position.set(2, 3, 38);
+    else this.camera.position.set(24, 21, 29);
+    this.camera.position.add(aim);
+    this.controls.update();
+    this.redraw();
+  }
+  setStage(stage, phase) {
+    this.stage = stage;
+    this.phase = phase;
+    this.redraw();
+  }
+  renderEffects() {
     const t = this.phase;
     const angle = this.angle * Math.PI / 180;
     const y = 5.5 - t * 10;
@@ -73,16 +90,20 @@ export class ScintillationScene {
     const sensorFired = this.stage === 4 && t >= .23;
     this.spot.visible = this.stage === 1 || this.stage === 2 || sensorFired;
     this.spot.position.set(...(sensorFired ? [-8.098,.35,8.098] : [0,.34,0]));
-    this.spot.material.color.set(sensorFired ? '#ffcc7c' : '#c6e9ff');
+    this.spot.material.color.set(sensorFired ? '#ed7300' : '#1686ed');
     this.spot.material.opacity = sensorFired ? .25 + .65 * Math.exp(-5 * (t - .23)) : .7;
-    this.spot.scale.setScalar(this.stage === 1 ? .8 + .55 * t : 1);
+    this.spot.scale.setScalar(this.stage === 1 ? 1.3 + .7 * t : 1.6);
 
-    for (let i = 0; i < this.packets.length; i++) {
-      const packet = this.packets[i];
-      const direction = i * 2.39996;
-      const distance = (3.5 + (i % 5)) * t;
-      packet.visible = this.stage === 2;
-      packet.position.set(Math.cos(direction) * distance, .32, Math.sin(direction) * distance);
+    this.photons.visible = this.stage === 2;
+    if (this.photons.visible) {
+      const timeNs = t * OPTICAL_WINDOW_NS;
+      let visible = 0;
+      for (const path of this.photonPaths) {
+        if (timeNs < path[0].timeNs || timeNs > path.at(-1).timeNs) continue;
+        this.photonPositions.setXYZ(visible++, ...pointAtTime(path, timeNs));
+      }
+      this.photonGeometry.setDrawRange(0, visible);
+      this.photonPositions.needsUpdate = true;
     }
 
     if (this.light) {
@@ -90,6 +111,5 @@ export class ScintillationScene {
       this.light.glow.visible = this.stage === 3;
       this.light.core.material.emissiveIntensity = this.stage === 3 ? .3 : .04;
     }
-    this.controls.update();this.renderer.render(this.scene,this.camera);
   }
 }

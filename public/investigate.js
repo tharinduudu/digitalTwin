@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TelescopeScene } from './scene.js';
+import { decodeSnapshot } from './network-data.js';
 import { createLabBench } from './lab-bench.js';
 import { applyStudioAppearance } from './studio-appearance.js';
 import { rotation, orientPoint, observation, RateExperiment, PIVOT } from './investigation-model.js';
@@ -18,6 +19,95 @@ $('play-sky').textContent=playing?'Pause preview':'Play preview';
 $('play-sky').setAttribute('aria-pressed',String(playing));
 const bearing=a=>['North','NE','East','SE','South','SW','West','NW'][Math.round(a/45)%8];
 function settings(){return {tilt:Number($('tilt').value),azimuth:Number($('azimuth').value),days:Number($('duration').value),samples:Number($('precision').value),orientationModel:'tilt-yaw-v2'};}
+const stationLocations = new Map();
+const locationType = $('location-type');
+const stationSelect = $('station-location');
+const latitudeInput = $('location-latitude');
+const longitudeInput = $('location-longitude');
+
+function coordinates({ latitude, longitude }) {
+  return `${latitude}°, ${longitude}°`;
+}
+
+function updateLocationFields() {
+  const custom = locationType.value === 'custom';
+  $('station-field').hidden = custom;
+  $('custom-location').hidden = !custom;
+  stationSelect.disabled = custom;
+  latitudeInput.disabled = !custom;
+  longitudeInput.disabled = !custom;
+  const station = stationLocations.get(stationSelect.value);
+  $('station-coordinates').textContent = station ? coordinates(station) : '';
+}
+
+function selectedLocation() {
+  if (locationType.value === 'station') {
+    if (!stationSelect.reportValidity()) return null;
+    return stationLocations.get(stationSelect.value) ?? null;
+  }
+  if (!latitudeInput.reportValidity() || !longitudeInput.reportValidity()) return null;
+  return {
+    type: 'custom',
+    label: 'Custom location',
+    latitude: latitudeInput.valueAsNumber,
+    longitude: longitudeInput.valueAsNumber,
+  };
+}
+
+function addStationLocation(location) {
+  if (stationLocations.has(location.id)) return;
+  stationLocations.set(location.id, location);
+  stationSelect.add(new Option(location.label, location.id));
+}
+
+async function loadStationLocations() {
+  try {
+    const response = await fetch(new URL('./assets/network-snapshot.json', import.meta.url));
+    if (!response.ok) throw new Error('Station snapshot unavailable');
+    const stations = decodeSnapshot(await response.json());
+    if (!stations.length) throw new Error('No station records');
+    const selected = stationSelect.value;
+    stationSelect.querySelector('option[value=""]')?.remove();
+    for (const station of stations) {
+      addStationLocation({
+        type: 'station',
+        id: station.id,
+        label: `${station.displayName} · ${station.country}`,
+        latitude: station.latitude,
+        longitude: station.longitude,
+      });
+    }
+    if (stationLocations.has(selected)) stationSelect.value = selected;
+    else if (stationLocations.has('GSU_Atlanta_Baseline')) stationSelect.value = 'GSU_Atlanta_Baseline';
+  } catch {
+    stationSelect.querySelector('option[value=""]')?.remove();
+    if (!stationLocations.size) {
+      locationType.value = 'custom';
+      locationType.options[0].disabled = true;
+    }
+    $('location-status').textContent = 'The network site list is unavailable. You can enter a custom location.';
+    $('location-status').hidden = false;
+  }
+  updateLocationFields();
+}
+
+function restoreLocation(location) {
+  if (location.type === 'station') {
+    locationType.options[0].disabled = false;
+    addStationLocation(location);
+    stationSelect.value = location.id;
+  } else {
+    latitudeInput.value = location.latitude;
+    longitudeInput.value = location.longitude;
+  }
+  locationType.value = location.type;
+  updateLocationFields();
+}
+
+locationType.addEventListener('change', updateLocationFields);
+stationSelect.addEventListener('change', updateLocationFields);
+loadStationLocations();
+
 function updateOrientation(){
   const {tilt,azimuth}=settings();
   $('tilt-value').textContent=`${tilt}°`;
@@ -83,6 +173,7 @@ for(const button of document.querySelectorAll('[data-az]'))button.onclick=()=>{$
 $('reset-view').onclick=()=>{if(scene){scene.camera.position.set(72,45,96);scene.controls.target.set(0,-12,0);scene.controls.update();}};
 $('play-sky').onclick=()=>{playing=!playing;$('play-sky').setAttribute('aria-pressed',String(playing));$('play-sky').textContent=playing?'Pause preview':'Play preview';};
 function busy(value){
+ $('location-fields').disabled=value;
  for(const id of ['run','tilt','azimuth','duration','precision','next-comparison','starter-baseline'])$(id).disabled=value;
  document.querySelectorAll('[data-tilt],[data-az]').forEach(b=>b.disabled=value);
  $('cancel').hidden=!value;$('progress').hidden=!value;
@@ -97,7 +188,9 @@ function collect(result,config){
  busy(false);
 }
 $('run').onclick=()=>{
- const config=settings(),key=`${config.tilt}/${config.azimuth}/${config.samples}`;
+ const location = selectedLocation();
+ if (!location) return;
+ const config={...settings(),location},key=`${config.tilt}/${config.azimuth}/${config.samples}`;
  if(rateCache.has(key)){collect(rateCache.get(key),config);return;}
  busy(true);$('progress').value=0;$('run-status').textContent='Transporting source muons through the rotated tiles…';
  worker=new Worker(new URL('./investigation-worker.js',import.meta.url),{type:'module'});
@@ -107,7 +200,7 @@ $('run').onclick=()=>{
   if(data.error){$('run-status').textContent=`Calculation failed: ${data.error}`;busy(false);worker.terminate();worker=null;}
  };
  worker.onerror=()=>{$('run-status').textContent='Calculation failed. Please retry; no observation was saved.';busy(false);worker?.terminate();worker=null;};
- worker.postMessage(config);
+ worker.postMessage({tilt:config.tilt,azimuth:config.azimuth,samples:config.samples});
 };
 $('cancel').onclick=()=>{worker?.terminate();worker=null;busy(false);$('run-status').textContent='Calculation cancelled. Previous observations are kept.';};
 const number=n=>n.toLocaleString(undefined,{maximumFractionDigits:0});
@@ -127,6 +220,9 @@ function renderRuns(){
   const tr=document.createElement('tr');
   const labels=[`#${i+1} · ${run.tilt}° / ${run.azimuth}° ${bearing(run.azimuth)}`,`${run.days} days`];
   for(const text of labels){const td=document.createElement('td');td.textContent=text;tr.append(td);}
+  const site = document.createElement('small');
+  site.textContent = run.location ? `${run.location.label} · ${coordinates(run.location)}` : 'Location not recorded';
+  tr.firstChild.append(site);
   if(!run.orientationModel){const note=document.createElement('small');note.textContent='Earlier orientation convention';tr.firstChild.append(note);}
   for(const key of ['c01','c12','c02','triple']){
    const td=document.createElement('td');td.textContent=number(run.counts[key]);
@@ -151,11 +247,15 @@ function drawChart(){
  c.fillText('coincidences / minute · 0–2',left,h-5);
 }
 $('clear').onclick=()=>{runs=[];renderRuns();};
+function csvCell(value) {
+ const text = String(value ?? '');
+ return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
 $('export').onclick=()=>{
- const headers=['run','orientation_model','tilt_deg','azimuth_deg','days','source_samples','observation_seed','pair','count','observed_per_min','counting_SE_per_min','model_per_min','MC_SE_per_min'];
+ const headers=['run','orientation_model','tilt_deg','azimuth_deg','days','source_samples','observation_seed','pair','count','observed_per_min','counting_SE_per_min','model_per_min','MC_SE_per_min','location_type','station_id','location_name','latitude_deg','longitude_deg'];
  const rows=[headers.join(',')];
- runs.forEach((r,i)=>{for(const key of ['c01','c12','c02','triple'])rows.push([i+1,r.orientationModel||'earlier-minimal-rotation',r.tilt,r.azimuth,r.days,r.rateSamples,r.seed,key,r.counts[key],r.counts[key]/r.minutes,Math.sqrt(r.counts[key])/r.minutes,r.rates[key],r.numericalSE[key]].join(','));});
- const blob=new Blob(['# Simulated stationary sea-level open-sky ideal detector; not measured data. Monte Carlo errors are not physical model uncertainties.\n'+rows.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='glowcost-angle-investigation.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ runs.forEach((r,i)=>{for(const key of ['c01','c12','c02','triple'])rows.push([i+1,r.orientationModel||'earlier-minimal-rotation',r.tilt,r.azimuth,r.days,r.rateSamples,r.seed,key,r.counts[key],r.counts[key]/r.minutes,Math.sqrt(r.counts[key])/r.minutes,r.rates[key],r.numericalSE[key],r.location?.type,r.location?.id,r.location?.label,r.location?.latitude,r.location?.longitude].map(csvCell).join(','));});
+ const blob=new Blob(['# Simulated stationary sea-level open-sky ideal detector; not measured data. Locations are labels and do not affect the model. Monte Carlo errors are not physical model uncertainties.\n'+rows.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='glowcost-angle-investigation.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 new ResizeObserver(drawChart).observe($('comparison'));updateOrientation();renderRuns();
 
@@ -164,8 +264,11 @@ if(runs.length)$('run-status').textContent=`Restored ${runs.length} saved observ
 $('next-comparison').onclick=()=>{
  const last=runs.at(-1);if(!last)return;
  $('tilt').value=last.tilt===0?60:0;$('azimuth').value=last.azimuth;$('duration').value=last.days;
+ if (last.location) restoreLocation(last.location);
  updateOrientation();
- $('run-status').textContent='Comparison ready: the exposure and compass bearing match your last observation. Collect data when ready.';
+ $('run-status').textContent = last.location
+   ? 'Comparison ready with the same location, exposure and compass bearing.'
+   : 'Exposure and compass bearing match the earlier run. Choose a location for this run.';
  $('run').focus();
 };
 

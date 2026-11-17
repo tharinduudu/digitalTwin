@@ -329,8 +329,9 @@ export class TelescopeScene {
     const triangles = [];
     const lines = [];
     corners.forEach((corner, i) => {
-      triangles.push(...apex.toArray(), ...corner.toArray(), ...corners[(i + 1) % 4].toArray());
-      lines.push(apex, corner, corner, corners[(i + 1) % 4]);
+      const next = corners[(i + 1) % corners.length];
+      triangles.push(...apex.toArray(), ...corner.toArray(), ...next.toArray());
+      lines.push(apex, corner, corner, next);
     });
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(triangles, 3));

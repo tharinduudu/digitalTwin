@@ -1,30 +1,29 @@
-import { ScintillationScene } from './scintillation-scene.js';
+import { setupTileExtraction } from './tile-extraction.js';
+import { OPTICAL_WINDOW_NS } from './tile-photons.js';
 import { traceMuon } from './muon-transport.js';
 import { TILE_HEIGHTS } from './detector-geometry.js';
 const $=id=>document.getElementById(id);
 const stages=[
  ['Energy deposition','A charged particle transfers energy to electrons in the plastic. Excitation and ionization leave the material with energy to release. Only some of that deposited energy becomes light.','The moving muon is a teaching marker. Energy transfer explains the physical process; this detector does not measure the muon’s energy or the deposited energy.'],
  ['Molecular excitation','Energy can reach fluorescent molecules in an organic scintillator. They enter excited electronic states, with energy also distributed among molecular vibrations.','These are conceptual molecular energy levels, not circular electron orbits. The supplied tile’s specific fluorescent formulation is not known here.'],
- ['Relaxation and fluorescence','Some energy is lost without light, including through vibrational relaxation. A radiative transition emits a photon as the molecule returns towards a lower electronic state.','The drawing separates non-radiative relaxation from fluorescence. It does not assign an unverified wavelength, lifetime or light yield to this tile.'],
+ ['Relaxation and fluorescence','Some energy is lost without light, including through vibrational relaxation. A radiative transition emits a photon as the molecule returns towards a lower electronic state.','The 3D view samples photon emission and reflection using EJ-200 reference properties. The blue points represent a sample of paths.'],
  ['Collection by the WLS fibre','Light spreads through the tile. Some reaches the wavelength-shifting fibre, is absorbed and re-emitted at a longer wavelength. A fraction travels along the fibre towards the sensor.','The fibre path follows the supplied groove section. Travelling dots show the idea; their number, speed and collection efficiency are not a photon-transport calculation.'],
  ['A SiPM avalanche','A photon reaching the Hamamatsu S13360-2050VE can trigger an avalanche in a biased microcell. The combined cell signals form an electrical pulse for the readout.','Arrival does not guarantee detection. Photon detection probability, dark noise and microcell response are not calculated in this illustration.'],
 ];
 // Presentation seconds for each stage. The slider uses normalized stage progress.
-const stageSeconds = [0.8, 1, 1.2, 1.1, 1.4];
-let phase=0,playing=false,last=0,groove=[];
+const stageSeconds = [0.95, 1.2, 5.75, 1.3, 1.7];
+let phase=0,playing=false,last,groove=[];
+let playbackFrame;
 let displayedStage = -1;
 let tileView;
-try {tileView=new ScintillationScene($('tile-scene'));tileView.ready.catch(error=>{console.error(error);$('tile-scene').textContent='Tile CAD unavailable. The process diagrams remain available.';});}
-catch(error){console.error(error);$('tile-scene').textContent='3D unavailable. Explore the diagrams below.';}
 for(const b of document.querySelectorAll('[data-tile-view]'))b.onclick=()=>tileView?.setView(b.dataset.tileView);
 const canvas=$('optical-canvas'),ctx=canvas.getContext('2d');
-const buttons=stages.map((stage,i)=>{const b=document.createElement('button');b.textContent=`${i+1} ${['Energy','Excitation','Light','Fibre','Signal'][i]}`;b.setAttribute('aria-label',`Stage ${i+1}: ${stage[0]}`);b.onclick=()=>{playing=false;setPhase(i);};document.querySelector('.stages').append(b);return b;});
+const buttons=stages.map((stage,i)=>{const b=document.createElement('button');b.textContent=`${i+1} ${['Energy','Excitation','Light','Fibre','Signal'][i]}`;b.setAttribute('aria-label',`Stage ${i+1}: ${stage[0]}`);b.onclick=()=>{playing=false;setPhase(i === 2 ? 2.25 : i);};document.querySelector('.stages').append(b);return b;});
 function setPhase(value){
  phase=Math.min(4.999,Math.max(0,value));const i=Math.floor(phase),[title,body,detail]=stages[i];
  if (i !== displayedStage) {
   displayedStage = i;
   $('stage-label').textContent = `STAGE ${i+1} OF 5`;
-  $('continue-lab').hidden = i !== 4;
   $('stage-title').textContent = title;
   $('stage-body').textContent = body;
   $('stage-detail').textContent = detail;
@@ -38,19 +37,22 @@ function setPhase(value){
  }
  tileView?.setStage(i,phase-i);
  $('process-time').value=phase;
- $('process-value').textContent=`${i+1} / 5`;
+ $('process-value').textContent = i === 2
+  ? `3 / 5 · ${((phase - i) * OPTICAL_WINDOW_NS).toFixed(1)} ns` : `${i+1} / 5`;
  $('play-process').textContent=playing?'Pause sequence':'Play sequence';
  $('play-process').setAttribute('aria-pressed',String(playing));
  draw();
+ if (playing && playbackFrame === undefined) playbackFrame = requestAnimationFrame(frame);
+ if (!playing) last = undefined;
 }
-function resize(){const d=Math.min(devicePixelRatio,2);canvas.width=canvas.clientWidth*d;canvas.height=canvas.clientHeight*d;draw();}
+function resize(){const d=Math.min(devicePixelRatio,1.25);canvas.width=canvas.clientWidth*d;canvas.height=canvas.clientHeight*d;draw();}
 function line(x1,y1,x2,y2,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function dot(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
 function text(t,x,y,color='#344b3e',size=12){ctx.fillStyle=color;ctx.font=`${size}px system-ui`;ctx.fillText(t,x,y);}
 function arrow(x1,y1,x2,y2,color){line(x1,y1,x2,y2,color,2);const a=Math.atan2(y2-y1,x2-x1);line(x2,y2,x2-8*Math.cos(a-.4),y2-8*Math.sin(a-.4),color);line(x2,y2,x2-8*Math.cos(a+.4),y2-8*Math.sin(a+.4),color);}
 function wave(x1,y1,x2,y2,color){ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy);if(l<.01)return;for(let i=0;i<=80;i++){const t=i/80,o=Math.sin(t*10*Math.PI)*4;const x=x1+dx*t-dy/l*o,y=y1+dy*t+dx/l*o;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
 function draw(){
- const d=Math.min(devicePixelRatio,2),w=canvas.clientWidth,h=canvas.clientHeight;if(!w)return;ctx.setTransform(d,0,0,d,0,0);ctx.fillStyle='#edf0e9';ctx.fillRect(0,0,w,h);
+ const d=Math.min(devicePixelRatio,1.25),w=canvas.clientWidth,h=canvas.clientHeight;if(!w)return;ctx.setTransform(d,0,0,d,0,0);ctx.fillStyle='#edf0e9';ctx.fillRect(0,0,w,h);
  const stage=Math.floor(phase),t=phase-stage;
  if(stage<3){
   const l=w*.2,r=w*.75,low=h*.76,high=h*.27,relax=h*.39;
@@ -74,7 +76,7 @@ function draw(){
   }
   ctx.fillStyle='#805d2c';ctx.fillRect(x+size*.06,y+size*.04,15,15);text('SiPM',x,y+size+24,'#805d2c');text('Source groove · top view',x,h-20,'#637458',11);
  }else{
-  const x=w*.25,y=55,size=Math.min(w*.4,h*.4,130);text('Illustrative microcells',x,30,'#556e48',12);
+  const x=w*.25,y=55,size=Math.min(w*.4,h*.4,130);text('Silicon photomultiplier (SiPM)',x,30,'#556e48',12);
   const cellY = y + size * .5;
   const arrival = .23;
   const photonProgress = Math.min(1, t / arrival);
@@ -110,26 +112,42 @@ function draw(){
 $('process-time').oninput=()=>{playing=false;setPhase(Number($('process-time').value));};
 $('play-process').onclick=()=>{if(phase>=4.99)phase=0;playing=!playing;setPhase(phase);};
 $('restart-process').onclick=()=>{playing=false;setPhase(0);};
-function deposit(){const angle=Number($('crossing-angle').value),a=angle*Math.PI/180;tileView?.setAngle(angle);const event=traceMuon({origin:[0,TILE_HEIGHTS[0]+.500001,0],direction:[Math.sin(a),-Math.cos(a),0],energyGeV:4},()=>.5,{scatter:false,decay:false});const hit=event.crossings.find(h=>h.index===0);$('crossing-value').textContent=`${angle}°`;$('path-length').textContent=hit?`${hit.pathCm.toFixed(3)} cm`:'No crossing';$('energy-deposit').textContent=hit?`${hit.depositedMeV.toFixed(3)} MeV`:'—';}
-$('crossing-angle').oninput=deposit;
+const crossingAngle = 25;
+const angleRadians = crossingAngle * Math.PI / 180;
+const event = traceMuon({
+ origin: [0, TILE_HEIGHTS[0] + .500001, 0],
+ direction: [Math.sin(angleRadians), -Math.cos(angleRadians), 0],
+ energyGeV: 4,
+}, () => .5, { scatter: false, decay: false });
+const crossing = event.crossings.find(hit => hit.index === 0);
+$('energy-deposit').textContent = crossing ? `${crossing.depositedMeV.toFixed(3)} MeV` : '—';
+
 fetch('./assets/fibre-path.json').then(r=>{if(!r.ok)throw Error('Groove unavailable');return r.json();}).then(data=>{groove=data.points_mm;draw();}).catch(error=>{$('stage-status').textContent=error.message;});
 new ResizeObserver(resize).observe(canvas);
 function frame(now) {
- if (playing) {
-  const elapsed = Math.min((now - last) / 1000, .1);
-  const nextPhase = phase + elapsed / stageSeconds[Math.floor(phase)];
-  if (nextPhase >= 4.999) playing = false;
-  setPhase(nextPhase);
+ playbackFrame = undefined;
+ if (!playing) return;
+ const elapsed = last === undefined ? 0 : (now - last) / 1000;
+ if (last !== undefined && elapsed < 1 / 30) {
+  playbackFrame = requestAnimationFrame(frame);
+  return;
  }
  last = now;
- requestAnimationFrame(frame);
+ const nextPhase = phase + Math.min(elapsed, .1) / stageSeconds[Math.floor(phase)];
+ if (nextPhase >= 4.999) playing = false;
+ setPhase(nextPhase);
 }
-requestAnimationFrame(frame);setPhase(0);$('crossing-angle').value=25;deposit();
+setPhase(0);
 
-for(const b of document.querySelectorAll('[data-prediction]'))b.onclick=()=>{
- $('crossing-angle').value=60;deposit();
- $('prediction-feedback').hidden=false;
- $('prediction-feedback').textContent=`At 60°, the calculated path is ${$('path-length').textContent}, compared with 1.000 cm upright. The oblique path is longer. Explore the slider and compare the calculated path lengths. The detector counts events; it does not measure muon energy.`;
- b.setAttribute('aria-pressed','true');
- document.querySelectorAll('[data-prediction]').forEach(other=>{if(other!==b)other.setAttribute('aria-pressed','false');});
-};
+setupTileExtraction(view => {
+ tileView = view;
+ view.setAngle(crossingAngle, crossing, TILE_HEIGHTS[0]);
+ setPhase(phase);
+}, progress => {
+ playing = false;
+ // Give the photon burst twice as much scroll distance as each other stage.
+ const position = progress * 6;
+ const phaseAtScroll = position < 2 ? position
+  : position < 4 ? 2 + (position - 2) / 2 : position - 1;
+ setPhase(phaseAtScroll);
+});

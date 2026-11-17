@@ -87,3 +87,47 @@ body[data-page=network]{height:auto;min-height:100dvh;display:block}.network-sum
 @media (min-width: 851px) {
   .hero-image { max-height: max(440px, calc(100svh - 145px)); }
 }
+
+#tile-extraction {
+  max-width: 1250px;
+  min-height: 310vh;
+  margin: 0 auto 16px;
+}
+.extraction-panel {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: stretch;
+  background: #edf0e9;
+  border: 1px solid #d6ddd2;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.extraction-panel .visual { border-radius: 0; }
+#extraction-scene {
+  height: min(62svh, 500px);
+  background: center / contain no-repeat url('./assets/detector-hero.png');
+}
+#extraction-scene canvas { display: block; width: 100%; height: 100%; }
+#extraction-caption { min-height: 42px; }
+#extraction-views { min-height: 48px; visibility: hidden; }
+#tile-explorer[data-interacting="true"] #extraction-views { visibility: visible; }
+#tile-explorer .tile-physics #optical-canvas { height: min(49svh, 374px); }
+.scintillation-workspace .stage-copy,
+.scintillation-workspace .process-controls { grid-column: 1 / -1; }
+.scintillation-workspace .stage-copy { position: static; }
+.scintillation-workspace .process-controls {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+@media (max-width: 760px) {
+  .extraction-panel { grid-template-columns: minmax(0, 1fr); }
+  #extraction-scene { height: min(37svh, 330px); }
+  #tile-explorer .tile-physics #optical-canvas { height: min(32svh, 245px); }
+  #tile-explorer .visual-bottom { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tile-extraction { min-height: 0; }
+  .extraction-panel { position: static; }
+}

@@ -22,3 +22,35 @@ select{min-height:44px;padding:10px 12px;border-color:#bac8b5;background:#fff;co
 .process-controls{padding:18px 22px;border-top:1px solid #d3ddcc;border-bottom:1px solid #d3ddcc;background:#f6f8f1}.process-controls .stages{padding:0;margin:0 0 14px;border:0}.process-controls .field{margin:10px 0}.process-controls .buttons{margin-top:12px}.process-controls .note{margin:12px 0 0;color:#5b6d55}.process-controls .field>label{color:#3c5444}.process-controls .field output{color:#2f644c}.scintillation-workspace .stage-copy{padding-top:32px}.scintillation-workspace .stage-copy h2{font-size:25px;margin:15px 0 20px}
 .stages{flex-wrap:wrap}.stages button{width:auto;height:auto;min-height:36px;padding:8px 10px;border-radius:9px;font-size:11px}.next-layer{display:inline-block;margin-top:22px;color:#2d6247;text-decoration:underline;text-underline-offset:4px;font-size:14px;font-weight:550}.result-insight{padding:14px 16px;background:#edf3e7;border-left:3px solid #5c8250;color:#3b5b3c;font-size:14px;line-height:1.7}.wide>#next-comparison{margin:0 0 14px}
 .starter-challenge{padding:13px 15px;background:#f2f6ec;border:1px solid #d0dcc4;border-radius:10px;margin-bottom:24px;font-size:13px;color:#385c36}.starter-challenge summary{cursor:pointer;font-weight:550}.starter-challenge p{font-size:13px;color:#536b4d;line-height:1.75}.prediction-options{display:flex;gap:8px;flex-wrap:wrap}.prediction-options button[aria-pressed=true]{border-color:#426e39;background:#e5eedb}
+
+.location-fields {
+  margin: 18px 0;
+  padding: 0 12px 12px;
+  min-width: 0;
+  border: 1px solid #d6ddd2;
+  border-radius: 9px;
+}
+.location-fields legend {
+  padding: 0 6px;
+  color: #3c5444;
+  font-size: 14px;
+  font-weight: 600;
+}
+.location-fields .field { margin: 12px 0; }
+.location-fields .note { margin: 8px 0 0; }
+.coordinate-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.location-fields select,
+.coordinate-fields input {
+  width: 100%;
+  min-width: 0;
+}
+.coordinate-fields input {
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #bac8b5;
+  border-radius: 9px;
+}

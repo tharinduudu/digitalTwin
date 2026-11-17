@@ -206,11 +206,10 @@ document.addEventListener('fullscreenchange', () => {
   $('fullscreen').setAttribute('aria-label', document.fullscreenElement ? 'Exit full screen' : 'Enter full screen');
   icons();
 });
-for (const [button, dialog] of [['photo', 'photo-dialog'], ['info', 'details']]) {
-  $(button).addEventListener('click', () => $(dialog).showModal());
-  $(dialog).querySelector('.close-dialog').addEventListener('click', () => $(dialog).close());
-  $(dialog).addEventListener('click', event => { if (event.target === $(dialog)) $(dialog).close(); });
-}
+const details = $('details');
+$('info').addEventListener('click', () => details.showModal());
+details.querySelector('.close-dialog').addEventListener('click', () => details.close());
+details.addEventListener('click', event => { if (event.target === details) details.close(); });
 
 new ResizeObserver(drawCharts).observe($('history').parentElement);
 setInterval(updateClock, 500);
