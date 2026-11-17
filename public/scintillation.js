@@ -52,7 +52,7 @@ function text(t,x,y,color='#344b3e',size=12){ctx.fillStyle=color;ctx.font=`${siz
 function arrow(x1,y1,x2,y2,color){line(x1,y1,x2,y2,color,2);const a=Math.atan2(y2-y1,x2-x1);line(x2,y2,x2-8*Math.cos(a-.4),y2-8*Math.sin(a-.4),color);line(x2,y2,x2-8*Math.cos(a+.4),y2-8*Math.sin(a+.4),color);}
 function wave(x1,y1,x2,y2,color){ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy);if(l<.01)return;for(let i=0;i<=80;i++){const t=i/80,o=Math.sin(t*10*Math.PI)*4;const x=x1+dx*t-dy/l*o,y=y1+dy*t+dx/l*o;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
 function draw(){
- const d=Math.min(devicePixelRatio,1.25),w=canvas.clientWidth,h=canvas.clientHeight;if(!w)return;ctx.setTransform(d,0,0,d,0,0);ctx.fillStyle='#edf0e9';ctx.fillRect(0,0,w,h);
+ const d=Math.min(devicePixelRatio,1.25),width=canvas.clientWidth;if(!width)return;const scale=Math.min(1,width/360),w=width/scale,h=canvas.clientHeight/scale;ctx.setTransform(d*scale,0,0,d*scale,0,0);ctx.fillStyle='#edf0e9';ctx.fillRect(0,0,w,h);
  const stage=Math.floor(phase),t=phase-stage;
  if(stage<3){
   const l=w*.2,r=w*.75,low=h*.76,high=h*.27,relax=h*.39;

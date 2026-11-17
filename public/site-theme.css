@@ -131,3 +131,66 @@ body[data-page=network]{height:auto;min-height:100dvh;display:block}.network-sum
   #tile-extraction { min-height: 0; }
   .extraction-panel { position: static; }
 }
+
+/* Keep the lesson text and controls with the scroll-driven visuals. */
+#tile-explorer .process-controls,
+#tile-explorer .stage-copy {
+  grid-column: 1 / -1;
+}
+#extraction-scene { height: min(38svh, 300px); }
+#tile-explorer .tile-physics #optical-canvas { height: min(38svh, 300px); }
+#tile-explorer .visual-bottom { display: none; }
+#tile-explorer .process-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 10px 20px;
+}
+#tile-explorer .process-controls .stages {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+#tile-explorer .process-controls .field,
+#tile-explorer .process-controls .buttons { margin: 0; }
+#tile-explorer .process-controls .field > label { margin-bottom: 2px; }
+#tile-explorer .process-controls .note { display: none; }
+#tile-explorer .stage-copy {
+  position: static;
+  padding: 14px 20px;
+  min-height: 190px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+#tile-explorer .stage-copy h2 { margin: 5px 0 8px; font-size: 23px; }
+#tile-explorer .stage-copy p { margin: 6px 0; font-size: 13px; line-height: 1.5; }
+#tile-explorer .stage-copy .notice { padding: 8px 12px; font-size: 11px; }
+@media (max-width: 760px) {
+  .extraction-panel { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  #extraction-scene,
+  #tile-explorer .tile-physics #optical-canvas { height: min(28svh, 210px); }
+  #extraction-caption,
+  #tile-explorer .tile-physics .optical-title { padding: 10px; font-size: 9px; min-height: 45px; }
+  #extraction-views { padding: 6px; gap: 4px; }
+  #extraction-views button { padding: 5px 6px; font-size: 10px; }
+  #tile-explorer .process-controls { padding: 10px; gap: 8px; }
+  #tile-explorer .process-controls .stages { gap: 4px; }
+  #tile-explorer .stages button { padding: 6px; font-size: 10px; min-height: 30px; }
+  #tile-explorer .buttons { gap: 5px; }
+  #tile-explorer .buttons button { padding: 8px; font-size: 10px; }
+  #tile-explorer .stage-copy { padding: 10px 12px; min-height: 235px; }
+  #tile-explorer .stage-copy h2 { font-size: 19px; }
+  #tile-explorer .stage-copy p { font-size: 12px; }
+}
+@media (max-height: 650px) {
+  #extraction-scene,
+  #tile-explorer .tile-physics #optical-canvas { height: 18svh; }
+  #tile-explorer .stage-copy { min-height: 200px; }
+}
+@media (max-width: 380px) and (max-height: 650px) {
+  #tile-explorer .stage-copy { min-height: 230px; }
+  #tile-explorer .stage-copy p { font-size: 11px; line-height: 1.4; }
+  #tile-explorer .stage-copy .notice { font-size: 10px; }
+  #tile-explorer .process-controls { gap: 4px; padding: 6px; }
+}
