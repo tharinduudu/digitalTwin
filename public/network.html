@@ -25,6 +25,7 @@
       <div class="browser-heading"><h2>Stations</h2><span id="result-count" aria-live="polite"></span></div>
       <label class="search"><i data-lucide="search"></i><input id="station-search" type="search" placeholder="Search stations or cities" aria-label="Search stations"></label>
       <div class="filters"><select id="country-filter" aria-label="Filter by country"><option value="">All countries</option></select><select id="status-filter" aria-label="Filter by data status"><option value="">All statuses</option><option value="recent">Recent data</option><option value="review">Check stability</option><option value="older">Older data</option><option value="missing">No ingested data</option></select></div>
+      <fieldset class="institution-options"><legend>Highlight institutions</legend><label><input type="checkbox" id="school-flags"><span class="institution-key school">⚑</span> Schools</label><label><input type="checkbox" id="university-flags"><span class="institution-key university">⚑</span> Universities</label><p>Flags use institution names in the saved portal records. Unclassified sites keep their status dots.</p></fieldset>
       <div id="station-list" class="station-list" aria-label="Station records"></div>
       <div class="empty" id="no-results" hidden>No matching stations.<button id="clear-filters">Clear filters</button></div>
     </aside>

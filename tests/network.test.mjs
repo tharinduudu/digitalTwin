@@ -64,3 +64,15 @@ test('the network stays static-host compatible and identifies its snapshot', asy
   assert.equal(stations.filter(s => s.portalUrl !== snapshot.sourceUrl).length, 32);
   for (const s of stations) assert.equal(new URL(s.portalUrl).hostname, 'cosmic.gsu.edu');
 });
+
+
+test('institution flags use explicit host names and leave ambiguous sites unclassified', () => {
+  const type = id => stations.find(s => s.id === id).institutionType;
+  assert.equal(type('sweden_Lund_1'), 'school');
+  assert.equal(type('usa_Atlanta_6'), 'school');
+  assert.equal(type('usa_SkyView_1'), 'school');
+  assert.equal(type('GSU_Atlanta_Baseline'), 'university');
+  assert.equal(type('Indore_India'), 'university');
+  assert.equal(type('usa_Atlanta_West'), 'other');
+  assert.equal(type('usa_APO_1'), 'other');
+});

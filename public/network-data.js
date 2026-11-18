@@ -7,6 +7,14 @@ export const STATUS = {
   missing: { label: 'No ingested data', color: '#839297' },
 };
 
+// Classify only explicit institution names in the saved portal metadata.
+export function institutionType(station) {
+  const name = `${station.name || ''} ${station.institution || ''}`;
+  if (/\b(school|high school|middle school)\b/i.test(name)) return 'school';
+  if (/\b(university|universidad|Indian Institute of Technology)\b/i.test(name)) return 'university';
+  return 'other';
+}
+
 export function statusKey(station) {
   if (station.running !== 'Running') return station.latest ? 'older' : 'missing';
   return station.stability === 'Check stability' ? 'review' : 'recent';
@@ -30,6 +38,7 @@ export function decodeSnapshot(snapshot) {
     station.country = station.sourceCountry === 'USA' ? 'United States' : station.sourceCountry;
     station.displayName = station.name.startsWith('display name =') ? 'University of Ruhuna (data record)' : station.name;
     station.status = statusKey(station);
+    station.institutionType = institutionType(station);
     const portal = new URL(PORTAL_URL);
     const query = snapshot.portalQueries?.[station.id];
     if (query) portal.search = new URLSearchParams(query).toString();

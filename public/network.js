@@ -23,6 +23,7 @@ function selectStation(id, focus = true) {
   const facts = [
     ['Detector ID', station.id],
     ['Institution', station.institution || 'Not listed'],
+    ['Institution type', station.institutionType === 'other' ? 'Not classified in this view' : station.institutionType === 'school' ? 'School' : 'University'],
     ['Observations', integer.format(station.observations)],
     ['First record', station.first || 'Not available'],
     ['Portal status', station.running],
@@ -121,12 +122,19 @@ async function start() {
     const land = await loadJson('./assets/network-land.geojson');
     globe = new NetworkGlobe($('network-globe'), $('location-labels'), stations, land, id => selectStation(id));
     globe.select(selectedId, false);
+    updateInstitutionFlags();
+    updateList();
   } catch (error) {
     console.error(error);
     $('globe-error').hidden = false;
     for (const button of document.querySelectorAll('.globe-tools button:not(#full-screen)')) button.disabled = true;
   }
 }
+
+function updateInstitutionFlags() {
+  globe?.setInstitutionFlags({ school: $('school-flags').checked, university: $('university-flags').checked });
+}
+for (const id of ['school-flags', 'university-flags']) $(id).addEventListener('change', updateInstitutionFlags);
 
 for (const id of ['station-search', 'country-filter', 'status-filter']) $(id).addEventListener('input', updateList);
 $('clear-filters').addEventListener('click', () => {

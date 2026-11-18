@@ -70,6 +70,7 @@ export class NetworkGlobe {
     this.scene.add(this.earth);
     this.addGraticule();
     this.markers = [];
+    this.institutionFlags = { school: false, university: false };
     this.raycaster = new THREE.Raycaster();
     for (const group of this.groups) this.addMarker(group);
     let down;
@@ -122,6 +123,18 @@ export class NetworkGlobe {
     label.title = group.stations.map(s => s.displayName).join('\n');
     label.addEventListener('click', () => this.chooseGroup(group));
     this.labels.append(label);
+    group.flags = ['school', 'university'].filter(type => group.stations.some(s => s.institutionType === type)).map(type => {
+      const flag = document.createElement('button');
+      flag.className = `institution-flag ${type}`;
+      flag.textContent = '⚑';
+      const members = group.stations.filter(s => s.institutionType === type);
+      flag.title = `${type === 'school' ? 'School' : 'University'}: ${members.map(s => s.displayName).join(', ')}`;
+      flag.setAttribute('aria-label', flag.title);
+      flag.hidden = true;
+      flag.addEventListener('click', () => this.onSelect(members.find(s => !this.visibleIds || this.visibleIds.has(s.id))?.id || members[0].id));
+      this.labels.append(flag);
+      return { flag, type };
+    });
     group.marker = marker;
     group.ring = ring;
     group.label = label;
@@ -148,7 +161,10 @@ export class NetworkGlobe {
     }
   }
 
+  setInstitutionFlags(options) { this.institutionFlags = options; }
+
   setVisible(ids) {
+    this.visibleIds = ids;
     for (const group of this.groups) {
       group.filtered = !group.stations.some(s => ids.has(s.id));
       group.marker.visible = !group.filtered;
@@ -191,6 +207,7 @@ export class NetworkGlobe {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
     const occupied = [];
+    const occupiedFlags = [];
     // Selected labels win collisions. Occluded locations never show through Earth.
     const ordered = [...this.groups].sort((a, b) => Number(b.stations.some(s => s.id === this.selected)) - Number(a.stations.some(s => s.id === this.selected)));
     for (const group of ordered) {
@@ -199,6 +216,18 @@ export class NetworkGlobe {
       const screen = point.clone().project(this.camera);
       const x = (screen.x * 0.5 + 0.5) * this.width;
       const y = (-screen.y * 0.5 + 0.5) * this.height - 14;
+      const enabledFlags = group.flags.filter(({ type }) => this.institutionFlags[type] && group.stations.some(s => s.institutionType === type && (!this.visibleIds || this.visibleIds.has(s.id))));
+      for (const { flag, type } of group.flags) {
+        const index = enabledFlags.findIndex(f => f.type === type);
+        flag.hidden = !(front && !group.filtered && index >= 0 && x > 16 && x < this.width - 16 && y > 125 && y < this.height - 110);
+        if (!flag.hidden) {
+          let flagX = x + (index - (enabledFlags.length - 1) / 2) * 32;
+          while (occupiedFlags.some(p => Math.abs(p.x - flagX) < 31 && Math.abs(p.y - y) < 36)) flagX += 32;
+          flag.style.left = `${flagX}px`;
+          flag.style.top = `${y + 48}px`;
+          occupiedFlags.push({ x: flagX, y });
+        }
+      }
       const crowded = occupied.some(p => Math.abs(p.x - x) < 112 && Math.abs(p.y - y) < 32);
       const visible = front && !group.filtered && !crowded && x > 45 && x < this.width - 45 && y > 125 && y < this.height - 110;
       group.label.hidden = !visible;
