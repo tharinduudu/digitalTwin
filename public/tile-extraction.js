@@ -87,6 +87,8 @@ export function setupTileExtraction(onReady, onPhysicsScroll) {
         if (hostBounds.bottom <= 0 || hostBounds.top >= innerHeight) return;
         const travel = Math.max(1, bounds.height - panel.offsetHeight);
         const scrollProgress = clamp(-bounds.top / travel);
+        const cue = document.querySelector('#tile-scroll-cue');
+        if (cue) cue.innerHTML = reduced.matches ? 'Use the stage controls' : scrollProgress >= .995 ? 'Continue below <span aria-hidden="true">↓</span>' : '<span aria-hidden="true">↓</span> Keep scrolling';
         const extractionEnd = .32;
         const progress = reduced.matches ? 1 : clamp(scrollProgress / extractionEnd);
         const width = host.clientWidth;

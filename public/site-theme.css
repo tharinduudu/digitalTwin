@@ -194,3 +194,50 @@ body[data-page=network]{height:auto;min-height:100dvh;display:block}.network-sum
   #tile-explorer .stage-copy .notice { font-size: 10px; }
   #tile-explorer .process-controls { gap: 4px; padding: 6px; }
 }
+.tile-scroll-cue {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #315c48;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 20px;
+}
+.tile-scroll-cue span { font-size: 18px; }
+@media (max-width: 380px) {
+  .tile-scroll-cue { font-size: 11px; gap: 4px; }
+}
+/* Let the sticky lesson fill taller screens instead of leaving a blank lower area. */
+@media (min-width: 761px) and (min-height: 651px) {
+  #tile-explorer {
+    height: calc(100svh - 24px);
+    grid-template-rows: minmax(0, 1fr) auto 190px;
+  }
+  #tile-explorer .tile-interaction,
+  #tile-explorer .tile-physics {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #extraction-scene,
+  #tile-explorer .tile-physics #optical-canvas {
+    flex: 1 1 0;
+    height: 0;
+    min-height: 0;
+  }
+  #extraction-caption,
+  #tile-explorer .tile-physics .optical-title,
+  #extraction-views { flex-shrink: 0; }
+  #tile-explorer .stage-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    column-gap: 28px;
+    align-content: center;
+  }
+  #tile-explorer .stage-copy .tile-scroll-cue { grid-column: 2; grid-row: 1; justify-self: end; }
+  #tile-explorer #stage-label { grid-column: 1; grid-row: 1; }
+  #tile-explorer #stage-title { grid-column: 1; grid-row: 2; }
+  #tile-explorer #stage-body { grid-column: 1; grid-row: 3; }
+  #tile-explorer #stage-detail { grid-column: 2; grid-row: 2 / 4; align-self: center; }
+}
